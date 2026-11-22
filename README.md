@@ -73,9 +73,41 @@ Place the NX files described in Configuration in the `wz/` directory.
 Fonts are compiled in via the generated `src/Graphics/EmbeddedFonts.{h,cpp}`, which are
 committed — no extra build step.
 
+## Language support (incremental)
+
+System Settings retains its original NX frame, colors, controls and layout.
+Click the bottom-left `中/EN` button to switch English / Simplified Chinese.
+The language choice is saved immediately, including when other settings are
+cancelled with Cancel / Esc. The ordinary Settings file in the resolved data
+directory stores `UILanguage = en` or `UILanguage = zh-CN`. Unknown values use English.
+
+Chinese currently covers the main settings labels, original-style common
+buttons, character/stat labels, inventory titles/tabs, skill-window titles,
+quest-tracker text, keyboard prompts/action tooltips, system-menu entries and selected client notices (quit,
+quest forfeiture, item dropping and numeric validation). Some text baked into
+artwork remains English. Other windows retain their original skin; no complete
+client translation or replacement NX pack is installed. Server text is unchanged.
+
+Translations and source notes are in `src/Localization/` and
+`docs/localization/terms.csv`. Official-page wording is distinguished from project
+translations; no newly obtained official Chinese client resources are claimed.
+On macOS, STHeiti provides CJK fallback even with an old Windows font setting.
+Monochrome glyphs use a reserved atlas region to avoid sprite collisions.
+
+`python3 tests/localization-settings.py` checks immediate language persistence,
+reload in a separate process, cancellation of other options,
+bilingual notice callbacks and renders the settings screens using production
+objects and local NX assets without connecting to a server. Screenshots are in
+`build-macos/localization-check/`. Game-session regression remains necessary.
+
 ## Configuration
 
 Use v83 game data in `wz/` and a compatible interface archive as `UI.nx`. The v154 interface archive supplies `UIWindow2.img`, `UIWindow4.img`, and `StatusBar2.img`, which the equipment, inventory, skill, stats, and status bar views use.
+The optional `UI.Login.nx` archive in the data directory supplies only v83 login
+buttons and the save-ID checkbox. This avoids v154 login controls clashing with
+the wooden v83 signboard. If absent, the existing UI.nx login art is used.
+See `docs/localization/login-resource.md` for the local resource record.
+
 Create a local `Settings` file beside the client executable and set `ServerIP`
 and `ServerPort` to your Cosmic server's reachable address and login port.
 The default address is loopback and does not select a public server.

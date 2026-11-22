@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIStatsInfo.h"
+#include "../Components/LocalizedMapleButton.h"
 
 #include "UINotice.h"
 
@@ -42,14 +43,48 @@ namespace ms
 		nl::node abilityTitle = detail["abilityTitle"];
 		nl::node metierLine = detail["metierLine"];
 
-		sprites.emplace_back(main["backgrnd"]);
-		sprites.emplace_back(main["backgrnd2"]);
-		sprites.emplace_back(main["backgrnd3"]);
+		translated_frame = LocalizedArt(main["backgrnd"], {{45, 3, 122, 12, localization::Key::CharacterStats, Color::Name::YELLOW}});
+
+
 
 		textures_detail.emplace_back(detail["backgrnd"]);
 		textures_detail.emplace_back(detail["backgrnd2"]);
 		textures_detail.emplace_back(detail["backgrnd3"]);
 		textures_detail.emplace_back(detail["backgrnd4"]);
+		translated_main = LocalizedArt(main["backgrnd2"], {
+			{3, 5, 54, 16, localization::Key::NameLabel, Color::Name::WHITE, 55},
+			{3, 23, 54, 16, localization::Key::ClassLabel, Color::Name::WHITE, 55},
+			{3, 41, 54, 16, localization::Key::GuildLabel, Color::Name::WHITE, 55},
+			{3, 59, 54, 16, localization::Key::FameLabel, Color::Name::WHITE, 55},
+			{3, 77, 54, 16, localization::Key::DamageLabel, Color::Name::WHITE, 55},
+			{3, 185, 54, 16, localization::Key::StrengthLabel, Color::Name::WHITE, 55},
+			{3, 203, 54, 16, localization::Key::DexterityLabel, Color::Name::WHITE, 55},
+			{3, 221, 54, 16, localization::Key::IntelligenceLabel, Color::Name::WHITE, 55},
+			{3, 239, 54, 16, localization::Key::LuckLabel, Color::Name::WHITE, 55},
+		});
+		translated_ap = LocalizedArt(main["backgrnd3"], {{5, 3, 108, 16, localization::Key::AbilityPoints, Color::Name::WHITE, 180}});
+		translated_detail_frame = LocalizedArt(detail["backgrnd"], {{45, 3, 122, 12, localization::Key::DetailedStats, Color::Name::YELLOW}});
+		translated_detail = LocalizedArt(detail["backgrnd3"], {
+			{7, 4, 150, 16, localization::Key::DetailedStats, Color::Name::WHITE},
+			{3, 28, 52, 14, localization::Key::AttackStats, Color::Name::WHITE},
+			{3, 46, 52, 14, localization::Key::CriticalChance, Color::Name::WHITE},
+			{3, 64, 52, 14, localization::Key::MinimumCritical, Color::Name::WHITE},
+			{99, 64, 52, 14, localization::Key::MaximumCritical, Color::Name::WHITE},
+			{3, 82, 52, 14, localization::Key::BossAttack, Color::Name::WHITE},
+			{99, 82, 52, 14, localization::Key::IgnoreDefense, Color::Name::WHITE},
+			{3, 100, 52, 14, localization::Key::StatusResistance, Color::Name::WHITE},
+			{99, 100, 52, 14, localization::Key::StanceLabel, Color::Name::WHITE},
+			{3, 118, 52, 14, localization::Key::WeaponDefense, Color::Name::WHITE},
+			{3, 136, 52, 14, localization::Key::MagicDefense, Color::Name::WHITE},
+			{3, 154, 52, 14, localization::Key::WeaponAccuracy, Color::Name::WHITE},
+			{3, 172, 52, 14, localization::Key::MagicAccuracy, Color::Name::WHITE},
+			{3, 190, 52, 14, localization::Key::WeaponAvoid, Color::Name::WHITE},
+			{3, 208, 52, 14, localization::Key::MagicAvoid, Color::Name::WHITE},
+			{3, 226, 52, 14, localization::Key::SpeedLabel, Color::Name::WHITE},
+			{99, 226, 52, 14, localization::Key::JumpLabel, Color::Name::WHITE},
+			{3, 347, 52, 12, localization::Key::HonorLabel, Color::Name::WHITE},
+			{143, 347, 44, 12, localization::Key::ResetLabel, Color::Name::WHITE},
+		});
 
 		abilities[Ability::RARE] = abilityTitle["rare"]["0"];
 		abilities[Ability::EPIC] = abilityTitle["epic"]["0"];
@@ -59,6 +94,8 @@ namespace ms
 
 		inner_ability[true] = metierLine["activated"]["0"];
 		inner_ability[false] = metierLine["disabled"]["0"];
+		translated_ability = LocalizedArt(abilityTitle["normal"]["0"], {{8, 5, 160, 16, localization::Key::AbilityLabel, Color::Name::WHITE}});
+		translated_locked = LocalizedArt(metierLine["disabled"]["0"], {{74, 2, 70, 14, localization::Key::LockedLabel, Color::Name::WHITE}});
 
 		buttons[Buttons::BT_CLOSE] = std::make_unique<MapleButton>(close, Point<int16_t>(190, 6));
 		buttons[Buttons::BT_HP] = std::make_unique<MapleButton>(main["BtHpUp"]);
@@ -70,7 +107,7 @@ namespace ms
 		buttons[Buttons::BT_AUTO] = std::make_unique<MapleButton>(main["BtAuto"]);
 		buttons[Buttons::BT_HYPERSTATOPEN] = std::make_unique<MapleButton>(main["BtHyperStatOpen"]);
 		buttons[Buttons::BT_HYPERSTATCLOSE] = std::make_unique<MapleButton>(main["BtHyperStatClose"]);
-		buttons[Buttons::BT_DETAILOPEN] = std::make_unique<MapleButton>(main["BtDetailOpen"]);
+		buttons[Buttons::BT_DETAILOPEN] = std::make_unique<LocalizedMapleButton>(main["BtDetailOpen"], localization::Key::DetailLabel);
 		buttons[Buttons::BT_DETAILCLOSE] = std::make_unique<MapleButton>(main["BtDetailClose"]);
 		buttons[Buttons::BT_ABILITY] = std::make_unique<MapleButton>(detail["BtAbility"], Point<int16_t>(212, 0));
 		buttons[Buttons::BT_DETAIL_DETAILCLOSE] = std::make_unique<MapleButton>(detail["BtHpUp"], Point<int16_t>(212, 0));
@@ -151,7 +188,10 @@ namespace ms
 
 	void UIStatsInfo::draw(float alpha) const
 	{
+		translated_frame.draw(position);
 		UIElement::draw_sprites(alpha);
+		translated_main.draw(position);
+		translated_ap.draw(position);
 
 		if (showdetail)
 		{
@@ -159,14 +199,14 @@ namespace ms
 
 			textures_detail[0].draw(detail_pos + Point<int16_t>(0, -1));
 			textures_detail[1].draw(detail_pos);
-			textures_detail[2].draw(detail_pos);
+			translated_detail.draw(detail_pos);
 			textures_detail[3].draw(detail_pos);
 
-			abilities[Ability::NONE].draw(DrawArgument(detail_pos));
+			translated_ability.draw(detail_pos);
 
-			inner_ability[false].draw(detail_pos);
-			inner_ability[false].draw(detail_pos + Point<int16_t>(0, 19));
-			inner_ability[false].draw(detail_pos + Point<int16_t>(0, 38));
+			translated_locked.draw(detail_pos);
+			translated_locked.draw(detail_pos + Point<int16_t>(0, 19));
+			translated_locked.draw(detail_pos + Point<int16_t>(0, 38));
 		}
 
 		size_t last = showdetail ? StatLabel::NUM_LABELS : StatLabel::NUM_NORMAL;

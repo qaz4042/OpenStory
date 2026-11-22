@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UINotice.h"
+#include "../Components/LocalizedMapleButton.h"
+#include "../../Localization/Actions.h"
 
 #include "../NotificationCenter.h"
 #include "UIStatusBar.h"
@@ -160,8 +162,8 @@ namespace ms
 
 		int16_t belowtext = box2offset(false) + (legacy_notice ? 0 : button_y_offset);
 
-		buttons[Buttons::YES] = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"), Point<int16_t>(legacy_notice ? 135 : 156 + button_x_offset, belowtext));
-		buttons[Buttons::NO] = std::make_unique<MapleButton>(notice_button("BtCancel4", "BtCancel"), Point<int16_t>(legacy_notice ? 193 : 198 + button_x_offset, belowtext));
+		buttons[Buttons::YES] = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK, Point<int16_t>(legacy_notice ? 135 : 156 + button_x_offset, belowtext));
+		buttons[Buttons::NO] = std::make_unique<LocalizedMapleButton>(notice_button("BtCancel4", "BtCancel"), localization::Key::Cancel, Point<int16_t>(legacy_notice ? 193 : 198 + button_x_offset, belowtext));
 	}
 
 	UIYesNo::UIYesNo(std::string message, std::function<void(bool yes)> yesnohandler) : UIYesNo(message, yesnohandler, Text::Alignment::CENTER) {}
@@ -220,8 +222,8 @@ namespace ms
 		int16_t belowtext = box2offset(true) + (legacy_notice ? 0 : field_y_offset);
 		int16_t pos_y = legacy_notice ? box2offset(false) : belowtext + 35 + button_y_offset;
 
-		buttons[Buttons::OK] = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"), legacy_notice ? 135 : 156 + button_x_offset, pos_y);
-		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(notice_button("BtCancel4", "BtCancel"), legacy_notice ? 193 : 198 + button_x_offset, pos_y);
+		buttons[Buttons::OK] = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK, legacy_notice ? 135 : 156 + button_x_offset, pos_y);
+		buttons[Buttons::CANCEL] = std::make_unique<LocalizedMapleButton>(notice_button("BtCancel4", "BtCancel"), localization::Key::Cancel, legacy_notice ? 193 : 198 + button_x_offset, pos_y);
 
 		numfield = Textfield(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::LIGHTGREY, Rectangle<int16_t>(24, 232, belowtext, belowtext + 20), 10);
 		numfield.change_text(std::to_string(quantity));
@@ -318,7 +320,7 @@ namespace ms
 
 		if (!has_only_digits)
 		{
-			UI::get().emplace<UIOk>("Only numbers are allowed.", okhandler);
+			UI::get().emplace<UIOk>(localization::get(localization::Key::NumbersOnly), okhandler);
 			return;
 		}
 		else
@@ -328,12 +330,12 @@ namespace ms
 
 		if (num < 1)
 		{
-			UI::get().emplace<UIOk>("You may only enter a number equal to or higher than 1.", okhandler);
+			UI::get().emplace<UIOk>(localization::get(localization::Key::NumberMinimum), okhandler);
 			return;
 		}
 		else if (num > max)
 		{
-			UI::get().emplace<UIOk>("You may only enter a number equal to or lower than " + std::to_string(max) + ".", okhandler);
+			UI::get().emplace<UIOk>(localization::format(localization::Key::NumberMaximum, std::to_string(max)), okhandler);
 			return;
 		}
 		else
@@ -353,8 +355,8 @@ namespace ms
 		int16_t belowtext = box2offset(true) + (legacy_notice ? 0 : field_y_offset - 21);
 		int16_t pos_y = legacy_notice ? box2offset(false) : belowtext + 35 + button_y_offset;
 
-		buttons[Buttons::OK]     = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"),     legacy_notice ? 135 : 156 + button_x_offset, pos_y);
-		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(notice_button("BtCancel4", "BtCancel"), legacy_notice ? 193 : 198 + button_x_offset, pos_y);
+		buttons[Buttons::OK]     = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK,     legacy_notice ? 135 : 156 + button_x_offset, pos_y);
+		buttons[Buttons::CANCEL] = std::make_unique<LocalizedMapleButton>(notice_button("BtCancel4", "BtCancel"), localization::Key::Cancel, legacy_notice ? 193 : 198 + button_x_offset, pos_y);
 
 		textfield = Textfield(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::LIGHTGREY, Rectangle<int16_t>(24, 232, belowtext, belowtext + 20), maxlength);
 
@@ -462,7 +464,7 @@ namespace ms
 	{
 		okhandler = oh;
 
-		buttons[Buttons::OK] = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"), 197, box2offset(false));
+		buttons[Buttons::OK] = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK, 197, box2offset(false));
 	}
 
 	void UIOk::draw(float alpha) const

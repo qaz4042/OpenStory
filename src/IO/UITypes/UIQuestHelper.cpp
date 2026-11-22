@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIQuestHelper.h"
+#include "../../Localization/Locale.h"
 #include "UIQuestLog.h"
 
 #include "../Components/MapleButton.h"
@@ -399,7 +400,7 @@ namespace ms
 		// Draw title
 		{
 			int16_t count = static_cast<int16_t>(tracked_quests.size());
-			std::string title = "Quest Helper (" + std::to_string(count) + "/" + std::to_string(MAX_TRACKED) + ")";
+			std::string title = std::string(localization::get(localization::Key::QuestHelper)) + " (" + std::to_string(count) + "/" + std::to_string(MAX_TRACKED) + ")";
 			title_text.change_text(title);
 			title_text.draw(content_pos + Point<int16_t>(8, 1));
 		}
@@ -414,6 +415,7 @@ namespace ms
 
 		if (tracked_quests.empty())
 		{
+			no_quest_text.change_text(localization::get(localization::Key::NoQuestTracked));
 			no_quest_text.draw(content_pos + Point<int16_t>(15, 22));
 		}
 		else

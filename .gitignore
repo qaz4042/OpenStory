@@ -65,3 +65,6 @@ __pycache__/
 # ...but the .app bundle's build inputs are source, not build output
 # (the blanket *.cmake rule above would otherwise swallow this one).
 !resource/macos/make_icns.cmake
+
+# Isolated training-assist build
+/build-training/

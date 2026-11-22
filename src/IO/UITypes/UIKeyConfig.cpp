@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIKeyConfig.h"
+#include "../Components/LocalizedMapleButton.h"
+#include "../../Localization/Actions.h"
 
 #include "../UI.h"
 
@@ -48,11 +50,11 @@ namespace ms
 		sprites.emplace_back(KeyConfig["backgrnd2"]);
 		sprites.emplace_back(KeyConfig["backgrnd3"]);
 
-		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(KeyConfig["BtCancel"]);
-		buttons[Buttons::DEFAULT] = std::make_unique<MapleButton>(KeyConfig["BtDefault"]);
-		buttons[Buttons::DELETE] = std::make_unique<MapleButton>(KeyConfig["BtDelete"]);
-		buttons[Buttons::KEYSETTING] = std::make_unique<MapleButton>(KeyConfig["BtQuickSlot"]);
-		buttons[Buttons::OK] = std::make_unique<MapleButton>(KeyConfig["BtOK"]);
+		buttons[Buttons::CANCEL] = std::make_unique<LocalizedMapleButton>(KeyConfig["BtCancel"], localization::Key::Cancel);
+		buttons[Buttons::DEFAULT] = std::make_unique<LocalizedMapleButton>(KeyConfig["BtDefault"], localization::Key::RestoreDefaults);
+		buttons[Buttons::DELETE] = std::make_unique<LocalizedMapleButton>(KeyConfig["BtDelete"], localization::Key::ClearBindings);
+		buttons[Buttons::KEYSETTING] = std::make_unique<LocalizedMapleButton>(KeyConfig["BtQuickSlot"], localization::Key::QuickSlots);
+		buttons[Buttons::OK] = std::make_unique<LocalizedMapleButton>(KeyConfig["BtOK"], localization::Key::OK);
 
 		dimension = Point<int16_t>(622, 374);
 		dragarea = Point<int16_t>(622, 20);
@@ -508,7 +510,7 @@ namespace ms
 			break;
 		case Buttons::DEFAULT:
 		{
-			constexpr char* message = "Would you like to revert to default settings?";
+			const char* message = localization::get(localization::Key::RestorePrompt);
 
 			auto onok = [&](bool ok)
 			{
@@ -535,7 +537,7 @@ namespace ms
 		}
 		case Buttons::DELETE:
 		{
-			constexpr char* message = "Would you like to clear all key bindings?";
+			const char* message = localization::get(localization::Key::ClearPrompt);
 
 			auto onok = [&](bool ok)
 			{
@@ -574,6 +576,7 @@ namespace ms
 		{
 			if (auto icon = action_icons[icon_slot].get())
 			{
+				UI::get().show_text(Tooltip::Parent::KEYCONFIG, localization::action_name(icon_slot));
 				if (clicked)
 				{
 					icon->start_drag(cursorpos - position - unbound_actions_pos[icon_slot]);
@@ -623,6 +626,7 @@ namespace ms
 				{
 					KeyAction::Id action = KeyAction::actionbyid(mapping.action);
 					ficon = action_icons[action].get();
+					UI::get().show_text(Tooltip::Parent::KEYCONFIG, localization::action_name(action));
 				}
 				else
 				{
@@ -686,7 +690,7 @@ namespace ms
 	{
 		if (dirty)
 		{
-			constexpr char* message = "Do you want to save your changes?";
+			const char* message = localization::get(localization::Key::SavePrompt);
 
 			auto onok = [&](bool ok)
 			{

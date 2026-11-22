@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UI.h"
+#include "UITypes/UITrainingPanel.h"
+#include "../Gameplay/Stage.h"
 
 #include <vector>
 
@@ -231,6 +233,11 @@ namespace ms
 
 	void UI::send_cursor(bool pressed)
 	{
+		if (pressed) {
+			auto panel = get_element<UITrainingPanel>();
+			if (!panel || !panel->is_in_range(cursor.get_position()))
+				Stage::get().stop_training_auto("Manual mouse input");
+		}
 		mouse_held = pressed;
 		Cursor::State cursorstate = (pressed && enabled) ? Cursor::State::CLICKING : Cursor::State::IDLE;
 		Point<int16_t> cursorpos = cursor.get_position();
@@ -282,8 +289,27 @@ namespace ms
 			focusedtextfield->add_codepoint(codepoint);
 	}
 
+	bool UI::blocks_training_attack()
+	{
+		if (!enabled || (focusedtextfield && focusedtextfield->get_state() == Textfield::State::FOCUSED)) return true;
+		for (auto type : {UIElement::NOTICE, UIElement::NPCTALK, UIElement::SHOP,
+			UIElement::STORAGE, UIElement::TRADE, UIElement::CASHSHOP, UIElement::MTS,
+			UIElement::OPTIONMENU, UIElement::KEYCONFIG, UIElement::CHANNEL, UIElement::QUIT,
+			UIElement::PERSONALSHOP, UIElement::HIREDMERCHANT, UIElement::MINIGAME})
+			if (auto element = state->get(type))
+				if (element->is_active()) return true;
+		return false;
+	}
+
 	void UI::send_key(int32_t keycode, bool pressed)
 	{
+		if (keycode == GLFW_KEY_F8) {
+			if (pressed && !is_key_down[keycode])
+				if (auto panel = get_element<UITrainingPanel>()) panel->toggle();
+			is_key_down[keycode] = pressed;
+			return;
+		}
+		if (pressed) Stage::get().stop_training_auto("Manual keyboard input");
 		if ((is_key_down[GLFW_KEY_LEFT_ALT] || is_key_down[GLFW_KEY_RIGHT_ALT]) && (is_key_down[GLFW_KEY_ENTER] || is_key_down[GLFW_KEY_KP_ENTER]))
 		{
 			Window::get().toggle_fullscreen();

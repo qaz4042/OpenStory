@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../UIDragElement.h"
+#include "../Components/LocalizedArt.h"
 
 #include "../../Graphics/Geometry.h"
 #include "../../Graphics/Text.h"
@@ -53,9 +54,12 @@ namespace ms
 		{
 			BT_OK,
 			BT_CANCEL,
-			BT_LOGOUT
+			BT_LOGOUT,
+			BT_LANGUAGE
 		};
 
+		LocalizedArt translated_options, translated_title;
+		std::string original_language;
 		bool fallback_layout;
 		Text title;
 		Text logout_label;

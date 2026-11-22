@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UILoginNotice.h"
+#include "../Components/LocalizedMapleButton.h"
+#include "../../Localization/Actions.h"
 
 #include "../UI.h"
 

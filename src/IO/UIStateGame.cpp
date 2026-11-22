@@ -1,3 +1,4 @@
+#include "../Localization/Locale.h"
 //////////////////////////////////////////////////////////////////////////////////
 //	This file is part of the continued Journey MMORPG client					//
 //	Copyright (C) 2015-2019  Daniel Allendorf, Ryan Payton						//
@@ -16,6 +17,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIStateGame.h"
+#include "UITypes/UITrainingPanel.h"
+#include "../Net/Packets/MessagingPackets.h"
 
 
 #include "UI.h"
@@ -98,6 +101,7 @@ namespace ms
 		emplace<UIShop>(look, inventory);
 		emplace<UIQuestHelper>(Stage::get().get_player().get_quests());
 		emplace<UIPartyHUD>();
+		emplace<UITrainingPanel>(Stage::get().get_training_status(), [](const std::string& command) { GeneralChatPacket(command, false).dispatch(); });
 
 		VWIDTH = Constants::Constants::get().get_viewwidth();
 		VHEIGHT = Constants::Constants::get().get_viewheight();
@@ -253,7 +257,7 @@ namespace ms
 			if (escape && pressed)
 			{
 				UI::get().emplace<UIYesNo>(
-					"Do you want to quit?",
+					localization::get(localization::Key::QuitPrompt),
 					[](bool yes)
 					{
 						if (yes)
@@ -709,7 +713,7 @@ namespace ms
 	void UIStateGame::send_close()
 	{
 		UI::get().emplace<UIYesNo>(
-			"Do you want to quit?",
+			localization::get(localization::Key::QuitPrompt),
 			[](bool yes)
 			{
 				if (yes)

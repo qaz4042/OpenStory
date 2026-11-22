@@ -31,6 +31,7 @@ namespace ms
 		settings.emplace<Width>();
 		settings.emplace<Height>();
 		settings.emplace<VSync>();
+		settings.emplace<UILanguage>();
 		settings.emplace<FontPathNormal>();
 		settings.emplace<FontPathBold>();
 		settings.emplace<FontPathEmoji>();
@@ -179,7 +180,7 @@ namespace ms
 		static const std::vector<std::pair<const char*, std::vector<const char*>>> sections = {
 			{ "Connection",  { "ServerIP", "ServerPort", "SaveLogin", "Account", "Password",
 			                   "World", "Channel", "Character", "Region" } },
-			{ "Display",     { "Width", "Height", "Fullscreen", "VSync" } },
+			{ "Display",     { "Width", "Height", "Fullscreen", "VSync", "UILanguage" } },
 			{ "Audio",       { "BGMVolume", "SFXVolume" } },
 			{ "Quality",     { "GraphicsQuality", "EffectsQuality", "ScreenShake" } },
 			{ "Input",       { "MouseSpeed", "Chatopen" } },

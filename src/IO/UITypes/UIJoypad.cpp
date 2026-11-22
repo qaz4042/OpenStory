@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIJoypad.h"
+#include "../Components/LocalizedMapleButton.h"
+#include "../../Localization/Actions.h"
 
 #include "../Components/MapleButton.h"
 #include "../Gamepad.h"
@@ -54,15 +56,15 @@ namespace ms
 		backgrnd[true] = JoyPad["backgrnd_alternative"];
 		backgrnd[false] = JoyPad["backgrnd_classic"];
 
-		buttons[Buttons::DEFAULT] = std::make_unique<MapleButton>(JoyPad["BtDefault"], Point<int16_t>(18, 303));
-		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(Basic["BtCancel4"], Point<int16_t>(124, 303));
-		buttons[Buttons::OK] = std::make_unique<MapleButton>(Basic["BtOK4"], Point<int16_t>(82, 303));
+		buttons[Buttons::DEFAULT] = std::make_unique<LocalizedMapleButton>(JoyPad["BtDefault"], localization::Key::RestoreDefaults, Point<int16_t>(18, 303));
+		buttons[Buttons::CANCEL] = std::make_unique<LocalizedMapleButton>(Basic["BtCancel4"], localization::Key::Cancel, Point<int16_t>(124, 303));
+		buttons[Buttons::OK] = std::make_unique<LocalizedMapleButton>(Basic["BtOK4"], localization::Key::OK, Point<int16_t>(82, 303));
 
 		for (size_t i = 0; i < Setting::SETTING_NUM; i++)
 			assigned_button[i] = Gamepad::GP_NONE;
 
 		for (Text& text : key_text)
-			text = Text(Text::Font::A12M, Text::Alignment::LEFT, Color::Name::BLACK, "None");
+			text = Text(Text::Font::A12M, Text::Alignment::LEFT, Color::Name::BLACK, localization::get(localization::Key::Unassigned));
 
 		load_from_gamepad();
 		refresh_texts();
@@ -102,12 +104,12 @@ namespace ms
 		if (gp.is_connected())
 			key_text[NAME].change_text(gp.get_name());
 		else
-			key_text[NAME].change_text("No gamepad");
+			key_text[NAME].change_text(localization::get(localization::Key::NoGamepad));
 
 		for (size_t i = 1; i < Setting::SETTING_NUM; i++)
 		{
 			if (assigned_button[i] == Gamepad::GP_NONE)
-				key_text[i].change_text("None");
+				key_text[i].change_text(localization::get(localization::Key::Unassigned));
 			else
 				key_text[i].change_text(Gamepad::get_button_name(assigned_button[i]));
 		}

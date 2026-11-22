@@ -294,6 +294,12 @@ namespace ms
 		VSync() : BoolEntry("VSync", "true") {}
 	};
 
+	// UI language for the program-drawn localization pilot.
+	struct UILanguage : public Configuration::StringEntry
+	{
+		UILanguage() : StringEntry("UILanguage", "en") {}
+	};
+
 	// The normal font which will be used.
 	// Names in EmbeddedFonts.h resolve to fonts compiled into the binary;
 	// anything else is treated as a file path.

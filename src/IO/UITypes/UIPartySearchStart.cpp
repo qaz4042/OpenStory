@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIPartySearchStart.h"
+#include "../Components/LocalizedMapleButton.h"
+#include "../../Localization/Actions.h"
 
 #include "../UI.h"
 #include "../Components/MapleButton.h"
@@ -57,8 +59,8 @@ namespace ms
 		sprites.emplace_back(src["backgrnd"]);
 		chrome.load(src);
 
-		buttons[BT_OK]     = std::make_unique<MapleButton>(src["BtSave"]);
-		buttons[BT_CANCEL] = std::make_unique<MapleButton>(src["BtCancel"]);
+		buttons[BT_OK]     = std::make_unique<LocalizedMapleButton>(src["BtSave"], localization::Key::StartRecruit);
+		buttons[BT_CANCEL] = std::make_unique<LocalizedMapleButton>(src["BtCancel"], localization::Key::Cancel);
 
 		// Pre-fill with the ±10 window around the local player's
 		// level so the leader can hit Start immediately.

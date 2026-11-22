@@ -24,6 +24,10 @@
 #include "../Configuration.h"
 
 #include "../IO/UI.h"
+#include "../IO/UITypes/UITrainingPanel.h"
+#include "../IO/UITypes/UIChatBar.h"
+#include "../Net/Packets/MessagingPackets.h"
+#include "../Net/Session.h"
 #include "../IO/UITypes/UISkillBook.h"
 
 #include "../IO/UITypes/UIStatusBar.h"
@@ -80,6 +84,9 @@ namespace ms
 
 	void Stage::clear()
 	{
+		stop_training_auto("Map changed / disconnected", false);
+		training_status.clear();
+		player.set_training_invulnerable(false);
 		MiniRooms::get().clear_all();
 		HiredMerchants::get().clear_all();
 		state = State::INACTIVE;
@@ -221,6 +228,42 @@ namespace ms
 		}
 	}
 
+	bool Stage::training_auto_notice(const std::string& notice)
+	{
+		if (training_status.accept(notice, get_mapid())) {
+			// The confirmed flag lasts until an off acknowledgement or map clear,
+			// independent of the panel freshness timer when the panel is collapsed.
+			player.set_training_invulnerable(training_status.known && training_status.allowed && training_status.invincible);
+			// A status poll may stop a stale local session, but never starts one.
+			if (training_status.fresh() && training_status.auto_skill < 0)
+				stop_training_auto("Server stopped auto attack", false);
+			return true;
+		}
+		const bool handled = training_auto.accept(notice, get_mapid());
+		if (handled && training_auto.active()) training_status.stop_reason.clear();
+		if (handled)
+			if (auto chat = UI::get().get_element<UIChatBar>())
+				chat->send_chatline(training_auto.active()
+					? "Auto attack enabled (skill " + std::to_string(training_auto.skill()) + "). Manual input stops it."
+					: "Auto attack disabled.", UIChatBar::LineType::YELLOW);
+		return handled;
+	}
+
+	void Stage::stop_training_auto(const std::string& reason, bool notify_server)
+	{
+		if (!training_auto.active()) return;
+		training_auto.stop();
+		training_status.stop_reason = reason == "Manual keyboard input" || reason == "Manual mouse input" || reason == "Manual game input"
+			? "手动操作，已停止挂机" : reason == "Disconnected / dead" ? "断线或死亡，已停止挂机"
+			: reason == "No weapon equipped" ? "未装备武器，已停止挂机"
+			: reason == "Skill unavailable (MP, ammunition, weapon or skill requirements)" ? "技能条件不足，请检查蓝量、弹药和武器"
+			: reason == "Server stopped auto attack" ? "服务端已停止挂机" : "挂机已停止";
+		if (notify_server && Session::get().is_connected())
+			GeneralChatPacket("@assist auto off", false).dispatch();
+		if (auto chat = UI::get().get_element<UIChatBar>())
+			chat->send_chatline("Auto attack stopped: " + reason, UIChatBar::LineType::YELLOW);
+	}
+
 	void Stage::update()
 	{
 		if (state != State::ACTIVE)
@@ -248,6 +291,19 @@ namespace ms
 		mists.update(physics);
 		point_effects.update();
 		player.update(physics);
+
+		if (training_auto.active())
+		{
+			if (!Session::get().is_connected() || player.get_stats().get_stat(MapleStat::Id::HP) == 0)
+				stop_training_auto("Disconnected / dead");
+			else if (!(UI::get().get_element<UITrainingPanel>() && UI::get().get_element<UITrainingPanel>()->expanded())
+				&& !UI::get().blocks_training_attack() && !player.is_climbing() && !player.is_sitting()
+				&& training_auto.ready(TrainingAutoAttack::Clock::now()))
+			{
+				std::string reason;
+				if (!combat.auto_use_move(training_auto.skill(), reason)) stop_training_auto(reason);
+			}
+		}
 
 		portals.update(player.get_position());
 		camera.update(player.get_position());
@@ -353,6 +409,7 @@ namespace ms
 
 	void Stage::send_key(KeyType::Id type, int32_t action, bool down)
 	{
+		if (down) stop_training_auto("Manual game input");
 		if (state != State::ACTIVE || !playable)
 			return;
 

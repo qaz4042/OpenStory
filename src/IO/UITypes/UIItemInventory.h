@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../UIDragElement.h"
+#include "../Components/LocalizedArt.h"
 
 #include "../Components/Slider.h"
 
@@ -55,6 +56,7 @@ namespace ms
 		Button::State button_pressed(uint16_t buttonid) override;
 
 	private:
+		LocalizedArt translated_frame, translated_full_frame;
 		void show_item(int16_t slot);
 		void clear_tooltip();
 		void load_icons();

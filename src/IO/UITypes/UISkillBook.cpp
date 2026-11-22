@@ -151,9 +151,9 @@ namespace ms
 		buttons[Buttons::BT_RIDE]->set_state(Button::State::DISABLED);
 
 
-		sprites.emplace_back(ui_backgrnd, Point<int16_t>(1, 0));
+		translated_frame = LocalizedArt(ui_backgrnd, {{30, 3, 114, 12, localization::Key::SkillInventory, Color::Name::YELLOW}});
 		sprites.emplace_back(main["backgrnd2"]);
-		sprites.emplace_back(main["backgrnd3"]);
+		translated_content = LocalizedArt(main["backgrnd3"], {{57, 208, 81, 13, localization::Key::SkillPoints, Color::Name::DARKGREY}});
 
 		nl::node macro = Skill["macro"];
 
@@ -267,7 +267,9 @@ namespace ms
 
 	void UISkillBook::draw(float alpha) const
 	{
+		translated_frame.draw(position + Point<int16_t>(1, 0));
 		UIElement::draw_sprites(alpha);
+		translated_content.draw(position);
 
 		bookicon.draw(position + Point<int16_t>(11, 85));
 		booktext.draw(position + Point<int16_t>(95, 59));

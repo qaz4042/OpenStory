@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIOptionMenu.h"
+#include "../Components/LocalizedMapleButton.h"
 
 #include "../KeyAction.h"
 
@@ -51,12 +52,10 @@ namespace ms
 		fallback_layout = !OptionMenu["backgrnd"] || !OptionMenu["scroll"][0] || !OptionMenu["BtOK"];
 		if (!fallback_layout)
 		{
-			sprites.emplace_back(OptionMenu["backgrnd"]);
 			sprites.emplace_back(OptionMenu["backgrnd2"]);
-			sprites.emplace_back(OptionMenu["backgrnd3"]);
 
-			buttons[BT_OK] = std::make_unique<MapleButton>(OptionMenu["BtOK"]);
-			buttons[BT_CANCEL] = std::make_unique<MapleButton>(OptionMenu["BtCancle"]);
+			buttons[BT_OK] = std::make_unique<LocalizedMapleButton>(OptionMenu["BtOK"], localization::Key::OK);
+			buttons[BT_CANCEL] = std::make_unique<LocalizedMapleButton>(OptionMenu["BtCancle"], localization::Key::Cancel);
 
 			nl::node scroll = OptionMenu["scroll"];
 			scroll_normal = scroll["0"];
@@ -65,6 +64,37 @@ namespace ms
 			scroll_disabled = scroll["3"];
 
 			check_sprite = OptionMenu["check"];
+			translated_title = LocalizedArt(OptionMenu["backgrnd"], {{100, 3, 83, 11, localization::Key::Settings, Color::Name::YELLOW}});
+			translated_options = LocalizedArt(OptionMenu["backgrnd3"], {
+				{2, 0, 46, 28, localization::Key::Graphics, Color::Name::WHITE},
+				{2, 30, 46, 28, localization::Key::Effects, Color::Name::WHITE},
+				{2, 120, 46, 28, localization::Key::Music, Color::Name::WHITE},
+				{2, 150, 46, 28, localization::Key::Sound, Color::Name::WHITE},
+				{2, 180, 46, 28, localization::Key::ScreenshotFolder, Color::Name::WHITE},
+				{2, 210, 46, 28, localization::Key::Mouse, Color::Name::WHITE},
+				{2, 240, 46, 28, localization::Key::HP, Color::Name::WHITE},
+				{2, 270, 46, 28, localization::Key::MP, Color::Name::WHITE},
+				{2, 300, 46, 28, localization::Key::Shake, Color::Name::WHITE},
+				{2, 330, 46, 28, localization::Key::MonsterInfo, Color::Name::WHITE},
+				{2, 60, 46, 28, localization::Key::Resolution, Color::Name::WHITE},
+				{2, 90, 46, 28, localization::Key::WindowLabel, Color::Name::WHITE},
+				{2, 360, 46, 33, localization::Key::MinimapMode, Color::Name::WHITE},
+				{2, 396, 84, 16, localization::Key::Whispers, Color::Name::WHITE},
+				{2, 414, 84, 16, localization::Key::Chat, Color::Name::WHITE},
+				{2, 432, 84, 16, localization::Key::Party, Color::Name::WHITE},
+				{2, 450, 84, 16, localization::Key::GuildChat, Color::Name::WHITE},
+				{2, 468, 84, 16, localization::Key::AllianceChat, Color::Name::WHITE},
+				{2, 486, 84, 16, localization::Key::Family, Color::Name::WHITE},
+				{136, 396, 84, 16, localization::Key::Friend, Color::Name::WHITE},
+				{136, 414, 84, 16, localization::Key::Trade, Color::Name::WHITE},
+				{136, 432, 84, 16, localization::Key::Expedition, Color::Name::WHITE},
+				{136, 450, 84, 16, localization::Key::Guild, Color::Name::WHITE},
+				{136, 468, 84, 16, localization::Key::Alliance, Color::Name::WHITE},
+				{136, 486, 84, 16, localization::Key::Follow, Color::Name::WHITE},
+				{70, 365, 60, 20, localization::Key::Normal, Color::Name::DARKGREY},
+				{171, 365, 61, 20, localization::Key::Simple, Color::Name::DARKGREY},
+			});
+			buttons[BT_LANGUAGE] = std::make_unique<LocalizedMapleButton>(nl::nx::ui["Basic.img"]["BtOK4"], localization::Key::LanguageToggle, Point<int16_t>(12, 536));
 
 			dimension = Point<int16_t>(283, 558);
 			dragarea = Point<int16_t>(283, 20);
@@ -197,7 +227,11 @@ namespace ms
 		if (fallback_layout)
 			draw_fallback();
 		else
+		{
+			translated_title.draw(position);
 			UIElement::draw_sprites(inter);
+			translated_options.draw(position);
+		}
 
 		// Draw all slider thumbs and percentage labels
 		for (int i = 0; i < NUM_SLIDERS; i++)
@@ -264,6 +298,13 @@ namespace ms
 	{
 		switch (buttonid)
 		{
+		case BT_LANGUAGE:
+			Setting<UILanguage>::get().save(Setting<UILanguage>::get().load() == "zh-CN" ? "en" : "zh-CN");
+			// Language is a client preference, committed immediately even if
+			// other previewed options are cancelled or the process is stopped.
+			original_language = Setting<UILanguage>::get().load();
+			Configuration::get().save();
+			return Button::State::NORMAL;
 		case BT_LOGOUT:
 			revert_settings();
 			deactivate();
@@ -396,6 +437,7 @@ namespace ms
 
 	void UIOptionMenu::load_settings()
 	{
+		original_language = localization::normalize(Setting<UILanguage>::get().load());
 		slider_val[SL_BGM] = Setting<BGMVolume>::get().load();
 		slider_val[SL_SFX] = Setting<SFXVolume>::get().load();
 		slider_val[SL_GRAPHICS] = Setting<GraphicsQuality>::get().load();
@@ -496,6 +538,7 @@ namespace ms
 		Music::set_bgmvolume(check_val[CHK_MUTE_BGM] ? 0 : slider_val[SL_BGM]);
 		Sound::set_sfxvolume(check_val[CHK_MUTE_SFX] ? 0 : slider_val[SL_SFX]);
 
+		original_language = Setting<UILanguage>::get().load();
 		Configuration::get().save();
 
 		// Update originals
@@ -508,6 +551,7 @@ namespace ms
 
 	void UIOptionMenu::revert_settings()
 	{
+		Setting<UILanguage>::get().save(original_language);
 		for (int i = 0; i < NUM_SLIDERS; i++)
 			slider_val[i] = slider_orig[i];
 

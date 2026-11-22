@@ -18,6 +18,8 @@
 #pragma once
 
 #include "Combat/Combat.h"
+#include "TrainingAutoAttack.h"
+#include "TrainingAssistStatus.h"
 #include "PetAI.h"
 #include "MapleMap/MapBackgrounds.h"
 #include "MapleMap/MapEnvironments.h"
@@ -57,6 +59,9 @@ namespace ms
 		void draw(float alpha) const;
 		// Calls 'update()' of all objects on stage
 		void update();
+		TrainingAssistStatus& get_training_status() { return training_status; }
+		bool training_auto_notice(const std::string& notice);
+		void stop_training_auto(const std::string& reason, bool notify_server = true);
 
 		// Show a character effect
 		void show_character_effect(int32_t cid, CharEffect::Id effect);
@@ -156,6 +161,8 @@ namespace ms
 			ACTIVE
 		};
 
+		TrainingAssistStatus training_status;
+		TrainingAutoAttack training_auto;
 		Camera camera;
 		PetAI petai;
 		Physics physics;

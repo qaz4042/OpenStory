@@ -328,6 +328,8 @@ namespace ms
 
 		static const GLshort ATLASW = 8192;
 		static const GLshort ATLASH = 8192;
+		// Keep lazily loaded monochrome glyphs separate from sprite/emoji uploads.
+		static constexpr GLshort FONT_REGION_H = 1024;
 		static const GLshort MINLOSIZE = 32;
 
 		bool locked;

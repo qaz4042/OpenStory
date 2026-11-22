@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../UIDragElement.h"
+#include "../Components/LocalizedArt.h"
 
 #include "../Components/Charset.h"
 #include "../Components/Slider.h"
@@ -66,6 +67,7 @@ namespace ms
 		Button::State button_pressed(uint16_t id) override;
 
 	private:
+		LocalizedArt translated_frame, translated_content;
 		class SkillIcon : public StatefulIcon::Type
 		{
 		public:

@@ -331,12 +331,13 @@ namespace ms
 	void ServerMessageHandler::handle(InPacket& recv) const
 	{
 		int8_t type = recv.read_byte();
-		bool servermessage = recv.inspect_bool();
+		bool servermessage = type == 4 && recv.inspect_bool();
 
 		if (servermessage)
 			recv.skip(1);
 
 		std::string message = recv.read_string();
+		if (type == 5 && Stage::get().training_auto_notice(message)) return;
 
 		auto chatbar = UI::get().get_element<UIChatBar>();
 

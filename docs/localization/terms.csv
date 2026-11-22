@@ -1,0 +1,180 @@
+key,english,chinese,context,source_region,source_version,source,evidence,notes
+Settings,System Settings,系统设置,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Logout,Log out,退出登录,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Graphics,Graphics,画面质量,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Effects,Effects,特效质量,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Music,Music,背景音乐,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+Sound,Sound effects,音效,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Mouse,Mouse speed,鼠标速度,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+HP,HP alert,HP 警告,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+MP,MP alert,MP 警告,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+Windowed,Windowed,窗口模式,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Mute,Mute,静音,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Shake,Screen shake,画面晃动,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+NormalMap,Normal map,小地图：普通,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+SimpleMap,Simple map,小地图：简易,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Whispers,Whispers,悄悄话,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+Chat,Chat invites,对话邀请,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+Party,Party invites,组队邀请,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+GuildChat,Guild chat,公会聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+AllianceChat,Alliance chat,联盟聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Family,Family invites,家族邀请,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Friend,Friend chat,好友聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Trade,Trade requests,申请交换,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+Expedition,Expedition invites,远征邀请,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Guild,Guild invites,公会邀请,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Alliance,Alliance invites,联盟邀请,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Follow,Follow requests,跟随请求,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+OK,OK,确定,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Cancel,Cancel,取消,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Language,Language: English,语言：简体中文,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+QuitPrompt,Do you want to quit?,确定退出并返回登录界面吗？,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ForfeitQuest,Are you sure you want to forfeit this quest?,确定放弃这个任务吗？,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+DropQuantity,How many will you drop?,要丢弃多少个？,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+DropUntradable,This item can't be taken back once thrown away.\\nWill you still drop it?,这个物品丢弃后无法取回。\\n仍要丢弃吗？,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+CannotDrop,You can't drop this item.,无法丢弃这个物品。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+NumbersOnly,Only numbers are allowed.,只能输入数字。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+NumberMinimum,You may only enter a number equal to or higher than 1.,请输入大于或等于 1 的数字。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+NumberMaximum,You may only enter a number equal to or lower than {value}.,请输入小于或等于 {value} 的数字。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Notice,Notice,提示,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+KeySettings,Keyboard Settings,键盘设置,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+GamepadSettings,Gamepad Settings,手柄设置,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+RestoreDefaults,Defaults,还原,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+ClearBindings,Clear bindings,清空键位,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+QuickSlots,Quick slots,快捷键栏,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Save,Save,保存,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Close,Close,关闭,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+KeyHelp,"Drag an action, skill or item to a key. Hover an action to see its name.",将功能、技能或物品拖到按键上；悬停功能图标可查看名称。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+RestorePrompt,Would you like to revert to default settings?,是否恢复默认键位设置？,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ClearPrompt,Would you like to clear all key bindings?,是否清空所有键位？,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+SavePrompt,Do you want to save your changes?,是否保存本次修改？,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ChooseKeys,Choose a keyboard layout,选择键位方案,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ClassicKeys,Classic layout,键位方案 A,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+AlternateKeys,Alternate layout,键位方案 B,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ChooseKeysHint,Select a layout to restore its default key bindings.,选择方案后，将恢复该方案的默认键位。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+KeysChosen,Keyboard layout selected,键位方案已选择,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+NoGamepad,No gamepad connected,无手柄,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Unassigned,Unassigned,未绑定,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Device,Device,设备,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+BindingWait,Press a gamepad button...,请按下手柄上的按键……,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+GamepadHelp,Click a row to bind a button. Esc cancels binding.,点击一行后按手柄键绑定；Esc 取消本次绑定。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+PartySettings,Party settings,组队设置,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+RecruitSettings,Party recruitment,组队招募,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+PartyNoOptions,There are no adjustable options in this window.,此窗口暂无可调整的选项。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+MinimumLevel,Min:,最低：,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+MaximumLevel,Max:,最高：,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+LevelRangeHint,Level difference must be 30 or less.,最高与最低等级之差不能超过 30。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+StartRecruit,Start,开始招募,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ChangeChannel,Change channel,切换频道,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ExitGame,Quit game,退出游戏,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionEQUIPMENT,Equipment,装备,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionITEMS,Inventory,背包,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionSTATS,Stats,角色属性,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionSKILLS,Skills,技能,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFRIENDS,Friends,好友,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionWORLDMAP,World map,世界地图,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMAPLECHAT,Maple chat,冒险岛聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMINIMAP,Minimap,小地图,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionQUESTLOG,Quests,任务,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionKEYBINDINGS,Key bindings,键盘设置,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionSAY,Chat,聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionWHISPER,Whisper,密语,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionPARTYCHAT,Party chat,队伍聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFRIENDSCHAT,Friend chat,好友聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMENU,Menu,菜单,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionQUICKSLOTS,Quick slots,快捷键栏,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionTOGGLECHAT,Toggle chat,切换聊天窗口,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionGUILD,Guild,公会,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionGUILDCHAT,Guild chat,公会聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionPARTY,Party,队伍,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionNOTIFIER,Notifications,通知,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionCHARINFO,Character info,角色信息,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMONSTERBOOK,Monster book,怪物图鉴,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionCASHSHOP,Cash shop,商城,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionALLIANCECHAT,Alliance chat,联盟聊天,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionCHANGECHANNEL,Change channel,切换频道,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMEDALS,Medals,勋章,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionBOSSPARTY,Expedition,远征队,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMAINMENU,Main menu,主菜单,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionSCREENSHOT,Screenshot,截图,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionPROFESSION,Professions,专业技能,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionITEMPOT,Item pot,道具罐,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionEVENT,Events,活动,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionSILENTCRUSADE,Silent Crusade,十字猎人,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMANAGELEGION,Legion,联盟管理,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionBATTLEANALYSIS,Battle analysis,战斗分析,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionBITS,Bits,比特,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionGUIDE,Guide,游戏向导,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionENHANCEEQUIP,Enhance equipment,装备强化,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMONSTERCOLLECTION,Monster collection,怪物收藏,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionSOULWEAPON,Soul weapon,灵魂武器,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionMAPLENEWS,Maple news,游戏资讯,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFAMILY,Family,家族,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionPICKUP,Pick up,拾取,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionSIT,Sit,坐下,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionATTACK,Attack,攻击,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionJUMP,Jump,跳跃,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionINTERACT_HARVEST,Interact / harvest,互动／采集,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFACE1,Expression 1,表情 1,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFACE2,Expression 2,表情 2,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFACE3,Expression 3,表情 3,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFACE4,Expression 4,表情 4,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFACE5,Expression 5,表情 5,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFACE6,Expression 6,表情 6,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ActionFACE7,Expression 7,表情 7,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+SkillMacro,Skill macros,技能宏设置,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+MacroName,Name,名称,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+MacroShout,Shout name,喊出宏名称,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+MacroHelp,Drag skills into the slots.,将技能拖入对应的格子。,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+LanguageToggle,EN / ZH,中/EN,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+ScreenshotFolder,Screenshot folder,截图目录,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+MonsterInfo,Monster info,怪物信息,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Allow,Allow,允许,客户端设置/提示；是否接入以源码调用为准,OpenStory,项目自有,src/Localization/Messages.h,项目自译,未取得原版中文资源证据；按实际行为自译
+Normal,Normal,普通,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+Simple,Simple,简易,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+Resolution,Resolution,分辨率,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+WindowLabel,Windowed,窗口模式,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+MinimapMode,Minimap mode,小地图模式,客户端设置/提示；是否接入以源码调用为准,CMS,未知,https://mxd.web.sdo.com/web7/gameinfo/config.html,官方页面已核对,依据用户提供的《汉化资源与术语校对方案》；非 v83 资源逐节点核对
+CharacterStats,Character stats,角色属性,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+DetailedStats,Detailed stats,详细属性,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+ItemInventory,Item inventory,道具背包,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+SkillInventory,Skill inventory,技能栏,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+QuestHelper,Quest Helper,任务追踪,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+NoQuestTracked,No quest tracked,暂无追踪任务,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+NameLabel,Name,名称,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+ClassLabel,Class,职业,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+GuildLabel,Guild,家族,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+FameLabel,Fame,人气度,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+DamageLabel,Damage,攻击力,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+AbilityPoints,Ability points,能力点,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+StrengthLabel,STR,力量,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+DexterityLabel,DEX,敏捷,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+IntelligenceLabel,INT,智力,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+LuckLabel,LUK,运气,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+DetailLabel,Detail,详细,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+AttackStats,ATT stats,攻击属性,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+CriticalChance,Critical chance,暴击率,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+MinimumCritical,Minimum critical,最小暴击,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+MaximumCritical,Maximum critical,最大暴击,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+BossAttack,Boss ATT,首领伤害,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+IgnoreDefense,Ignore DEF,无视防御,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+StatusResistance,Status resistance,状态抗性,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+StanceLabel,Stance,稳如泰山,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+WeaponDefense,Weapon DEF,物理防御,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+MagicDefense,Magic DEF,魔法防御,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+WeaponAccuracy,Weapon ACC,物理命中,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+MagicAccuracy,Magic ACC,魔法命中,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+WeaponAvoid,Weapon avoidability,物理回避,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+MagicAvoid,Magic avoidability,魔法回避,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+SpeedLabel,Speed,移动速度,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+JumpLabel,Jump,跳跃力,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+HonorLabel,Honor EXP,荣誉经验,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+SkillPoints,Skill point,技能点,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+TabEquip,Equip,装备,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+TabUse,Use,消耗,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+TabEtc,Etc,其他,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+TabSetup,Set-up,设置,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+TabCash,Cash,特殊,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+AbilityLabel,Ability,特殊能力,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+LockedLabel,Locked,未解锁,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+ResetLabel,Reset,重置,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对

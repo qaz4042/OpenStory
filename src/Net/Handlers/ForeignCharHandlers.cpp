@@ -46,6 +46,7 @@ namespace ms
 			recv.read_int(); // padding 0
 
 		int32_t damage = recv.read_int();
+		if (Stage::get().is_player(cid) && Stage::get().get_player().is_training_invulnerable()) return;
 
 		bool has_knockback = false;
 		int8_t direction = 0;

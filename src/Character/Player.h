@@ -87,6 +87,8 @@ namespace ms
 
 		// Check whether the player is invincible
 		bool is_invincible() const override;
+		void set_training_invulnerable(bool enabled) { training_invulnerable = enabled; }
+		bool is_training_invulnerable() const { return training_invulnerable; }
 		// Check whether the player is hidden (GM dark sight)
 		bool is_hidden() const override;
 		// Handle an attack to the player
@@ -165,6 +167,7 @@ namespace ms
 		BuddyList& get_buddylist();
 
 	private:
+		bool training_invulnerable = false;
 		CharStats stats;
 		Inventory inventory;
 		SkillBook skillbook;

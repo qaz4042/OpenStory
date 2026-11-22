@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UILogin.h"
+#include "../Components/LoginResources.h"
 
 #include "UILoginNotice.h"
 #include "UILoginWait.h"
@@ -57,6 +58,7 @@ namespace ms
 		nl::node back = loginBackground["back"];
 
 		nl::node loginUI = nl::nx::ui["Login.img"]["Title"];
+		nl::node loginButtons = login_title_resources();
 
 		nl::node Login = nl::nx::map.resolve("Obj/login.img");
 		nl::node signboard = nl::nx::map.resolve("Obj/login.img/Title/signboard/0/0");
@@ -78,17 +80,17 @@ namespace ms
 		sprites.emplace_back(frame, UIScale::bg_args());
 
 
-		buttons[Buttons::BT_LOGIN] = std::make_unique<MapleButton>(loginUI["BtLogin"], signboard_pos + Point<int16_t>(85, -105));
-		buttons[Buttons::BT_GUEST_LOGIN] = std::make_unique<MapleButton>(loginUI["BtGuestLogin"], signboard_pos + Point<int16_t>(85, -62));
-		buttons[Buttons::BT_SAVEID] = std::make_unique<MapleButton>(loginUI["BtLoginIDSave"], signboard_pos + Point<int16_t>(-100, -25));
-		buttons[Buttons::BT_IDLOST] = std::make_unique<MapleButton>(loginUI["BtLoginIDLost"], signboard_pos + Point<int16_t>(-20, -25));
-		buttons[Buttons::BT_PASSLOST] = std::make_unique<MapleButton>(loginUI["BtPasswdLost"], signboard_pos + Point<int16_t>(70, -25));
-		buttons[Buttons::BT_REGISTER] = std::make_unique<MapleButton>(loginUI["BtNew"], signboard_pos + Point<int16_t>(-120, 20));
-		buttons[Buttons::BT_HOMEPAGE] = std::make_unique<MapleButton>(loginUI["BtHomePage"], signboard_pos + Point<int16_t>(-20, 20));
-		buttons[Buttons::BT_QUIT] = std::make_unique<MapleButton>(loginUI["BtQuit"], signboard_pos + Point<int16_t>(80, 20));
+		buttons[Buttons::BT_LOGIN] = std::make_unique<MapleButton>(loginButtons["BtLogin"], signboard_pos + Point<int16_t>(85, -105));
+		buttons[Buttons::BT_GUEST_LOGIN] = std::make_unique<MapleButton>(loginButtons["BtGuestLogin"], signboard_pos + Point<int16_t>(85, -62));
+		buttons[Buttons::BT_SAVEID] = std::make_unique<MapleButton>(loginButtons["BtLoginIDSave"], signboard_pos + Point<int16_t>(-100, -25));
+		buttons[Buttons::BT_IDLOST] = std::make_unique<MapleButton>(loginButtons["BtLoginIDLost"], signboard_pos + Point<int16_t>(-20, -25));
+		buttons[Buttons::BT_PASSLOST] = std::make_unique<MapleButton>(loginButtons["BtPasswdLost"], signboard_pos + Point<int16_t>(70, -25));
+		buttons[Buttons::BT_REGISTER] = std::make_unique<MapleButton>(loginButtons["BtNew"], signboard_pos + Point<int16_t>(-120, 20));
+		buttons[Buttons::BT_HOMEPAGE] = std::make_unique<MapleButton>(loginButtons["BtHomePage"], signboard_pos + Point<int16_t>(-20, 20));
+		buttons[Buttons::BT_QUIT] = std::make_unique<MapleButton>(loginButtons["BtQuit"], signboard_pos + Point<int16_t>(80, 20));
 
-		checkbox[false] = loginUI["check"]["0"];
-		checkbox[true] = loginUI["check"]["1"];
+		checkbox[false] = loginButtons["check"]["0"];
+		checkbox[true] = loginButtons["check"]["1"];
 
 		background = ColorBox(UIScale::view_width(), UIScale::view_height(), Color::Name::BLACK, 1.0f);
 

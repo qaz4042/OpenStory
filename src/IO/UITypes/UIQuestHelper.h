@@ -183,6 +183,6 @@ namespace ms
 		// Pre-allocated draw objects
 		mutable Text title_text;
 		mutable Text drag_text;
-		Text no_quest_text;
+		mutable Text no_quest_text;
 	};
 }

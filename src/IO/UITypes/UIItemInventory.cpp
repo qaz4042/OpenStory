@@ -1,3 +1,4 @@
+#include "../../Localization/Locale.h"
 //////////////////////////////////////////////////////////////////////////////////
 //	This file is part of the continued Journey MMORPG client					//
 //	Copyright (C) 2015-2019  Daniel Allendorf, Ryan Payton						//
@@ -16,6 +17,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIItemInventory.h"
+#include "../Components/LocalizedTabButton.h"
 
 #include "UINotice.h"
 #include "UIAvatarMegaphone.h"
@@ -51,10 +53,12 @@ namespace ms
 		nl::node Item = nl::nx::ui["UIWindow2.img"]["Item"];
 
 		backgrnd = Item["productionBackgrnd"];
+		translated_frame = LocalizedArt(Item["productionBackgrnd"], {{30, 3, 112, 12, localization::Key::ItemInventory, Color::Name::YELLOW}});
 		backgrnd2 = Item["productionBackgrnd2"];
 		backgrnd3 = Item["productionBackgrnd3"];
 
 		full_backgrnd = Item["FullBackgrnd"];
+		translated_full_frame = LocalizedArt(Item["FullBackgrnd"], {{30, 3, 112, 12, localization::Key::ItemInventory, Color::Name::YELLOW}});
 		full_backgrnd2 = Item["FullBackgrnd2"];
 		full_backgrnd3 = Item["FullBackgrnd3"];
 
@@ -75,11 +79,11 @@ namespace ms
 		nl::node close = nl::nx::ui["Basic.img"]["BtClose3"];
 		buttons[Buttons::BT_CLOSE] = std::make_unique<MapleButton>(close);
 
-		buttons[Buttons::BT_TAB_EQUIP] = std::make_unique<TwoSpriteButton>(tabdis["0"], taben["0"]);
-		buttons[Buttons::BT_TAB_USE] = std::make_unique<TwoSpriteButton>(tabdis["1"], taben["1"]);
-		buttons[Buttons::BT_TAB_ETC] = std::make_unique<TwoSpriteButton>(tabdis["2"], taben["2"]);
-		buttons[Buttons::BT_TAB_SETUP] = std::make_unique<TwoSpriteButton>(tabdis["3"], taben["3"]);
-		buttons[Buttons::BT_TAB_CASH] = std::make_unique<TwoSpriteButton>(tabdis["4"], taben["4"]);
+		buttons[Buttons::BT_TAB_EQUIP] = std::make_unique<LocalizedTabButton>(tabdis["0"], taben["0"], localization::Key::TabEquip);
+		buttons[Buttons::BT_TAB_USE] = std::make_unique<LocalizedTabButton>(tabdis["1"], taben["1"], localization::Key::TabUse);
+		buttons[Buttons::BT_TAB_ETC] = std::make_unique<LocalizedTabButton>(tabdis["2"], taben["2"], localization::Key::TabEtc);
+		buttons[Buttons::BT_TAB_SETUP] = std::make_unique<LocalizedTabButton>(tabdis["3"], taben["3"], localization::Key::TabSetup);
+		buttons[Buttons::BT_TAB_CASH] = std::make_unique<LocalizedTabButton>(tabdis["4"], taben["4"], localization::Key::TabCash);
 
 		buttons[Buttons::BT_COIN] = std::make_unique<MapleButton>(Item["BtCoin3"]);
 		buttons[Buttons::BT_POINT] = std::make_unique<MapleButton>(Item["BtPoint0"]);
@@ -160,7 +164,7 @@ namespace ms
 
 		if (full_enabled)
 		{
-			full_backgrnd.draw(position);
+			translated_full_frame.draw(position);
 			full_backgrnd2.draw(position);
 			full_backgrnd3.draw(position);
 
@@ -169,7 +173,7 @@ namespace ms
 		}
 		else
 		{
-			backgrnd.draw(position);
+			translated_frame.draw(position);
 			backgrnd2.draw(position);
 			backgrnd3.draw(position);
 
@@ -1141,9 +1145,9 @@ namespace ms
 
 	void UIItemInventory::ItemIcon::drop_on_stage() const
 	{
-		constexpr char* dropmessage = "How many will you drop?";
-		constexpr char* untradablemessage = "This item can't be taken back once thrown away.\\nWill you still drop it?";
-		constexpr char* cashmessage = "You can't drop this item.";
+		const char* dropmessage = localization::get(localization::Key::DropQuantity);
+		const char* untradablemessage = localization::get(localization::Key::DropUntradable);
+		const char* cashmessage = localization::get(localization::Key::CannotDrop);
 
 		if (cashitem)
 		{

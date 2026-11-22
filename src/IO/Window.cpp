@@ -347,6 +347,12 @@ namespace ms
 	{
 		fullscreen = Setting<Fullscreen>::get().load();
 
+#ifdef PLATFORM_MACOS
+		// main() already resolved the NX/Settings directory. GLFW otherwise
+		// changes cwd to Contents/Resources only in a real .app bundle, making
+		// optional login art and settings silently resolve to a different place.
+		glfwInitHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_FALSE);
+#endif
 		if (!glfwInit())
 			return Error::Code::GLFW;
 

@@ -406,6 +406,9 @@ namespace ms
 		// Hebrew character renders as a missing-glyph box.
 		fallback_faces.push_back(Setting<FontPathHebrew>().get().load());
 		fallback_faces.push_back(Setting<FontPathCJK>().get().load());
+#ifdef __APPLE__
+		fallback_faces.push_back("/System/Library/Fonts/STHeiti Light.ttc");
+#endif
 
 		const std::string FONT_EMOJI = Setting<FontPathEmoji>().get().load();
 		if (!FONT_EMOJI.empty())
@@ -619,6 +622,12 @@ namespace ms
 			fontborder.set_y(fontymax);
 		}
 
+		if (fontborder.y() + h > FONT_REGION_H)
+		{
+			FT_Done_Face(face);
+			return false;
+		}
+
 		GLshort ox = fontborder.x();
 		GLshort oy = fontborder.y();
 
@@ -789,7 +798,7 @@ namespace ms
 
 		glUseProgram(shaderProgram);
 
-		glUniform1i(uniform_fontregion, fontymax);
+		glUniform1i(uniform_fontregion, FONT_REGION_H);
 		glUniform2f(uniform_atlassize, ATLASW, ATLASH);
 		glUniform2f(uniform_screensize, VWIDTH, VHEIGHT);
 
@@ -829,7 +838,7 @@ namespace ms
 
 	void GraphicsGL::clearinternal()
 	{
-		border = Point<GLshort>(0, fontymax);
+		border = Point<GLshort>(0, FONT_REGION_H);
 		yrange = Range<GLshort>();
 
 		offsets.clear();
@@ -1741,7 +1750,7 @@ namespace ms
 #ifdef PLATFORM_IOS
 		// iOS/GLKit may reset GL state between frames — re-establish it
 		glUseProgram(shaderProgram);
-		glUniform1i(uniform_fontregion, fontymax);
+		glUniform1i(uniform_fontregion, FONT_REGION_H);
 		glUniform2f(uniform_atlassize, ATLASW, ATLASH);
 		glUniform2f(uniform_screensize, VWIDTH, VHEIGHT);
 		glEnable(GL_BLEND);

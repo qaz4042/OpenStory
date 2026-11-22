@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIStatusBar.h"
+#include "../Components/LocalizedMapleButton.h"
 
 #include <algorithm>
 #include <cmath>
@@ -554,11 +555,11 @@ namespace ms
 		int16_t sys_y = sys_panel_top - 26;
 
 		int16_t si = 0;
-		buttons[BT_SYS_CHANNEL]    = std::make_unique<MapleButton>(sys_node["BtChannel"],    Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
-		buttons[BT_SYS_JOYPAD]     = std::make_unique<MapleButton>(sys_node["BtJoyPad"],     Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
-		buttons[BT_SYS_KEYSETTING] = std::make_unique<MapleButton>(sys_node["BtKeySetting"], Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
-		buttons[BT_SYS_OPTION]     = std::make_unique<MapleButton>(sys_node["BtOption"],     Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
-		buttons[BT_SYS_GAMEQUIT]   = std::make_unique<MapleButton>(sys_node["BtGameQuit"],   Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
+		buttons[BT_SYS_CHANNEL]    = std::make_unique<LocalizedMapleButton>(sys_node["BtChannel"], localization::Key::ChangeChannel,    Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
+		buttons[BT_SYS_JOYPAD]     = std::make_unique<LocalizedMapleButton>(sys_node["BtJoyPad"], localization::Key::GamepadSettings,     Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
+		buttons[BT_SYS_KEYSETTING] = std::make_unique<LocalizedMapleButton>(sys_node["BtKeySetting"], localization::Key::KeySettings, Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
+		buttons[BT_SYS_OPTION]     = std::make_unique<LocalizedMapleButton>(sys_node["BtOption"], localization::Key::Settings,     Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
+		buttons[BT_SYS_GAMEQUIT]   = std::make_unique<LocalizedMapleButton>(sys_node["BtGameQuit"], localization::Key::ExitGame,   Point<int16_t>(sys_x, sys_y + SYS_STEP * si++));
 
 		// All system buttons hidden until toggled
 		buttons[BT_SYS_CHANNEL]->set_active(false);
@@ -1264,7 +1265,7 @@ namespace ms
 			              *buttons.at(BT_SYS_GAMEQUIT),
 			              sys_bg_top, sys_bg_mid, sys_bg_bot, sys_fade);
 			auto draw_sys = [&](uint16_t id) {
-				static_cast<MapleButton*>(buttons.at(id).get())->draw(position, sys_fade);
+				static_cast<LocalizedMapleButton*>(buttons.at(id).get())->draw(position, sys_fade);
 			};
 			draw_sys(BT_SYS_CHANNEL);
 			draw_sys(BT_SYS_JOYPAD);

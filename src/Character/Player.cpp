@@ -556,6 +556,7 @@ namespace ms
 
 	bool Player::is_invincible() const
 	{
+		if (training_invulnerable) return true;
 		if (state == Char::State::DIED)
 			return true;
 
@@ -572,6 +573,7 @@ namespace ms
 
 	MobAttackResult Player::damage(const MobAttack& attack)
 	{
+		if (training_invulnerable) return {attack, 0, 0};
 		int32_t damage = stats.calculate_damage(attack.watk);
 		show_damage(damage);
 

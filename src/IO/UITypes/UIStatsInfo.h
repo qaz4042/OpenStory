@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../UIDragElement.h"
+#include "../Components/LocalizedArt.h"
 
 #include "../../Character/CharStats.h"
 #include "../../Template/BoolPair.h"
@@ -47,6 +48,7 @@ namespace ms
 		Button::State button_pressed(uint16_t buttonid) override;
 
 	private:
+		LocalizedArt translated_frame, translated_main, translated_ap, translated_detail_frame, translated_detail, translated_ability, translated_locked;
 		enum StatLabel
 		{
 			// Normal

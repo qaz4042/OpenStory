@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIPartySettings.h"
+#include "../Components/LocalizedMapleButton.h"
+#include "../../Localization/Actions.h"
 
 #include "../UI.h"
 #include "../Components/MapleButton.h"
@@ -35,8 +37,8 @@ namespace ms
 		sprites.emplace_back(src["backgrnd"]);
 		chrome.load(src);
 
-		buttons[BT_OK]     = std::make_unique<MapleButton>(src["BtSave"]);
-		buttons[BT_CANCEL] = std::make_unique<MapleButton>(src["BtCancel"]);
+		buttons[BT_OK]     = std::make_unique<LocalizedMapleButton>(src["BtSave"], localization::Key::Close);
+		buttons[BT_CANCEL] = std::make_unique<LocalizedMapleButton>(src["BtCancel"], localization::Key::Cancel);
 
 		dimension = Point<int16_t>(PopupSettingsChrome::WIDTH, PopupSettingsChrome::HEIGHT);
 		dragarea  = Point<int16_t>(PopupSettingsChrome::WIDTH, PopupSettingsChrome::DRAGAREA_H);

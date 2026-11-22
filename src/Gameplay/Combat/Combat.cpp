@@ -35,6 +35,34 @@
 
 namespace ms
 {
+	static Rectangle<int16_t> attack_bounds(const Attack& attack)
+	{
+		const auto origin = attack.origin;
+		Rectangle<int16_t> range = attack.range;
+		int16_t hrange = static_cast<int16_t>(range.left() * attack.hrange);
+
+		if (attack.toleft)
+		{
+			range = {
+				static_cast<int16_t>(origin.x() + hrange),
+				static_cast<int16_t>(origin.x() + range.right()),
+				static_cast<int16_t>(origin.y() + range.top()),
+				static_cast<int16_t>(origin.y() + range.bottom())
+			};
+		}
+		else
+		{
+			range = {
+				static_cast<int16_t>(origin.x() - range.right()),
+				static_cast<int16_t>(origin.x() - hrange),
+				static_cast<int16_t>(origin.y() + range.top()),
+				static_cast<int16_t>(origin.y() + range.bottom())
+			};
+		}
+
+		return range;
+	}
+
 	Combat::Combat(Player& in_player, MapChars& in_chars, MapMobs& in_mobs, MapReactors& in_reactors, const Physics& in_physics) : player(in_player), chars(in_chars), mobs(in_mobs), reactors(in_reactors), physics(in_physics),
 		attackresults([&](const AttackResult& attack) { apply_attack(attack); }),
 		bulleteffects([&](const BulletEffect& effect) { apply_bullet_effect(effect); }),
@@ -111,6 +139,45 @@ namespace ms
 		}
 	}
 
+	bool Combat::auto_use_move(int32_t move_id, std::string& stop_reason)
+	{
+		if (!player.get_look().get_equips().has_weapon())
+		{
+			stop_reason = "No weapon equipped";
+			return false;
+		}
+		if (!player.can_attack()) return true;
+		const auto& move = get_move(move_id);
+		if (!move.is_attack()) { stop_reason = "Not an attack skill"; return false; }
+		const auto reason = player.can_use(move);
+		if (reason == SpecialMove::FBR_COOLDOWN) return true;
+		if (reason != SpecialMove::FBR_NONE)
+		{
+			stop_reason = "Skill unavailable (MP, ammunition, weapon or skill requirements)";
+			return false;
+		}
+		const bool melee = move.is_skill() && SkillData::get(move_id).is_melee();
+		Attack preview = player.prepare_attack(move.is_skill(), melee);
+		move.apply_stats(player, preview);
+		// Regular melee chooses a random swing only when used, so its authored
+		// afterimage range is not available while idle. Acquire conservatively;
+		// the actual attack still computes its normal swing range and targets.
+		if (move_id == 0 && preview.type == Attack::CLOSE)
+			preview.range = Rectangle<int16_t>(-60, 0, -40, 10);
+		// Skill acquisition shares manual range logic; check living targets in both directions.
+		for (int direction = 0; direction < 2; ++direction)
+		{
+			if (!find_closest(mobs.get_mobs(), attack_bounds(preview), preview.origin, 1, true).empty())
+			{
+				player.set_direction(!preview.toleft);
+				use_move(move_id);
+				return true;
+			}
+			preview.toleft = !preview.toleft;
+		}
+		return true;
+	}
+
 	void Combat::apply_move(const SpecialMove& move)
 	{
 		local_cast_id = move.get_id();
@@ -128,28 +195,8 @@ namespace ms
 
 			move.apply_stats(player, attack);
 
-			Point<int16_t> origin = attack.origin;
-			Rectangle<int16_t> range = attack.range;
-			int16_t hrange = static_cast<int16_t>(range.left() * attack.hrange);
-
-			if (attack.toleft)
-			{
-				range = {
-					static_cast<int16_t>(origin.x() + hrange),
-					static_cast<int16_t>(origin.x() + range.right()),
-					static_cast<int16_t>(origin.y() + range.top()),
-					static_cast<int16_t>(origin.y() + range.bottom())
-				};
-			}
-			else
-			{
-				range = {
-					static_cast<int16_t>(origin.x() - range.right()),
-					static_cast<int16_t>(origin.x() - hrange),
-					static_cast<int16_t>(origin.y() + range.top()),
-					static_cast<int16_t>(origin.y() + range.bottom())
-				};
-			}
+			const auto origin = attack.origin;
+			const auto range = attack_bounds(attack);
 
 			// This approach should also make it easier to implement PvP
 			uint8_t mobcount = attack.mobcount;

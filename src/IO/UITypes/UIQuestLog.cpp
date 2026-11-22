@@ -1,3 +1,4 @@
+#include "../../Localization/Locale.h"
 //////////////////////////////////////////////////////////////////////////////////
 //	This file is part of the continued Journey MMORPG client					//
 //	Copyright (C) 2015-2019  Daniel Allendorf, Ryan Payton						//
@@ -3046,7 +3047,7 @@ namespace ms
 			{
 				int16_t questid = active_entries[selected_entry].id;
 
-				UI::get().emplace<UIYesNo>("Are you sure you want to forfeit this quest?",
+				UI::get().emplace<UIYesNo>(localization::get(localization::Key::ForfeitQuest),
 					[questid](bool yes)
 					{
 						if (yes)
