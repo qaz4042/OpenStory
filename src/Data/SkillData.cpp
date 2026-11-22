@@ -82,7 +82,13 @@ namespace ms
 		if (jobid == "900" || jobid == "910")
 			reqweapon = Weapon::Type::NONE;
 		else
-			reqweapon = Weapon::by_value(100 + (int32_t)src["weapon"]);
+		{
+			// v83 resources also contain a trailing-space spelling (Double Shot).
+			nl::node weapon = src["weapon"];
+			if (!weapon)
+				weapon = src["weapon "];
+			reqweapon = Weapon::by_value(100 + (int32_t)weapon);
+		}
 
 		masterlevel = static_cast<int32_t>(stats.size());
 		passive = (id % 10000) / 1000 == 0;
@@ -152,7 +158,11 @@ namespace ms
 			// No data for this skill level
 			{ SkillId::FIRE_DEMON, ATTACK },
 			{ SkillId::PARALYZE, ATTACK | RANGED },
-			{ SkillId::METEOR_SHOWER, ATTACK }
+			{ SkillId::METEOR_SHOWER, ATTACK },
+			// Pirate
+			{ SkillId::FLASH_FIST, ATTACK | MELEE },
+			{ SkillId::SOMERSAULT_KICK, ATTACK | MELEE },
+			{ SkillId::DOUBLE_SHOT, ATTACK | RANGED }
 		};
 
 		auto iter = skill_flags.find(id);
@@ -171,6 +181,11 @@ namespace ms
 	bool SkillData::is_attack() const
 	{
 		return !passive && (flags & ATTACK);
+	}
+
+	bool SkillData::is_melee() const
+	{
+		return is_attack() && (flags & MELEE);
 	}
 
 	bool SkillData::is_invisible() const

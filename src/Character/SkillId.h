@@ -162,7 +162,12 @@ namespace ms
 			TRIPLE_THROW = 4121007,
 
 			// Bandit
-			MESO_EXPLOSION = 4211006
+			MESO_EXPLOSION = 4211006,
+
+			// Pirate
+			FLASH_FIST = 5001001,
+			SOMERSAULT_KICK = 5001002,
+			DOUBLE_SHOT = 5001003
 		};
 	}
 }

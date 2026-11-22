@@ -33,9 +33,20 @@
 
 namespace ms
 {
+	static nl::node notice_button(const char* name, const char* fallback)
+	{
+		nl::node basic = nl::nx::ui["Basic.img"];
+		nl::node button = basic[name];
+		return button ? button : basic[fallback];
+	}
+
 	UINotice::UINotice(std::string message, NoticeType t, Text::Alignment a) : UIDragElement<PosNOTICE>(Point<int16_t>(250, 20)), type(t), alignment(a)
 	{
-		nl::node src = nl::nx::ui["Basic.img"]["Notice6"];
+		nl::node basic = nl::nx::ui["Basic.img"];
+		nl::node src = basic["Notice6"];
+		legacy_notice = !src["t"] || !src["c"] || !src["s_box"];
+		if (legacy_notice)
+			src = basic["Notice3"];
 
 		top = src["t"];
 		center = src["c"];
@@ -60,6 +71,12 @@ namespace ms
 		}
 
 		height = question.height();
+		if (legacy_notice)
+		{
+			height = std::max<int16_t>(height, 32);
+			if (type == NoticeType::ENTERNUMBER)
+				height += 29;
+		}
 		dimension = Point<int16_t>(top.width(), top.height() + height + bottom.height());
 
 		// Settings store the top-left corner already (that's what
@@ -79,6 +96,15 @@ namespace ms
 
 		top.draw(start);
 		start.shift_y(top.height());
+
+		if (legacy_notice)
+		{
+			center.draw(DrawArgument(start, Point<int16_t>(0, height)));
+			bottom.draw(start + Point<int16_t>(0, height));
+			const int16_t text_x = alignment == Text::Alignment::LEFT || textfield ? 24 : top.width() / 2;
+			question.draw(position + Point<int16_t>(text_x, top.height() + 3));
+			return;
+		}
 
 		if (textfield)
 		{
@@ -115,6 +141,9 @@ namespace ms
 
 	int16_t UINotice::box2offset(bool textfield) const
 	{
+		if (legacy_notice)
+			return top.height() + height + (textfield ? -25 : 23);
+
 		int16_t offset = top.height() + centerbox.height() + box.height() + height - (textfield ? 0 : 16);
 
 		if (type == NoticeType::OK)
@@ -129,12 +158,10 @@ namespace ms
 	{
 		yesnohandler = yh;
 
-		int16_t belowtext = box2offset(false) + button_y_offset;
+		int16_t belowtext = box2offset(false) + (legacy_notice ? 0 : button_y_offset);
 
-		nl::node src = nl::nx::ui["Basic.img"];
-
-		buttons[Buttons::YES] = std::make_unique<MapleButton>(src["BtOK4"], Point<int16_t>(156 + button_x_offset, belowtext));
-		buttons[Buttons::NO] = std::make_unique<MapleButton>(src["BtCancel4"], Point<int16_t>(198 + button_x_offset, belowtext));
+		buttons[Buttons::YES] = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"), Point<int16_t>(legacy_notice ? 135 : 156 + button_x_offset, belowtext));
+		buttons[Buttons::NO] = std::make_unique<MapleButton>(notice_button("BtCancel4", "BtCancel"), Point<int16_t>(legacy_notice ? 193 : 198 + button_x_offset, belowtext));
 	}
 
 	UIYesNo::UIYesNo(std::string message, std::function<void(bool yes)> yesnohandler) : UIYesNo(message, yesnohandler, Text::Alignment::CENTER) {}
@@ -190,13 +217,11 @@ namespace ms
 		numhandler = nh;
 		max = m;
 
-		int16_t belowtext = box2offset(true) + field_y_offset;
-		int16_t pos_y = belowtext + 35 + button_y_offset;
+		int16_t belowtext = box2offset(true) + (legacy_notice ? 0 : field_y_offset);
+		int16_t pos_y = legacy_notice ? box2offset(false) : belowtext + 35 + button_y_offset;
 
-		nl::node src = nl::nx::ui["Basic.img"];
-
-		buttons[Buttons::OK] = std::make_unique<MapleButton>(src["BtOK4"], 156 + button_x_offset, pos_y);
-		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(src["BtCancel4"], 198 + button_x_offset, pos_y);
+		buttons[Buttons::OK] = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"), legacy_notice ? 135 : 156 + button_x_offset, pos_y);
+		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(notice_button("BtCancel4", "BtCancel"), legacy_notice ? 193 : 198 + button_x_offset, pos_y);
 
 		numfield = Textfield(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::LIGHTGREY, Rectangle<int16_t>(24, 232, belowtext, belowtext + 20), 10);
 		numfield.change_text(std::to_string(quantity));
@@ -325,13 +350,11 @@ namespace ms
 	{
 		texthandler = th;
 
-		int16_t belowtext = box2offset(true) - 21 + field_y_offset;
-		int16_t pos_y = belowtext + 35 + button_y_offset;
+		int16_t belowtext = box2offset(true) + (legacy_notice ? 0 : field_y_offset - 21);
+		int16_t pos_y = legacy_notice ? box2offset(false) : belowtext + 35 + button_y_offset;
 
-		nl::node src = nl::nx::ui["Basic.img"];
-
-		buttons[Buttons::OK]     = std::make_unique<MapleButton>(src["BtOK4"],     156 + button_x_offset, pos_y);
-		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(src["BtCancel4"], 198 + button_x_offset, pos_y);
+		buttons[Buttons::OK]     = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"),     legacy_notice ? 135 : 156 + button_x_offset, pos_y);
+		buttons[Buttons::CANCEL] = std::make_unique<MapleButton>(notice_button("BtCancel4", "BtCancel"), legacy_notice ? 193 : 198 + button_x_offset, pos_y);
 
 		textfield = Textfield(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::LIGHTGREY, Rectangle<int16_t>(24, 232, belowtext, belowtext + 20), maxlength);
 
@@ -439,9 +462,7 @@ namespace ms
 	{
 		okhandler = oh;
 
-		nl::node src = nl::nx::ui["Basic.img"];
-
-		buttons[Buttons::OK] = std::make_unique<MapleButton>(src["BtOK4"], 197, box2offset(false));
+		buttons[Buttons::OK] = std::make_unique<MapleButton>(notice_button("BtOK4", "BtOK"), 197, box2offset(false));
 	}
 
 	void UIOk::draw(float alpha) const
@@ -629,9 +650,8 @@ namespace ms
 
 		// OK button — reuse the Basic.img/BtOK4 sprite. Place it centered
 		// near the bottom of the 286x146 frame.
-		nl::node basic = nl::nx::ui["Basic.img"];
 		buttons[Buttons::OK] = std::make_unique<MapleButton>(
-			basic["BtOK4"],
+			notice_button("BtOK4", "BtOK"),
 			Point<int16_t>(dimension.x() / 2 - 30, dimension.y() - 32));
 
 		Sound(Sound::Name::DLGNOTICE).play();

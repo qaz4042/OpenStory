@@ -297,6 +297,10 @@ namespace ms
 		if (weapon != reqweapon && reqweapon != Weapon::NONE)
 			return FBR_WEAPONTYPE;
 
+		// Punches/kicks do not consume ammunition, including when holding a gun.
+		if (SkillData::get(skillid).is_melee())
+			return FBR_NONE;
+
 		switch (weapon)
 		{
 		case Weapon::BOW:

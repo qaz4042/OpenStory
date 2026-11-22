@@ -19,6 +19,7 @@
 
 #include "../KeyAction.h"
 
+#include "../Components/AreaButton.h"
 #include "../Components/MapleButton.h"
 #include "../UI.h"
 #include "../Window.h"
@@ -47,7 +48,8 @@ namespace ms
 
 		nl::node OptionMenu = nl::nx::ui["UIWindow2.img"]["OptionMenu"];
 
-		if (OptionMenu)
+		fallback_layout = !OptionMenu["backgrnd"] || !OptionMenu["scroll"][0] || !OptionMenu["BtOK"];
+		if (!fallback_layout)
 		{
 			sprites.emplace_back(OptionMenu["backgrnd"]);
 			sprites.emplace_back(OptionMenu["backgrnd2"]);
@@ -67,12 +69,6 @@ namespace ms
 			dimension = Point<int16_t>(283, 558);
 			dragarea = Point<int16_t>(283, 20);
 		}
-		else
-		{
-			dimension = Point<int16_t>(283, 558);
-			dragarea = Point<int16_t>(283, 20);
-		}
-
 		// Slider layout — per-slider track position and width
 		// Common sliders
 		for (int i = 0; i < NUM_SLIDERS; i++)
@@ -142,6 +138,53 @@ namespace ms
 		check_val[CHK_MINIMAP_NORMAL] = true;
 		check_orig[CHK_MINIMAP_NORMAL] = true;
 
+		if (fallback_layout)
+		{
+			dimension = Point<int16_t>(366, 496);
+			dragarea = Point<int16_t>(366, 28);
+			position = Point<int16_t>((screen_w - dimension.x()) / 2, (screen_h - dimension.y()) / 2);
+
+			using Font = Text::Font;
+			using Align = Text::Alignment;
+			using Shade = Color::Name;
+			title = Text(Font::A12B, Align::LEFT, Shade::WHITE, "System Settings");
+			logout_label = Text(Font::A11M, Align::CENTER, Shade::WHITE, "Log out");
+			const char* slider_titles[] = {
+				"Graphics", "Effects", "Music", "Sound effects", "Mouse speed", "HP alert", "MP alert"
+			};
+			for (int i = 0; i < NUM_SLIDERS; ++i)
+			{
+				slider_names[i] = Text(Font::A11M, Align::LEFT, Shade::PRUSSIANBLUE, slider_titles[i]);
+				slider_x[i] = 112;
+				slider_w[i] = 139;
+				slider_y[i] = 48 + 28 * i;
+			}
+
+			const char* check_titles[] = {
+				"", "", "Windowed", "Mute", "Mute", "Screen shake", "Normal map", "Simple map",
+				"Whispers", "Chat invites", "Party invites", "Guild chat", "Alliance chat", "Family invites",
+				"Friend chat", "Trade requests", "Expedition invites", "Guild invites", "Alliance invites", "Follow requests"
+			};
+			for (int i = CHK_WINDOWED; i < NUM_CHECKS; ++i)
+				check_names[i] = Text(Font::A11M, Align::LEFT, Shade::PRUSSIANBLUE, check_titles[i]);
+			check_positions[CHK_WINDOWED] = Point<int16_t>(16, 254);
+			check_positions[CHK_SCREEN_SHAKE] = Point<int16_t>(186, 254);
+			check_positions[CHK_MINIMAP_NORMAL] = Point<int16_t>(16, 278);
+			check_positions[CHK_MINIMAP_SIMPLE] = Point<int16_t>(186, 278);
+			check_positions[CHK_MUTE_BGM] = Point<int16_t>(305, slider_y[SL_BGM] - 6);
+			check_positions[CHK_MUTE_SFX] = Point<int16_t>(305, slider_y[SL_SFX] - 6);
+			for (int i = 0; i < 6; ++i)
+			{
+				check_positions[CHK_WHISPER + i] = Point<int16_t>(16, 313 + 24 * i);
+				check_positions[CHK_FRIEND_CHAT + i] = Point<int16_t>(186, 313 + 24 * i);
+			}
+
+			nl::node basic = nl::nx::ui["Basic.img"];
+			buttons[BT_OK] = std::make_unique<MapleButton>(basic["BtOK"], Point<int16_t>(230, 467));
+			buttons[BT_CANCEL] = std::make_unique<MapleButton>(basic["BtCancel"], Point<int16_t>(288, 467));
+			buttons[BT_LOGOUT] = std::make_unique<AreaButton>(Point<int16_t>(16, 464), Point<int16_t>(75, 23));
+		}
+
 		// Initialize slider percentage labels
 		for (int i = 0; i < NUM_SLIDERS; i++)
 			slider_labels[i] = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::BLACK);
@@ -151,7 +194,10 @@ namespace ms
 
 	void UIOptionMenu::draw(float inter) const
 	{
-		UIElement::draw_sprites(inter);
+		if (fallback_layout)
+			draw_fallback();
+		else
+			UIElement::draw_sprites(inter);
 
 		// Draw all slider thumbs and percentage labels
 		for (int i = 0; i < NUM_SLIDERS; i++)
@@ -159,7 +205,9 @@ namespace ms
 			int16_t thumb_x = slider_x[i] + static_cast<int16_t>(slider_val[i] * slider_w[i] / 100);
 			Point<int16_t> thumb_pos = position + Point<int16_t>(thumb_x, slider_y[i]);
 
-			if (active_slider == i && scroll_pressed.is_valid())
+			if (fallback_layout)
+				ColorBox(8, 14, Color::Name::ENDEAVOUR, 1.0f).draw(thumb_pos - Point<int16_t>(4, 7));
+			else if (active_slider == i && scroll_pressed.is_valid())
 				scroll_pressed.draw(DrawArgument(thumb_pos));
 			else if (scroll_normal.is_valid())
 				scroll_normal.draw(DrawArgument(thumb_pos));
@@ -184,10 +232,43 @@ namespace ms
 		UIElement::draw_buttons(inter);
 	}
 
+	void UIOptionMenu::draw_fallback() const
+	{
+		using Shade = Color::Name;
+		ColorBox(dimension.x(), dimension.y(), Shade::PRUSSIANBLUE, 1.0f).draw(position);
+		ColorBox(dimension.x() - 4, dimension.y() - 30, Shade::PORCELAIN, 1.0f)
+			.draw(position + Point<int16_t>(2, 28));
+		title.draw(position + Point<int16_t>(16, 7));
+
+		for (int i = 0; i < NUM_SLIDERS; ++i)
+		{
+			slider_names[i].draw(position + Point<int16_t>(16, slider_y[i] - 7));
+			ColorBox(slider_w[i], 4, Shade::DUSTYGRAY, 1.0f)
+				.draw(position + Point<int16_t>(slider_x[i], slider_y[i] - 2));
+		}
+
+		for (int i = CHK_WINDOWED; i < NUM_CHECKS; ++i)
+		{
+			Point<int16_t> checkbox = position + check_positions[i];
+			ColorBox(12, 12, Shade::PRUSSIANBLUE, 1.0f).draw(checkbox);
+			ColorBox(8, 8, check_val[i] ? Shade::ENDEAVOUR : Shade::WHITE, 1.0f)
+				.draw(checkbox + Point<int16_t>(2, 2));
+			check_names[i].draw(checkbox + Point<int16_t>(17, -1));
+		}
+
+		ColorBox(75, 23, Shade::PRUSSIANBLUE, 1.0f).draw(position + Point<int16_t>(16, 464));
+		logout_label.draw(position + Point<int16_t>(53, 469));
+	}
+
 	Button::State UIOptionMenu::button_pressed(uint16_t buttonid)
 	{
 		switch (buttonid)
 		{
+		case BT_LOGOUT:
+			revert_settings();
+			deactivate();
+			UI::get().send_close();
+			return Button::State::NORMAL;
 		case BT_CANCEL:
 			revert_settings();
 			deactivate();
@@ -233,8 +314,6 @@ namespace ms
 			int16_t rel_y = cursorpos.y() - position.y();
 			int16_t thumb_half = 10;
 
-
-
 			// Check all slider areas
 			for (int i = 0; i < NUM_SLIDERS; i++)
 			{
@@ -260,7 +339,7 @@ namespace ms
 			}
 
 			// Check all checkbox areas
-			for (int i = 0; i < NUM_CHECKS; i++)
+			for (int i = fallback_layout ? CHK_WINDOWED : CHK_RES_800; i < NUM_CHECKS; i++)
 			{
 				Point<int16_t> chk = check_positions[i];
 				if (rel_x >= chk.x() - 2 && rel_x <= chk.x() + CHECK_HIT_SIZE &&

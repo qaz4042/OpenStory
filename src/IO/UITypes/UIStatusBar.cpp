@@ -213,6 +213,24 @@ namespace ms
 		return Texture::from_pixels(key, w, h, std::move(out), Point<int16_t>(0, 0));
 	}
 
+	// Use a continuous vertical gradient so the fill keeps its shading at any width.
+	static Texture v83_gauge_fill(const std::string& key, Color light, Color dark)
+	{
+		const float light_bgr[] = {light.b(), light.g(), light.r()};
+		const float dark_bgr[] = {dark.b(), dark.g(), dark.r()};
+		std::vector<uint8_t> pixels(V83_FILL_H * 4);
+		for (int y = 0; y < V83_FILL_H; ++y)
+		{
+			float amount = static_cast<float>(y) / (V83_FILL_H - 1);
+			for (int channel = 0; channel < 3; ++channel)
+				pixels[y * 4 + channel] = static_cast<uint8_t>(
+					255.0f * (light_bgr[channel] * (1.0f - amount) + dark_bgr[channel] * amount));
+			pixels[y * 4 + 3] = 255;
+		}
+
+		return Texture::from_pixels(key, 1, V83_FILL_H, std::move(pixels), Point<int16_t>(0, 0));
+	}
+
 	// Short display name for a maple/DIK quickslot keycode (drawn on each cube).
 	static std::string qs_keyname(uint8_t code)
 	{
@@ -624,21 +642,19 @@ namespace ms
 		v83_icon_memo    = Texture(base["iconMemo"]);
 		v83_icon_red     = Texture(base["iconRed"]);
 
-		// Split the single 340x31 `gauge/bar` sheet into the caption strip
-		// plus one fill texture per gauge, then hand each fill to the shared
-		// Gauge component (single-texture ctor stretches it to the percentage).
+		// Keep the captions from the v83 sheet and draw consistent fills over the tracks.
 		nl::node barnode = gauge["bar"];
 
 		v83_gauge_labels = v83_crop(barnode, "sb83/labels", 0, 0, V83_GAUGE_W, V83_FILL_Y);
 
-		hpbar = Gauge(Gauge::Type::GAME,
-			v83_crop(barnode, "sb83/hp", V83_HP_X, V83_FILL_Y, V83_HP_W, V83_FILL_H),
+		hpbar = Gauge(Gauge::Type::STATIC_FILL,
+			v83_gauge_fill("sb83/hp-fill", Color(0xfa6963ff), Color(0xa51433ff)),
 			V83_HP_W, 0.0f);
-		mpbar = Gauge(Gauge::Type::GAME,
-			v83_crop(barnode, "sb83/mp", V83_MP_X, V83_FILL_Y, V83_MP_W, V83_FILL_H),
+		mpbar = Gauge(Gauge::Type::STATIC_FILL,
+			v83_gauge_fill("sb83/mp-fill", Color(0x60c8ffff), Color(0x174db6ff)),
 			V83_MP_W, 0.0f);
-		expbar = Gauge(Gauge::Type::GAME,
-			v83_crop(barnode, "sb83/exp", V83_EXP_X, V83_FILL_Y, V83_EXP_W, V83_FILL_H),
+		expbar = Gauge(Gauge::Type::STATIC_FILL,
+			v83_gauge_fill("sb83/exp-fill", Color(0xd6e77fff), Color(0x698919ff)),
 			V83_EXP_W, 0.0f);
 
 		v83_hp_flash = Animation(gauge["hpFlash"]);
@@ -1533,7 +1549,10 @@ namespace ms
 			return Button::State::NORMAL;
 
 		case BT_SYS_GAMEQUIT:
-			UI::get().emplace<UIQuit>(stats);
+			if (nl::nx::ui["UIWindow6.img"]["askReward"]["userLog"]["backgrnd"])
+				UI::get().emplace<UIQuit>(stats);
+			else
+				UI::get().send_close();
 			remove_menus();
 			return Button::State::NORMAL;
 

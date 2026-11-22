@@ -43,7 +43,10 @@ namespace ms
 {
 	UINpcTalk::UINpcTalk() : offset(0), unitrows(0), rowmax(0), show_slider(false), draw_text(false), formatted_text(""), formatted_text_pos(0), timestep(0), selection_top(0), hovered_selection(-1)
 	{
+		nl::node UtilDlgEx_v83 = nl::nx::ui["UIWindow.img"]["UtilDlgEx"];
 		nl::node UtilDlgEx = nl::nx::ui["UIWindow2.img"]["UtilDlgEx"];
+		if (!UtilDlgEx["c"] || !UtilDlgEx["BtClose"])
+			UtilDlgEx = UtilDlgEx_v83;
 
 		top = UtilDlgEx["t"];
 		fill = UtilDlgEx["c"];
@@ -55,8 +58,6 @@ namespace ms
 		// PROGRESS" stickers) that rendered over each selection row. Try
 		// the v83 path (UIWindow.img/UtilDlgEx) first and only accept nodes
 		// that actually resolve to something.
-		nl::node UtilDlgEx_v83 = nl::nx::ui["UIWindow.img"]["UtilDlgEx"];
-
 		auto pick = [](nl::node a, nl::node b) -> nl::node
 		{
 			return a ? a : b;
@@ -77,10 +78,10 @@ namespace ms
 		buttons[Buttons::QNO] = std::make_unique<MapleButton>(UtilDlgEx["BtQNo"]);
 		buttons[Buttons::QYES] = std::make_unique<MapleButton>(UtilDlgEx["BtQYes"]);
 		buttons[Buttons::YES] = std::make_unique<MapleButton>(UtilDlgEx["BtYes"]);
-		buttons[Buttons::QSTART] = std::make_unique<MapleButton>(UtilDlgEx["BtQStart"]);
-		buttons[Buttons::QAFTER] = std::make_unique<MapleButton>(UtilDlgEx["BtQAfter"]);
-		buttons[Buttons::QCYES] = std::make_unique<MapleButton>(UtilDlgEx["BtQCYes"]);
-		buttons[Buttons::QCNO] = std::make_unique<MapleButton>(UtilDlgEx["BtQCNo"]);
+		buttons[Buttons::QSTART] = std::make_unique<MapleButton>(pick(UtilDlgEx["BtQStart"], UtilDlgEx_v83["BtQYes"]));
+		buttons[Buttons::QAFTER] = std::make_unique<MapleButton>(pick(UtilDlgEx["BtQAfter"], UtilDlgEx_v83["BtQYes"]));
+		buttons[Buttons::QCYES] = std::make_unique<MapleButton>(pick(UtilDlgEx["BtQCYes"], UtilDlgEx_v83["BtQYes"]));
+		buttons[Buttons::QCNO] = std::make_unique<MapleButton>(pick(UtilDlgEx["BtQCNo"], UtilDlgEx_v83["BtQNo"]));
 		buttons[Buttons::QGIVEUP] = std::make_unique<MapleButton>(UtilDlgEx["BtQGiveup"]);
 
 		name = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);

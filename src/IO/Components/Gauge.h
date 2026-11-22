@@ -27,7 +27,8 @@ namespace ms
 		enum Type : uint8_t
 		{
 			GAME,
-			CASHSHOP
+			CASHSHOP,
+			STATIC_FILL
 		};
 
 		Gauge(Type type, Texture front, int16_t max, float percent);

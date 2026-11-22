@@ -452,7 +452,7 @@ namespace ms
 		return move.can_use(level, weapon, job, hp, mp, bullets);
 	}
 
-	Attack Player::prepare_attack(bool skill) const
+	Attack Player::prepare_attack(bool skill, bool melee_skill) const
 	{
 		Attack::Type attacktype;
 		bool degenerate;
@@ -460,6 +460,12 @@ namespace ms
 		if (state == Char::State::PRONE)
 		{
 			degenerate = true;
+			attacktype = Attack::Type::CLOSE;
+		}
+		else if (melee_skill)
+		{
+			// A gun must not turn a punch/kick into a projectile attack.
+			degenerate = false;
 			attacktype = Attack::Type::CLOSE;
 		}
 		else
@@ -510,7 +516,7 @@ namespace ms
 		attack.accuracy = stats.get_total(EquipStat::Id::ACC);
 		attack.playerlevel = stats.get_stat(MapleStat::Id::LEVEL);
 		attack.range = stats.get_range();
-		attack.bullet = inventory.get_bulletid();
+		attack.bullet = melee_skill ? 0 : inventory.get_bulletid();
 		attack.origin = get_position();
 		attack.toleft = !facing_right;
 		attack.speed = get_integer_attackspeed();

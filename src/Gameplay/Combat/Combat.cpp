@@ -118,7 +118,8 @@ namespace ms
 
 		if (move.is_attack())
 		{
-			Attack attack = player.prepare_attack(move.is_skill());
+			bool melee_skill = move.is_skill() && SkillData::get(move.get_id()).is_melee();
+			Attack attack = player.prepare_attack(move.is_skill(), melee_skill);
 
 			move.apply_useeffects(player);
 			move.apply_actions(player, attack.type);

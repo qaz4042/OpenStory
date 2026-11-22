@@ -46,7 +46,11 @@ namespace ms
 
 		if (length > 0)
 		{
-			if (type == Type::GAME)
+			if (type == Type::STATIC_FILL)
+			{
+				barfront.draw(args + DrawArgument(Point<int16_t>(0, 0), Point<int16_t>(std::min(length, maximum), 0)));
+			}
+			else if (type == Type::GAME)
 			{
 				barfront.draw(args + DrawArgument(Point<int16_t>(0, 0), Point<int16_t>(length, 0)));
 				barmid.draw(args);

@@ -68,14 +68,14 @@ cmake --build build --config Debug --target OpenStory
 # Output: wz/OpenStory.exe
 ```
 
-Place v83 NX files in the `wz/` directory.
+Place the NX files described in Configuration in the `wz/` directory.
 
 Fonts are compiled in via the generated `src/Graphics/EmbeddedFonts.{h,cpp}`, which are
 committed — no extra build step.
 
 ## Configuration
 
-Supply compatible v83 NX files in `wz/`; use the v83 UI file as `UI.nx`.
+Use v83 game data in `wz/` and a compatible interface archive as `UI.nx`. The v154 interface archive supplies `UIWindow2.img`, `UIWindow4.img`, and `StatusBar2.img`, which the equipment, inventory, skill, stats, and status bar views use.
 Create a local `Settings` file beside the client executable and set `ServerIP`
 and `ServerPort` to your Cosmic server's reachable address and login port.
 The default address is loopback and does not select a public server.

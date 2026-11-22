@@ -44,6 +44,7 @@ namespace ms
 		Button::State button_pressed(uint16_t buttonid) override;
 
 	private:
+		void draw_fallback() const;
 		void load_settings();
 		void save_settings();
 		void revert_settings();
@@ -51,8 +52,13 @@ namespace ms
 		enum Buttons : uint16_t
 		{
 			BT_OK,
-			BT_CANCEL
+			BT_CANCEL,
+			BT_LOGOUT
 		};
+
+		bool fallback_layout;
+		Text title;
+		Text logout_label;
 
 		// NX sprites
 		Texture scroll_normal;
@@ -104,6 +110,9 @@ namespace ms
 		bool check_orig[NUM_CHECKS];
 
 		static constexpr int16_t CHECK_HIT_SIZE = 14;
+
+		Text slider_names[NUM_SLIDERS];
+		Text check_names[NUM_CHECKS];
 
 		// Slider percentage labels
 		mutable Text slider_labels[NUM_SLIDERS];

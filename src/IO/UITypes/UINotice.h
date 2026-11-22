@@ -45,6 +45,8 @@ namespace ms
 
 		int16_t box2offset(bool textfield) const;
 
+		bool legacy_notice;
+
 	private:
 		Texture top;
 		Texture center;

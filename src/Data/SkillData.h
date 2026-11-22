@@ -55,7 +55,8 @@ namespace ms
 		{
 			NONE = 0x0000,
 			ATTACK = 0x0001,
-			RANGED = 0x0002
+			RANGED = 0x0002,
+			MELEE = 0x0004
 		};
 
 		// Icon types
@@ -71,6 +72,8 @@ namespace ms
 		bool is_passive() const;
 		// Return whether the skill is an attack skill
 		bool is_attack() const;
+		// Some skills remain melee attacks even while holding a ranged weapon.
+		bool is_melee() const;
 		// Return whether this skill is invisible in the skill book UI
 		bool is_invisible() const;
 		// Return the default masterlevel
