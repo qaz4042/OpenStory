@@ -441,6 +441,13 @@ namespace ms
 			case KeyType::Id::ACTION:
 				{
 					const auto key = KeyAction::actionbyid(action);
+					// Instant interaction: do not latch this key in Player. Its release
+					// may be consumed by the dialog opened by the server response.
+					if (key == KeyAction::Id::INTERACT_HARVEST)
+					{
+						if (down) npcs.talk_nearest(player.get_position());
+						break;
+					}
 					const bool fresh = down && !player.is_key_down(key);
 					playable->send_action(key, down);
 					if (fresh && (key == KeyAction::Id::LEFT || key == KeyAction::Id::RIGHT))

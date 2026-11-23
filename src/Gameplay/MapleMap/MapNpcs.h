@@ -49,10 +49,15 @@ namespace ms
 		// Refresh quest marks on all NPCs (call when quest state changes)
 		void refresh_quest_marks();
 
+		// Nearest active NPC within 150 horizontal / 80 vertical map pixels.
+		int32_t find_talk_target(Point<int16_t> playerpos) const;
+		void talk_nearest(Point<int16_t> playerpos);
+
 		// Send mouse input to clickable NPCs
 		Cursor::State send_cursor(bool pressed, Point<int16_t> position, Point<int16_t> viewpos);
 
 	private:
+		void request_talk(int32_t oid);
 		MapObjects npcs;
 
 		std::queue<NpcSpawn> spawns;

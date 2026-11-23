@@ -41,10 +41,11 @@ int main(int argc,char** argv) {
  Setting<Width>::get().save(1024); Setting<Height>::get().save(768);
  Setting<Fullscreen>::get().save(false);
  assert(!Window::get().init()); assert(!Sound::init()); assert(!Music::init());
+ UI::get().change_state(UI::State::LOGIN);
  Creation page;
  for(const char* language : {"en", "zh-CN"}) {
   Setting<UILanguage>::get().save(language);
-  for(const char* name : {"卡卡寂312", "ab", "abc def", "abcdefghijklmn"}) {
+  for(const char* name : {"卡卡寂312", "ab", "abc def", "abc!"}) {
    page.reject(name);
    auto notice=UI::get().get_element<UIOk>(); assert(notice);
    Window::get().begin(); page.draw(1.0f); notice->draw(1.0f); Window::get().end();

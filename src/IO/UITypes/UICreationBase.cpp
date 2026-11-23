@@ -141,6 +141,7 @@ namespace ms
 		if (name.empty())
 			return Button::State::NORMAL;
 
+		UI::get().remove_textfield();
 		namechar.set_state(Textfield::State::DISABLED);
 		buttons[Buttons::BT_CHARC_OK]->set_state(Button::State::DISABLED);
 		buttons[Buttons::BT_CHARC_CANCEL]->set_state(Button::State::DISABLED);

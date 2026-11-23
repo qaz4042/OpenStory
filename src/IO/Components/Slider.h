@@ -84,7 +84,7 @@ namespace ms
 		Point<int16_t> end;
 		int16_t type;
 		int16_t buttonheight;
-		int16_t rowheight;
+		double rowheight;
 		int16_t x;
 		int16_t row;
 		int16_t rowmax;

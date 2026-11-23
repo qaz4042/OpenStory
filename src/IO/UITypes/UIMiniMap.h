@@ -63,6 +63,7 @@ namespace ms
 
 		void update_buttons();
 		void toggle_buttons();
+		std::string display_language;
 		void update_text();
 		void update_canvas();
 		Point<int16_t> scale_map_pos(Point<int16_t> world_pos) const;

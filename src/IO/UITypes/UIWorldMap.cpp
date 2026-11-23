@@ -18,6 +18,9 @@
 #include "UIWorldMap.h"
 
 #include "../UI.h"
+#include "../Components/LocalizedMapleButton.h"
+#include "UINotice.h"
+#include "../../Net/Packets/MessagingPackets.h"
 
 #include "../../Gameplay/Stage.h"
 
@@ -44,6 +47,9 @@ namespace ms
 			npc_pos[i] = MapHelper["npcPos" + std::to_string(i)];
 
 		sprites.emplace_back(Border);
+		translated_border = LocalizedArt(Border, {{250, 3, 150, 12, localization::Key::WorldMapTitle, Color::Name::YELLOW, 200}});
+		translated_search = LocalizedArt(backgrnd, {{35, 3, 75, 12, localization::Key::SearchLabel, Color::Name::YELLOW, 20}});
+		translated_search_notice = LocalizedArt(WorldMapSearch["notice"], {{0, 0, 88, 59, localization::Key::MapSearchHint, Color::Name::DARKGREY}});
 
 		search_background = backgrnd;
 		search_notice = WorldMapSearch["notice"];
@@ -61,11 +67,11 @@ namespace ms
 		Point<int16_t> close_dimensions = Point<int16_t>(bg_dimension_x - 22, 4);
 
 		buttons[Buttons::BT_CLOSE] = std::make_unique<MapleButton>(close, close_dimensions);
-		buttons[Buttons::BT_SEARCH] = std::make_unique<MapleButton>(WorldMap["BtSearch"]);
-		buttons[Buttons::BT_AUTOFLY] = std::make_unique<MapleButton>(WorldMap["BtAutoFly_1"]);
-		buttons[Buttons::BT_NAVIREG] = std::make_unique<MapleButton>(WorldMap["BtNaviRegister"]);
+		buttons[Buttons::BT_SEARCH] = std::make_unique<LocalizedMapleButton>(WorldMap["BtSearch"], localization::Key::OpenMapSearch);
+		buttons[Buttons::BT_AUTOFLY] = std::make_unique<LocalizedMapleButton>(WorldMap["BtAutoFly_1"], localization::Key::AutoPilotReady, Point<int16_t>(), 20, 4);
+		buttons[Buttons::BT_NAVIREG] = std::make_unique<LocalizedMapleButton>(WorldMap["BtNaviRegister"], localization::Key::EnableNavigation, Point<int16_t>(), 20, 4);
 		buttons[Buttons::BT_SEARCH_CLOSE] = std::make_unique<MapleButton>(close, close_dimensions + Point<int16_t>(bg_search_dimensions.x(), 0));
-		buttons[Buttons::BT_ALLSEARCH] = std::make_unique<MapleButton>(WorldMapSearch["BtAllsearch"], background_dimensions);
+		buttons[Buttons::BT_ALLSEARCH] = std::make_unique<LocalizedMapleButton>(WorldMapSearch["BtAllsearch"], localization::Key::SearchLabel, background_dimensions);
 
 		Point<int16_t> search_text_pos = Point<int16_t>(bg_dimension_x + 14, 25);
 		Point<int16_t> search_box_dim = Point<int16_t>(83, 15);
@@ -80,12 +86,22 @@ namespace ms
 
 	void UIWorldMap::draw(float alpha) const
 	{
-		UIElement::draw_sprites(alpha);
+		// alpha is animation interpolation, not window opacity.
+		if (Setting<UILanguage>::get().load() == "zh-CN") translated_border.draw(position);
+		else UIElement::draw_sprites(alpha);
 
 		if (search)
 		{
-			search_background.draw(position + background_dimensions);
-			search_notice.draw(position + background_dimensions);
+			if (Setting<UILanguage>::get().load() == "zh-CN")
+			{
+				translated_search.draw(position + background_dimensions);
+				translated_search_notice.draw(position + background_dimensions);
+			}
+			else
+			{
+				search_background.draw(position + background_dimensions);
+				search_notice.draw(position + background_dimensions);
+			}
 			search_text.draw(position + Point<int16_t>(1, -5));
 		}
 
@@ -126,7 +142,8 @@ namespace ms
 					if (map_id == mapid)
 					{
 						found = true;
-						npc_pos[spot.second.type].draw(spot.first + position + base_position, alpha);
+						if (spot.second.type < MAPSPOT_TYPE_MAX)
+							npc_pos[spot.second.type].draw(spot.first + position + base_position, alpha);
 						cur_pos.draw(spot.first + position + base_position, alpha);
 						break;
 					}
@@ -142,6 +159,19 @@ namespace ms
 
 	void UIWorldMap::update()
 	{
+		// Replace the number notice after its callback returns.
+		if (!pending_destinations.empty())
+		{
+			auto ids = std::move(pending_destinations);
+			pending_destinations.clear();
+			choose_destination(std::move(ids), pending_page);
+		}
+		const auto language = Setting<UILanguage>::get().load();
+		if (display_language != language)
+		{
+			display_language = language;
+			if (!user_map.empty()) update_world(user_map);
+		}
 		int32_t mid = Stage::get().get_mapid();
 
 		if (mid != mapid)
@@ -226,7 +256,8 @@ namespace ms
 
 		if (buttonid >= Buttons::BT_LINK0)
 		{
-			update_world(link_maps[buttonid]);
+			auto link = link_maps.find(buttonid);
+			if (link != link_maps.end()) update_world(link->second);
 
 			return Button::State::IDENTITY;
 		}
@@ -261,12 +292,62 @@ namespace ms
 				path_img = path.second.path;
 				show_path_img = path_img.is_valid();
 
-				UI::get().show_map(Tooltip::Parent::WORLDMAP, path.second.title, path.second.description, path.second.map_ids[0], path.second.bolded);
+				UI::get().show_map(Tooltip::Parent::WORLDMAP, path.second.title, path.second.description, path.second.map_ids.empty() ? 0 : path.second.map_ids[0], path.second.bolded);
 				break;
 			}
 		}
 
 		return UIDragElement::send_cursor(clicked, cursorpos);
+	}
+
+	void UIWorldMap::doubleclick(Point<int16_t> cursorpos)
+	{
+		for (const auto& spot : map_spots)
+		{
+			auto top = spot.first + position + base_position - 10;
+			if (!Rectangle<int16_t>(top, top + spot.second.marker.get_dimensions()).contains(cursorpos)
+				|| spot.second.map_ids.empty())
+				continue;
+
+			const auto ids = spot.second.map_ids;
+			if (ids.size() == 1)
+			{
+				request_travel(ids.front());
+				return;
+			}
+
+			choose_destination(ids, 0);
+			return;
+		}
+	}
+
+	void UIWorldMap::choose_destination(std::vector<int32_t> ids, size_t page)
+	{
+		if (ids.empty() || page > (ids.size() - 1) / 8) return;
+		const size_t first = page * 8;
+		const size_t last = std::min(first + 8, ids.size());
+		std::string message = "选择目的地 / Destination (" + std::to_string(page + 1)
+			+ "/" + std::to_string((ids.size() + 7) / 8) + "):\n";
+		for (size_t i = first; i < last; ++i)
+			message += std::to_string(i - first + 1) + ". "
+				+ NxHelper::Map::get_map_info_by_id(ids[i]).full_name + "\n";
+		if (last < ids.size()) message += "9. 下一页 / Next\n";
+		if (page > 0) message += "10. 上一页 / Previous\n";
+		UI::get().emplace<UIEnterNumber>(message, [this, ids, page, first, last](int32_t choice)
+		{
+			if (choice == 9 && last < ids.size()) { pending_destinations = ids; pending_page = page + 1; }
+			else if (choice == 10 && page > 0) { pending_destinations = ids; pending_page = page - 1; }
+			else if (choice > 0 && static_cast<size_t>(choice) <= last - first)
+				request_travel(ids[first + choice - 1]);
+		}, 10, 1);
+	}
+
+	void UIWorldMap::request_travel(int32_t id)
+	{
+		const auto now = std::chrono::steady_clock::now();
+		if (id == Stage::get().get_mapid() || now < next_travel) return;
+		next_travel = now + std::chrono::seconds(3);
+		GeneralChatPacket("@maptravel " + std::to_string(id), false).dispatch();
 	}
 
 	void UIWorldMap::set_search(bool enable)
@@ -290,6 +371,8 @@ namespace ms
 
 	void UIWorldMap::update_world(std::string map)
 	{
+		show_path_img = false;
+		UI::get().clear_tooltip(Tooltip::Parent::WORLDMAP);
 		nl::node WorldMap = nl::nx::map["WorldMap"][map + ".img"];
 
 		if (!WorldMap)

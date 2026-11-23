@@ -90,6 +90,7 @@ namespace ms
 			USE_CHAIR = 43,
 
 			/// Inventory
+			MESO_DROP = 94,
 			GATHER_ITEMS = 69,
 			SORT_ITEMS = 70,
 			MOVE_ITEM = 71,

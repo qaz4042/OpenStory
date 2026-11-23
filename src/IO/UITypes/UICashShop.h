@@ -22,6 +22,7 @@
 #include "../Components/Charset.h"
 #include "../Components/Gauge.h"
 #include "../Components/Slider.h"
+#include "../Components/Textfield.h"
 
 #include "../../Character/Look/CharLook.h"
 #include "../../Data/ItemData.h"
@@ -40,6 +41,8 @@ namespace ms
 
 			void draw(float inter) const;
 		void update() override;
+		void send_scroll(double yoffset) override;
+		void filter_catalog();
 		void send_key(int32_t keycode, bool pressed, bool escape) override;
 
 		Button::State button_pressed(uint16_t buttonid);
@@ -202,6 +205,14 @@ namespace ms
 		Sprite item_none;
 		std::vector<Sprite> item_labels;
 		std::vector<Item> items;
+		std::vector<Item> catalog;
+		Textfield search;
+		std::string search_query;
+		uint8_t category = 0;
+		int16_t cash_offset = 0;
+		Point<int16_t> last_cursor;
+		static constexpr uint8_t CATEGORY_COUNT = 9;
+		static int category_for(int32_t itemid);
 		Text item_name[MAX_ITEMS];
 		Text item_price[MAX_ITEMS];
 		Text item_discount[MAX_ITEMS];

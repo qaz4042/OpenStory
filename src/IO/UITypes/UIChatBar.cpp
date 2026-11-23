@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIChatBar.h"
+#include "../../Localization/Vocabulary.h"
 
 #include "../Window.h"
 
@@ -993,7 +994,7 @@ namespace ms
 		if (message_cooldowns[line] > 0)
 			return;
 
-		std::string message = Messages::messages[line];
+		std::string message = localization::vocabulary(Messages::messages[line]);
 		send_line(message, type);
 
 		message_cooldowns[line] = MESSAGE_COOLDOWN;

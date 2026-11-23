@@ -18,9 +18,11 @@
 #pragma once
 
 #include "../UIDragElement.h"
+#include "../Components/LocalizedArt.h"
 
 #include "../Components/AreaButton.h"
 #include "../Components/Textfield.h"
+#include <chrono>
 
 namespace ms
 {
@@ -39,6 +41,7 @@ namespace ms
 		void toggle_active() override;
 
 		void remove_cursor() override;
+		void doubleclick(Point<int16_t> cursorpos) override;
 		Cursor::State send_cursor(bool clicked, Point<int16_t> cursor_pos) override;
 		void send_key(int32_t keycode, bool pressed, bool escape) override;
 
@@ -51,6 +54,8 @@ namespace ms
 		static constexpr uint8_t MAPSPOT_TYPE_MAX = 4u;
 
 		void set_search(bool enable);
+		void choose_destination(std::vector<int32_t> ids, size_t page);
+		void request_travel(int32_t id);
 		void update_world(std::string parent_map);
 
 		enum Buttons
@@ -84,14 +89,19 @@ namespace ms
 			std::vector<int32_t> map_ids;
 		};
 
-		bool search;
-		bool show_path_img;
+		std::vector<int32_t> pending_destinations;
+		size_t pending_page = 0;
+		bool search = false;
+		bool show_path_img = false;
+		std::chrono::steady_clock::time_point next_travel{};
 
-		int32_t mapid;
+		int32_t mapid = -1;
 
+		std::string display_language;
 		std::string parent_map;
 		std::string user_map;
 
+		LocalizedArt translated_border, translated_search, translated_search_notice;
 		Texture search_background;
 		Texture search_notice;
 		Texture base_img;

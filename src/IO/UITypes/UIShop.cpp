@@ -515,8 +515,12 @@ namespace ms
 
 	void UIShop::send_key(int32_t keycode, bool pressed, bool escape)
 	{
-		if (pressed && escape)
+		if (!pressed)
+			return;
+		if (escape)
 			exit_shop();
+		else if (keycode == KeyAction::Id::RETURN)
+			buystate.buy();
 	}
 
 	UIElement::Type UIShop::get_type() const

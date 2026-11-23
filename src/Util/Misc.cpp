@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "Misc.h"
+#include "../Localization/MapNames.h"
 
 #ifdef USE_NX
 #include <nlnx/nx.hpp>
@@ -84,12 +85,9 @@ namespace ms
 				std::string map_category = get_map_category(mapid);
 				nl::node map_info = nl::nx::string["Map.img"][map_category][mapid];
 
-				return {
-					map_info["mapDesc"],
-					map_info["mapName"],
-					map_info["streetName"],
-					map_info["streetName"] + " : " + map_info["mapName"]
-				};
+				const auto name = localization::map_name(map_info["mapName"].get_string());
+				const auto street = localization::map_name(map_info["streetName"].get_string());
+				return {map_info["mapDesc"], name, street, street + " : " + name};
 			}
 
 			std::string get_map_category(int32_t mapid)

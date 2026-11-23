@@ -88,7 +88,7 @@ namespace ms
 		rowmax = rm - ur;
 
 		if (rowmax > 0)
-			rowheight = (vertical.length() - buttonheight * 2) / rowmax;
+			rowheight = static_cast<double>(vertical.length() - buttonheight * 2) / rowmax;
 		else
 			rowheight = 0;
 
@@ -109,7 +109,7 @@ namespace ms
 		next.set_position(end);
 
 		if (rowmax > 0)
-			rowheight = (vertical.length() - buttonheight * 2) / rowmax;
+			rowheight = static_cast<double>(vertical.length() - buttonheight * 2) / rowmax;
 		else
 			rowheight = 0;
 	}

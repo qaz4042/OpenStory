@@ -226,6 +226,10 @@ namespace ms
 
 	void UIStateGame::send_key(KeyType::Id type, int32_t action, bool pressed, bool escape)
 	{
+		// Older/default server keymaps classify NPC chat as MENU.
+		if (type == KeyType::Id::MENU && action == KeyAction::Id::INTERACT_HARVEST)
+			type = KeyType::Id::ACTION;
+
 		// What reached the game state, and where it goes from here.
 		if (key_debug_enabled())
 			std::cout << "[KEYPROBE] UIStateGame::send_key type=" << static_cast<int32_t>(type)

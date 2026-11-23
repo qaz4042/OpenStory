@@ -35,8 +35,11 @@ namespace ms
 		UITermsOfService(std::function<void()> okhandler);
 
 		void draw(float inter) const override;
+		void send_scroll(double yoffset) override;
 
 		Cursor::State send_cursor(bool clicked, Point<int16_t> cursorpos) override;
+
+		void remove_cursor() override;
 
 		UIElement::Type get_type() const override;
 

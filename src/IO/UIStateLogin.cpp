@@ -92,7 +92,8 @@ namespace ms
 
 	Cursor::State UIStateLogin::send_cursor(Cursor::State cursorstate, Point<int16_t> cursorpos)
 	{
-		bool clicked = cursorstate == Cursor::State::CLICKING || cursorstate == Cursor::State::VSCROLLIDLE;
+		// Pointer-motion events arrive as IDLE even while the mouse is held.
+		bool clicked = UI::get().is_mouse_held() || cursorstate == Cursor::State::CLICKING || cursorstate == Cursor::State::VSCROLLIDLE;
 
 		if (auto focusedelement = get(focused))
 		{
@@ -122,6 +123,14 @@ namespace ms
 				return Cursor::State::IDLE;
 			}
 		}
+	}
+
+	void UIStateLogin::send_scroll(double yoffset)
+	{
+		if (auto element = get(focused); element && element->is_active())
+			element->send_scroll(yoffset);
+		else if (auto front = get_front())
+			front->send_scroll(yoffset);
 	}
 
 	void UIStateLogin::send_close()

@@ -71,11 +71,8 @@ namespace ms
 		Point<int16_t> get_tabpos(InventoryType::Id tab) const;
 		Icon* get_icon(int16_t slot);
 		void set_full(bool enabled);
-		// Fit the scrollbar to the rows that actually hold items: the range
-		// grows with the highest occupied slot, and the bar greys out when
-		// everything already fits in the visible rows
+		// Include unlocked empty slots so expanded inventories remain scrollable.
 		void update_slider();
-		int16_t used_rows() const;
 
 		class ItemIcon : public Icon::Type
 		{

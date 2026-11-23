@@ -79,9 +79,38 @@ namespace ms
 		nl::node backgrnd = character["backgrnd"];
 		Point<int16_t> bg_dimensions = Texture(backgrnd).get_dimensions();
 
+		translated_frame = LocalizedArt(backgrnd, {{23, 5, 137, 14, localization::Key::EquipmentInventory, Color::Name::YELLOW, 20}});
 		sprites.emplace_back(backgrnd);
 		sprites.emplace_back(character["backgrnd2"]);
 		sprites.emplace_back(character["backgrnd3"]);
+		translated_slots = LocalizedArt(character["backgrnd3"], {
+			{0, 12, 48, 14, localization::Key::SlotBook, Color::Name::DARKGREY, 0},
+			{33, 0, 31, 10, localization::Key::SlotHat, Color::Name::DARKGREY, 33},
+			{66, 12, 37, 10, localization::Key::SlotBadge, Color::Name::DARKGREY, 66},
+			{99, 0, 49, 10, localization::Key::SlotAndroid, Color::Name::DARKGREY, 99},
+			{132, 12, 31, 10, localization::Key::SlotHeart, Color::Name::DARKGREY, 132},
+			{0, 33, 31, 10, localization::Key::SlotMedal, Color::Name::DARKGREY, 0},
+			{33, 33, 32, 10, localization::Key::SlotFace, Color::Name::DARKGREY, 33},
+			{99, 33, 31, 10, localization::Key::SlotRing, Color::Name::DARKGREY, 99},
+			{132, 33, 31, 10, localization::Key::SlotRing, Color::Name::DARKGREY, 132},
+			{33, 66, 31, 17, localization::Key::SlotEye, Color::Name::DARKGREY, 33},
+			{99, 66, 31, 17, localization::Key::SlotEar, Color::Name::DARKGREY, 99},
+			{117, 84, 46, 12, localization::Key::SlotShoulder, Color::Name::DARKGREY, 117},
+			{0, 99, 38, 10, localization::Key::SlotCape, Color::Name::DARKGREY, 0},
+			{33, 111, 53, 12, localization::Key::SlotTop, Color::Name::DARKGREY, 33},
+			{66, 99, 51, 10, localization::Key::SlotPendant, Color::Name::DARKGREY, 66},
+			{99, 111, 49, 12, localization::Key::SlotWeapon, Color::Name::DARKGREY, 99},
+			{132, 99, 31, 10, localization::Key::SlotShield, Color::Name::DARKGREY, 132},
+			{0, 132, 50, 10, localization::Key::SlotGloves, Color::Name::DARKGREY, 0},
+			{33, 156, 35, 10, localization::Key::SlotBottom, Color::Name::DARKGREY, 33},
+			{66, 132, 31, 10, localization::Key::SlotBelt, Color::Name::DARKGREY, 66},
+			{99, 132, 31, 10, localization::Key::SlotRing, Color::Name::DARKGREY, 99},
+			{132, 132, 31, 10, localization::Key::SlotRing, Color::Name::DARKGREY, 132},
+			{66, 165, 34, 10, localization::Key::SlotShoes, Color::Name::DARKGREY, 66},
+			{0, 198, 40, 16, localization::Key::SlotMount, Color::Name::DARKGREY, 0},
+			{33, 219, 50, 11, localization::Key::SlotSaddle, Color::Name::DARKGREY, 33},
+			{66, 198, 31, 16, localization::Key::SlotMountEquip, Color::Name::DARKGREY, 66},
+		});
 
 		totem_dimensions = Point<int16_t>(0, 0);
 		totem_adj = Point<int16_t>(0, 0);
@@ -100,7 +129,15 @@ namespace ms
 
 	void UIEquipInventory::draw(float alpha) const
 	{
-		UIElement::draw(alpha);
+		if (Setting<UILanguage>::get().load() == "zh-CN")
+		{
+			translated_frame.draw(position, false, alpha);
+			// The frame must precede the paper-doll backing and captions.
+			sprites[1].draw(position, alpha);
+			translated_slots.draw(position, false, alpha);
+			draw_buttons(alpha);
+		}
+		else UIElement::draw(alpha);
 
 		for (auto iter : icons)
 		{

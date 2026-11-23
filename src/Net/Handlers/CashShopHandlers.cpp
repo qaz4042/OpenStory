@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "CashShopHandlers.h"
+#include <algorithm>
 
 #include "Helpers/CashShopParser.h"
 
@@ -28,8 +29,11 @@
 
 namespace ms
 {
+	static std::vector<CashInventoryItem> cash_inventory;
+
 	void SetCashShopHandler::handle(InPacket& recv) const
 	{
+		cash_inventory.clear();
 		CashShopParser::parseCharacterInfo(recv);
 
 		recv.skip_byte();	// Not MTS
@@ -68,55 +72,93 @@ namespace ms
 		transition();
 	}
 
+
+	const std::vector<CashInventoryItem>& get_cash_inventory() { return cash_inventory; }
+
+	static CashInventoryItem read_cash_item(InPacket& recv)
+	{
+		CashInventoryItem item;
+		item.cash_id = recv.read_long();
+		recv.skip(8); // account ID and reserved int
+		item.item_id = recv.read_int();
+		item.sn = recv.read_int();
+		item.count = static_cast<uint16_t>(recv.read_short());
+		recv.skip(29); // gift sender (13), expiration (8), reserved long (8)
+		return item;
+	}
+
+	static void add_cash_item(const CashInventoryItem& item)
+	{
+		for (auto& entry : cash_inventory)
+			if (entry.cash_id == item.cash_id) { entry = item; return; }
+		cash_inventory.push_back(item);
+	}
+
 	void CashShopOperationHandler::handle(InPacket& recv) const
 	{
-		int8_t operation = recv.read_byte();
+		uint8_t operation = static_cast<uint8_t>(recv.read_byte());
 
 		switch (operation)
 		{
+		case 0x4B: // Cosmic showCashInventory: complete account locker snapshot
+		{
+			const uint16_t count = static_cast<uint16_t>(recv.read_short());
+			std::vector<CashInventoryItem> snapshot;
+			for (uint16_t i = 0; i < count; ++i) snapshot.push_back(read_cash_item(recv));
+			recv.skip(4); // storage and character slot counts
+			cash_inventory = std::move(snapshot);
+			break;
+		}
+		case 0x57: // Cosmic showBoughtCashItem (not 0x4A)
+		case 0x6A: // putIntoCashInventory
+			add_cash_item(read_cash_item(recv));
+			break;
+		case 0x89: // package purchase
+		{
+			const uint8_t count = static_cast<uint8_t>(recv.read_byte());
+			std::vector<CashInventoryItem> purchased;
+			for (uint8_t i = 0; i < count; ++i) purchased.push_back(read_cash_item(recv));
+			recv.skip(2);
+			for (const auto& item : purchased) add_cash_item(item);
+			break;
+		}
+		case 0x6C: // deleted cash item
+		{
+			const auto id = recv.read_long();
+			cash_inventory.erase(std::remove_if(cash_inventory.begin(), cash_inventory.end(),
+				[id](const auto& item) { return item.cash_id == id; }), cash_inventory.end());
+			break;
+		}
+
 		case 0x4A:
 		{
 			// Buy item success
 			chat::log("[Cash Shop] Item purchased successfully!", chat::LineType::YELLOW);
 			break;
 		}
+		case 0x5C: // Cosmic showCashShopMessage
 		case 0x4C:
 		{
-			int8_t reason = recv.read_byte();
+			const uint8_t reason = static_cast<uint8_t>(recv.read_byte());
 			std::string msg;
 			switch (reason)
 			{
-			case 0: msg = "Unknown error."; break;
-			case 1: msg = "You don't have enough NX."; break;
-			case 2: msg = "Item is out of stock."; break;
-			case 3: msg = "Your cash inventory is full."; break;
-			case 4: msg = "This item is not available for purchase."; break;
-			case 5: msg = "You have exceeded the purchase limit."; break;
-			case 6: msg = "You are under the required level."; break;
-			case 7: msg = "You already have this item."; break;
-			default: msg = "Purchase failed (code: " + std::to_string(reason) + ")"; break;
+			case 0xA5: msg = "Not enough NX."; break;
+			case 0xAA: msg = "This item has a gender restriction."; break;
+			case 0xAC: case 0xBB: msg = "Cash inventory is full."; break;
+			case 0xB0: msg = "Invalid coupon code."; break;
+			case 0xB2: msg = "This coupon has expired."; break;
+			case 0xB3: msg = "This coupon has already been used."; break;
+			case 0xC0: msg = "Item is out of stock."; break;
+			default: msg = "Cash shop operation failed (code " + std::to_string(reason) + ")."; break;
 			}
 			chat::log("[Cash Shop] " + msg, chat::LineType::RED);
 			break;
 		}
+
 		case 0x59:
 		{
 			chat::log("[Cash Shop] Coupon redeemed successfully!", chat::LineType::YELLOW);
-			break;
-		}
-		case 0x5C:
-		{
-			int8_t reason = recv.read_byte();
-			std::string msg;
-			switch (reason)
-			{
-			case 0: msg = "Invalid coupon code."; break;
-			case 1: msg = "This coupon has expired."; break;
-			case 2: msg = "This coupon has already been used."; break;
-			case 3: msg = "This coupon is for a different server."; break;
-			default: msg = "Coupon error (code: " + std::to_string(reason) + ")"; break;
-			}
-			chat::log("[Cash Shop] " + msg, chat::LineType::RED);
 			break;
 		}
 		default:

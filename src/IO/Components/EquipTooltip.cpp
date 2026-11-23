@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "EquipTooltip.h"
+#include "../../Localization/Vocabulary.h"
+#include <algorithm>
 
 #include "../../Data/WeaponData.h"
 #include "../../Gameplay/Stage.h"
@@ -87,6 +89,20 @@ namespace ms
 		atkincset[true] = Charset(Equip["Summary"]["incline"], Charset::Alignment::RIGHT);
 
 		jobsback = Equip["Job"]["normal"];
+		// This strip already contains all six disabled English captions.
+		// Clear only its interior, retaining the original rounded border.
+		nl::bitmap job_bitmap = Equip["Job"]["normal"];
+		if (job_bitmap)
+		{
+			const auto* source = static_cast<const uint8_t*>(job_bitmap.data());
+			std::vector<uint8_t> pixels(source, source + job_bitmap.width() * job_bitmap.height() * 4);
+			for (int y = 3; y < job_bitmap.height() - 3; ++y)
+				for (int x = 5; x < job_bitmap.width() - 5; ++x)
+					for (int c = 0; c < 4; ++c)
+						pixels[(y * job_bitmap.width() + x) * 4 + c] = source[(y * job_bitmap.width() + 5) * 4 + c];
+			translated_jobsback = Texture::from_pixels("localized-job-strip/" + std::to_string(job_bitmap.id()),
+				job_bitmap.width(), job_bitmap.height(), std::move(pixels), Equip["Job"]["normal"]["origin"]);
+		}
 		jobs[false][0] = Equip["Job"]["disable"]["0"];
 		jobs[false][1] = Equip["Job"]["disable"]["1"];
 		jobs[false][2] = Equip["Job"]["disable"]["2"];
@@ -106,9 +122,12 @@ namespace ms
 
 	void EquipTooltip::set_equip(Tooltip::Parent parent, int16_t ivp)
 	{
-		if (invpos == ivp)
+		const auto language = Setting<UILanguage>::get().load();
+		if (invpos == ivp && last_language == language && last_parent == parent)
 			return;
 
+		last_language = language;
+		last_parent = parent;
 		invpos = ivp;
 		invpos_preview = 0;
 
@@ -184,23 +203,23 @@ namespace ms
 					{
 					case Equip::Potential::POT_HIDDEN:
 						potflag_preview = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::RED);
-						potflag_preview.change_text("(Hidden Potential)");
+						potflag_preview.change_text(localization::vocabulary("(Hidden Potential)"));
 						break;
 					case Equip::Potential::POT_RARE:
 						potflag_preview = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-						potflag_preview.change_text("(Rare Item)");
+						potflag_preview.change_text(localization::vocabulary("(Rare Item)"));
 						break;
 					case Equip::Potential::POT_EPIC:
 						potflag_preview = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-						potflag_preview.change_text("(Epic Item)");
+						potflag_preview.change_text(localization::vocabulary("(Epic Item)"));
 						break;
 					case Equip::Potential::POT_UNIQUE:
 						potflag_preview = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-						potflag_preview.change_text("(Unique Item)");
+						potflag_preview.change_text(localization::vocabulary("(Unique Item)"));
 						break;
 					case Equip::Potential::POT_LEGENDARY:
 						potflag_preview = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-						potflag_preview.change_text("(Legendary Item)");
+						potflag_preview.change_text(localization::vocabulary("(Legendary Item)"));
 						break;
 					default:
 						height_preview -= 16;
@@ -238,10 +257,10 @@ namespace ms
 					switch (reqGender)
 					{
 					case 0: // Male
-						namestr += " (M)";
+						namestr += localization::vocabulary(" (M)");
 						break;
 					case 1: // Female
-						namestr += " (F)";
+						namestr += localization::vocabulary(" (F)");
 						break;
 					case 2: // Unisex
 					default:
@@ -256,7 +275,7 @@ namespace ms
 					}
 
 					name_preview = Text(Text::Font::A12B, Text::Alignment::LEFT, namecolor, namestr, 400);
-					atkinc_preview = Text(Text::Font::A11M, Text::Alignment::RIGHT, Color::Name::DUSTYGRAY, "ATT INCREASE");
+					atkinc_preview = Text(Text::Font::A11M, Text::Alignment::RIGHT, Color::Name::DUSTYGRAY, localization::vocabulary("ATT INCREASE"));
 
 					std::string desctext = itemdata.get_desc();
 					hasdesc_preview = desctext.size() > 0;
@@ -267,14 +286,14 @@ namespace ms
 						height_preview += desc_preview.height() + 10;
 					}
 
-					category_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Type: " + equipdata.get_type());
+					category_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Type: ") + localization::vocabulary(equipdata.get_type()));
 
 					is_weapon_preview = equipdata.is_weapon();
 
 					if (is_weapon_preview)
 					{
 						const WeaponData& weapon = WeaponData::get(item_id);
-						wepspeed_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Attack Speed: " + weapon.getspeedstring());
+						wepspeed_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Attack Speed: ") + localization::vocabulary(weapon.getspeedstring()));
 					}
 					else
 					{
@@ -285,14 +304,14 @@ namespace ms
 
 					if (hasslots_preview)
 					{
-						slots_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Remaining Enhancements: " + std::to_string(equip.get_slots()));
+						slots_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Remaining Enhancements: ") + std::to_string(equip.get_slots()));
 
 						std::string vicious = std::to_string(equip.get_vicious());
 
 						if (equip.get_vicious() > 1)
 							vicious.append(" (MAX) ");
 
-						hammers_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Hammers Applied: " + vicious);
+						hammers_preview = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Hammers Applied: ") + vicious);
 					}
 					else
 					{
@@ -315,7 +334,7 @@ namespace ms
 								statstr.append(std::to_string(abs(delta)) + ")");
 							}
 
-							statlabels_preview[es] = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, EquipStat::names[es] + std::string(": ") + statstr);
+							statlabels_preview[es] = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary(EquipStat::names[es]) + std::string(": ") + statstr);
 						}
 						else
 						{
@@ -370,23 +389,23 @@ namespace ms
 		{
 		case Equip::Potential::POT_HIDDEN:
 			potflag = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::RED);
-			potflag.change_text("(Hidden Potential)");
+			potflag.change_text(localization::vocabulary("(Hidden Potential)"));
 			break;
 		case Equip::Potential::POT_RARE:
 			potflag = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-			potflag.change_text("(Rare Item)");
+			potflag.change_text(localization::vocabulary("(Rare Item)"));
 			break;
 		case Equip::Potential::POT_EPIC:
 			potflag = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-			potflag.change_text("(Epic Item)");
+			potflag.change_text(localization::vocabulary("(Epic Item)"));
 			break;
 		case Equip::Potential::POT_UNIQUE:
 			potflag = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-			potflag.change_text("(Unique Item)");
+			potflag.change_text(localization::vocabulary("(Unique Item)"));
 			break;
 		case Equip::Potential::POT_LEGENDARY:
 			potflag = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE);
-			potflag.change_text("(Legendary Item)");
+			potflag.change_text(localization::vocabulary("(Legendary Item)"));
 			break;
 		default:
 			height -= 16;
@@ -424,10 +443,10 @@ namespace ms
 		switch (reqGender)
 		{
 		case 0: // Male
-			namestr += " (M)";
+			namestr += localization::vocabulary(" (M)");
 			break;
 		case 1: // Female
-			namestr += " (F)";
+			namestr += localization::vocabulary(" (F)");
 			break;
 		case 2: // Unisex
 		default:
@@ -442,7 +461,7 @@ namespace ms
 		}
 
 		name = Text(Text::Font::A12B, Text::Alignment::LEFT, namecolor, namestr, 400);
-		atkinc = Text(Text::Font::A11M, Text::Alignment::RIGHT, Color::Name::DUSTYGRAY, "ATT INCREASE");
+		atkinc = Text(Text::Font::A11M, Text::Alignment::RIGHT, Color::Name::DUSTYGRAY, localization::vocabulary("ATT INCREASE"));
 
 		std::string desctext = itemdata.get_desc();
 		hasdesc = desctext.size() > 0;
@@ -453,14 +472,14 @@ namespace ms
 			height += desc.height() + 10;
 		}
 
-		category = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Type: " + equipdata.get_type());
+		category = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Type: ") + localization::vocabulary(equipdata.get_type()));
 
 		is_weapon = equipdata.is_weapon();
 
 		if (is_weapon)
 		{
 			const WeaponData& weapon = WeaponData::get(item_id);
-			wepspeed = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Attack Speed: " + weapon.getspeedstring());
+			wepspeed = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Attack Speed: ") + localization::vocabulary(weapon.getspeedstring()));
 		}
 		else
 		{
@@ -471,14 +490,14 @@ namespace ms
 
 		if (hasslots)
 		{
-			slots = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Remaining Enhancements: " + std::to_string(equip.get_slots()));
+			slots = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Remaining Enhancements: ") + std::to_string(equip.get_slots()));
 
 			std::string vicious = std::to_string(equip.get_vicious());
 
 			if (equip.get_vicious() > 1)
 				vicious.append(" (MAX) ");
 
-			hammers = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, "Hammers Applied: " + vicious);
+			hammers = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary("Hammers Applied: ") + vicious);
 		}
 		else
 		{
@@ -501,7 +520,7 @@ namespace ms
 					statstr.append(std::to_string(abs(delta)) + ")");
 				}
 
-				statlabels[es] = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, EquipStat::names[es] + std::string(": ") + statstr);
+				statlabels[es] = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE, localization::vocabulary(EquipStat::names[es]) + std::string(": ") + statstr);
 			}
 			else
 			{
@@ -597,8 +616,25 @@ namespace ms
 		for (MapleStat::Id ms : requirements)
 		{
 			Point<int16_t> reqpos = reqstatpositions[ms];
+			if (Setting<UILanguage>::get().load() == "zh-CN" && (ms == MapleStat::Id::DEX || ms == MapleStat::Id::INT)) reqpos.shift_y(5);
 			bool reqok = canequip[ms];
-			reqstattextures[ms][reqok].draw(pos + reqpos);
+			if (Setting<UILanguage>::get().load() == "zh-CN")
+			{
+				const char* caption = "";
+				switch (ms)
+				{
+				case MapleStat::Id::LEVEL: caption = "等级"; break;
+				case MapleStat::Id::FAME: caption = "人气"; break;
+				case MapleStat::Id::STR: caption = "力量"; break;
+				case MapleStat::Id::DEX: caption = "敏捷"; break;
+				case MapleStat::Id::INT: caption = "智力"; break;
+				case MapleStat::Id::LUK: caption = "运气"; break;
+				default: break;
+				}
+				Text(Text::A11M, Text::LEFT, reqok ? Color::Name::WHITE : Color::Name::RED,
+					caption).draw(pos + reqpos + Point<int16_t>(0, -7));
+			}
+			else reqstattextures[ms][reqok].draw(pos + reqpos);
 
 			if (ms != MapleStat::Id::LEVEL)
 				reqset[reqok].draw(reqstatstrings[ms], 6, pos + reqpos + Point<int16_t>(54, 0));
@@ -609,10 +645,21 @@ namespace ms
 		pos.shift_y(88);
 
 		Point<int16_t> job_position(pos + Point<int16_t>(10, 14));
-		jobsback.draw(job_position);
+		(Setting<UILanguage>::get().load() == "zh-CN" ? translated_jobsback : jobsback).draw(job_position);
 
-		for (auto& jbit : okjobs)
-			jobs[canequip[MapleStat::Id::JOB]].at(jbit).draw(job_position);
+		if (Setting<UILanguage>::get().load() == "zh-CN")
+		{
+			static const char* families[] = {"初心者", "战士", "法师", "弓箭手", "飞侠", "海盗"};
+			for (int family = 0; family <= 5; ++family)
+			{
+				const bool allowed = std::find(okjobs.begin(), okjobs.end(), family) != okjobs.end();
+				const auto color = allowed ? (canequip[MapleStat::Id::JOB] ? Color::Name::WHITE : Color::Name::RED) : Color::Name::DUSTYGRAY;
+				Text(Text::A11M, Text::CENTER, color, families[family]).draw(job_position + Point<int16_t>(20 + family * 39, 4));
+			}
+		}
+		else
+			for (auto& jbit : okjobs)
+				jobs[canequip[MapleStat::Id::JOB]].at(jbit).draw(job_position);
 
 		line.draw(pos + Point<int16_t>(0, 47));
 
@@ -735,8 +782,25 @@ namespace ms
 		for (MapleStat::Id ms : requirements)
 		{
 			Point<int16_t> reqpos = reqstatpositions[ms];
+			if (Setting<UILanguage>::get().load() == "zh-CN" && (ms == MapleStat::Id::DEX || ms == MapleStat::Id::INT)) reqpos.shift_y(5);
 			bool reqok = canequip_preview[ms];
-			reqstattextures[ms][reqok].draw(pos + reqpos);
+			if (Setting<UILanguage>::get().load() == "zh-CN")
+			{
+				const char* caption = "";
+				switch (ms)
+				{
+				case MapleStat::Id::LEVEL: caption = "等级"; break;
+				case MapleStat::Id::FAME: caption = "人气"; break;
+				case MapleStat::Id::STR: caption = "力量"; break;
+				case MapleStat::Id::DEX: caption = "敏捷"; break;
+				case MapleStat::Id::INT: caption = "智力"; break;
+				case MapleStat::Id::LUK: caption = "运气"; break;
+				default: break;
+				}
+				Text(Text::A11M, Text::LEFT, reqok ? Color::Name::WHITE : Color::Name::RED,
+					caption).draw(pos + reqpos + Point<int16_t>(0, -7));
+			}
+			else reqstattextures[ms][reqok].draw(pos + reqpos);
 
 			if (ms != MapleStat::Id::LEVEL)
 				reqset[reqok].draw(reqstatstrings_preview[ms], 6, pos + reqpos + Point<int16_t>(54, 0));
@@ -747,10 +811,21 @@ namespace ms
 		pos.shift_y(88);
 
 		Point<int16_t> job_position(pos + Point<int16_t>(10, 14));
-		jobsback.draw(job_position);
+		(Setting<UILanguage>::get().load() == "zh-CN" ? translated_jobsback : jobsback).draw(job_position);
 
-		for (auto& jbit : okjobs_preview)
-			jobs[canequip_preview[MapleStat::Id::JOB]].at(jbit).draw(job_position);
+		if (Setting<UILanguage>::get().load() == "zh-CN")
+		{
+			static const char* families[] = {"初心者", "战士", "法师", "弓箭手", "飞侠", "海盗"};
+			for (int family = 0; family <= 5; ++family)
+			{
+				const bool allowed = std::find(okjobs_preview.begin(), okjobs_preview.end(), family) != okjobs_preview.end();
+				const auto color = allowed ? (canequip_preview[MapleStat::Id::JOB] ? Color::Name::WHITE : Color::Name::RED) : Color::Name::DUSTYGRAY;
+				Text(Text::A11M, Text::CENTER, color, families[family]).draw(job_position + Point<int16_t>(20 + family * 39, 4));
+			}
+		}
+		else
+			for (auto& jbit : okjobs_preview)
+				jobs[canequip_preview[MapleStat::Id::JOB]].at(jbit).draw(job_position);
 
 		line.draw(pos + Point<int16_t>(0, 47));
 

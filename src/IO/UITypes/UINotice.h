@@ -94,7 +94,7 @@ namespace ms
 		UIEnterNumber(std::string message, std::function<void(int32_t number)> numhandler, int32_t max, int32_t quantity,
 			int16_t field_y_offset = -41,
 			int16_t button_x_offset = 0,
-			int16_t button_y_offset = 0);
+			int16_t button_y_offset = 0, int32_t minimum = 1);
 
 		void draw(float alpha) const override;
 		void update() override;
@@ -118,6 +118,7 @@ namespace ms
 		std::function<void(int32_t number)> numhandler;
 		Textfield numfield;
 		int32_t max;
+		int32_t minimum;
 	};
 
 	class UIEnterText : public UINotice

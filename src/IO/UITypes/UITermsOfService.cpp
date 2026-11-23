@@ -1061,7 +1061,7 @@ namespace ms
 #pragma endregion
 
 		text = Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::BLACK, EULA, 340, true, 2);
-		max_rows = text.height() / 300 + 1;
+		max_rows = std::max<int16_t>(1, (text.height() - 316 + 19) / 20 + 1);
 
 		int16_t slider_y = 77;
 
@@ -1091,8 +1091,8 @@ namespace ms
 	{
 		UIElement::draw(inter);
 
-		int16_t range_min = 80;
-		text.draw(position + Point<int16_t>(226, 84 - offset * 300), Range<int16_t>(range_min, range_min + 316));
+		int16_t range_min = position.y() + 80;
+		text.draw(position + Point<int16_t>(226, 84 - offset * 20), Range<int16_t>(range_min, range_min + 316));
 		slider.draw(position);
 	}
 
@@ -1109,6 +1109,17 @@ namespace ms
 		}
 
 		return UIElement::send_cursor(clicked, cursorpos);
+	}
+
+	void UITermsOfService::send_scroll(double yoffset)
+	{
+		if (slider.isenabled()) slider.send_scroll(yoffset);
+	}
+
+	void UITermsOfService::remove_cursor()
+	{
+		slider.remove_cursor();
+		UIElement::remove_cursor();
 	}
 
 	UIElement::Type UITermsOfService::get_type() const

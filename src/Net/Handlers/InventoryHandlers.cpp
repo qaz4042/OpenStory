@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "InventoryHandlers.h"
+#include "../Packets/InventoryPackets.h"
 
 #include "Helpers/ItemParser.h"
 
@@ -32,14 +33,19 @@
 
 namespace ms
 {
-	void GatherResultHandler::handle(InPacket&) const
+	void GatherResultHandler::handle(InPacket& recv) const
 	{
-		if (auto iteminventory = UI::get().get_element<UIItemInventory>())
-			iteminventory->set_sort(true);
+		if (recv.read_byte() != 0) return;
+		const auto type = recv.read_byte();
+		// Cosmic acknowledges the original tab, which may no longer be visible.
+		if (type >= InventoryType::EQUIP && type <= InventoryType::CASH)
+			SortItemsPacket(static_cast<InventoryType::Id>(type)).dispatch();
 	}
 
-	void SortResultHandler::handle(InPacket&) const
+	void SortResultHandler::handle(InPacket& recv) const
 	{
+		if (recv.read_byte() != 0) return;
+		recv.read_byte(); // completed inventory type
 		if (auto iteminventory = UI::get().get_element<UIItemInventory>())
 		{
 			iteminventory->set_sort(false);

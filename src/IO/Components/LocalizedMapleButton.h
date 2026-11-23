@@ -6,7 +6,7 @@ namespace ms
     class LocalizedMapleButton : public MapleButton
     {
     public:
-        LocalizedMapleButton(nl::node source, localization::Key key, Point<int16_t> at = {})
+        LocalizedMapleButton(nl::node source, localization::Key key, Point<int16_t> at = {}, int16_t caption_left = 3, int16_t sample_x = 4)
             : MapleButton(source, at), language_switch(key == localization::Key::LanguageToggle)
         {
             const char* names[] = {"normal", "disabled", "mouseOver", "pressed", "keyFocused"};
@@ -21,7 +21,7 @@ namespace ms
                 // The blank left padding contains the actual gradient. Sampling
                 // across the caption also picks up the baked letters and their
                 // dark outline, producing horizontal stripes on short buttons.
-                art[states[i]] = LocalizedArt(frame, {{3, 3, static_cast<int16_t>(bitmap.width()-6), static_cast<int16_t>(bitmap.height()-6), key, Color::Name::WHITE, 4}}, true);
+                art[states[i]] = LocalizedArt(frame, {{caption_left, 3, static_cast<int16_t>(bitmap.width()-caption_left-3), static_cast<int16_t>(bitmap.height()-6), key, Color::Name::WHITE, sample_x}}, true);
             }
         }
         LocalizedMapleButton(nl::node source, localization::Key key, int16_t x, int16_t y)

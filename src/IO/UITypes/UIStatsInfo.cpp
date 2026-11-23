@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIStatsInfo.h"
+#include "../../Localization/Vocabulary.h"
 #include "../Components/LocalizedMapleButton.h"
 
 #include "UINotice.h"
@@ -218,7 +219,13 @@ namespace ms
 			if (i >= StatLabel::NUM_NORMAL)
 				labelpos.shift_x(213);
 
-			statlabels[i].draw(labelpos);
+			if (i == StatLabel::JOB)
+			{
+				auto label = statlabels[i];
+				label.change_text(localization::vocabulary(stats.get_jobname()));
+				label.draw(labelpos);
+			}
+			else statlabels[i].draw(labelpos);
 		}
 
 		UIElement::draw_buttons(alpha);
@@ -312,7 +319,7 @@ namespace ms
 		switch (stat)
 		{
 			case MapleStat::Id::JOB:
-				statlabels[StatLabel::JOB].change_text(stats.get_jobname());
+				statlabels[StatLabel::JOB].change_text(localization::vocabulary(stats.get_jobname()));
 				break;
 			case MapleStat::Id::FAME:
 				update_simple(StatLabel::FAME, MapleStat::Id::FAME);

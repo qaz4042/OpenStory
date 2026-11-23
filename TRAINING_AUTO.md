@@ -159,3 +159,30 @@ python3 tests/pirate-skill-data.py --build-dir build-training --data-dir wz
 客户端新增 DASH2（速度）/DASH（跳跃）属性应用，并按主服务端 `src/main/java/tools/PacketCreator.java::givePirateBuff` 与 `server/StatEffect.java` 的实际格式处理双属性 Buff：前导 short、每项 int 数值/int 技能/5 字节保留/short 秒数，严格按速度→跳跃读取，秒转毫秒。不再把专用包按普通 10 字节 Buff 解析。本轮仅对照主工程协议，未引入参考库代码，无服务端修改。
 
 macOS 构建、海盗技能真实 NX 数据回归和应用签名验证通过；尚未登录游戏验证双击及服务器 Buff 往返。需手动重启 `build-macos/OpenStory.app` 后，以快速按两次同一方向（第一次松开，第二次可按住）复测。
+
+## 商店回车确认（2026-11-23）
+
+选中购买商品后按 Enter 打开原有购买数量/确认窗口；活动 NOTICE 弹窗优先于底层商店接收 Enter/Esc，避免单件购买确认或输入框失焦后回车被商店吞掉。数量窗口仅响应按下，提交沿用“确定”按钮相同校验，不再额外关闭校验错误弹窗。
+
+macOS 构建、签名检查和 `tests/localization-settings.py` 生产对象离线回归通过，新增数量窗口回车松开不提交、按下确认的检查。未执行实际游戏购买；重启主应用生效。
+
+## 角色命名格式与误报修复（2026-11-23）
+
+当前 Cosmic 的 Character.canCreateChar 仅允许 [a-zA-Z0-9]{3,12}，格式不符与已占用共用拒绝回包，因此中文名字此前被客户端误报为“已被使用”。客户端现在提交前校验同一格式，以中英文明确提示当前服务器不支持中文、空格和符号；允许原先客户端误拒绝的 3 位合法名字，禁用词独立提示。未修改服务端规则或部署服务端。
+
+`tests/character-name.cpp` 验证 ASCII、中文、符号及长度边界；`tests/character-naming.py` 用生产创建角色对象验证非法输入、中英文提示及关闭后恢复输入，截图复核通过。macOS 应用构建与签名通过；未登录或创建测试角色，需手动重启 build-macos/OpenStory.app。提交前先解除输入框焦点再禁用，避免解除焦点过程将 DISABLED 回写成 NORMAL。
+
+## 初始背包与点券扩容（2026-11-23）
+
+按用户确认，装备、消耗、设置、其他初始容量从 24 扩为 96 格；现金栏原本为 96 格。现有角色各栏不足 96 的一次性补齐，保留更高容量。新账号默认赠送 1,000,000 NX Credit 点券，现有账号不足的补齐到此余额，保留更高余额；不修改 Maple Point / NX Prepaid，不在登录或重启时重复补发。
+
+新增显式加载的 Liquibase 迁移 `db/changes/20261123-starter-benefits.sql`，同步角色创建默认值。客户端滚动条按已解锁容量计算，空背包也能滚动浏览后续格子。服务端部署目录 `my4g:/opt/maple-poc/starter-benefits-20261123`，原 jar、源码、配置与停服后的账号/角色数据备份位于 `backup/`。仅替换基于远端现有源码编译的 Character 类及数据库迁移资源，保留其他线上功能。
+
+macOS 构建、签名及现有离线 UI 回归通过；服务端 Java 21 编译通过，线上迁移记录确认为 EXECUTED，3 个角色各栏均为 96，4 个账号 NX Credit 均为 1,000,000。需重启主工作区应用并重新登录，客户端滚动修正才会生效。本轮未代替用户创建账号、购买商城物品或进行游戏内操作。
+
+
+## NPC 对话快捷键修复（2026-11-23）
+
+“NPC 对话 / 采集”（INTERACT_HARVEST，54）此前只显示在键位设置中，Stage 未实现交互动作；默认模板又将其标为 MENU，与设置页保存时采用的 ACTION 不一致。现默认模板统一为 ACTION，游戏输入兼容已有 MENU 绑定，并触发附近 NPC 对话。按键选择水平 150、垂直 80 地图像素范围内最近的活动 NPC，同距离按 OID 稳定选择，排除 talkMouseOnly；与鼠标共用原有请求、600ms 冷却及响应跟踪。该动作不锁存在 Player 按住状态，避免对话窗口吞掉松键后无法再次交互。未添加 v83 不具备的采集系统。
+
+`tests/npc-interaction.py` 使用生产 NPC/MapNpcs 与本机 NX 验证空地图、距离边界、最近目标、同距、移除、清图及冷却；macOS 应用构建和签名检查通过。未登录或发起实际 NPC 对话。用户手动重启 build-macos/OpenStory.app，关闭键位设置后靠近 NPC，按已绑定的 NPC 对话键（截图为 Y）复测；鼠标双击仍可用。无需修改或部署服务端。

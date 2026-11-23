@@ -129,6 +129,14 @@ open the client, then log in with an account created on that server. On PS5,
 enter the address on the server selection screen. Display preferences such as
 `VSync` and `Fullscreen` can also be changed in `Settings`.
 
+## Inventory
+
+Click the coin button in either inventory size to drop mesos. The amount must
+be 10–50,000 and cannot exceed your balance; Cancel / Esc sends no request.
+Click Gather to merge stacks and automatically sort that inventory tab after
+the server acknowledges the merge, even if you switch tabs while waiting.
+These actions use Cosmic's existing v83 packets; no server deployment is needed.
+
 ## Quest Helper
 
 Track up to 5 quests at once with live progress updates.

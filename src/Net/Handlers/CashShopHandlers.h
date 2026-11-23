@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../PacketHandler.h"
+#include <vector>
 
 namespace ms
 {
@@ -40,6 +41,15 @@ namespace ms
 	// Last cash balances the server reported (QUERY_CASH_RESULT):
 	// 0 = NX credit, 1 = maple points, 2 = NX prepaid
 	int32_t get_cash_balance(int which);
+
+	struct CashInventoryItem
+	{
+		int64_t cash_id;
+		int32_t item_id;
+		int32_t sn;
+		uint16_t count;
+	};
+	const std::vector<CashInventoryItem>& get_cash_inventory();
 
 	// Handler for Cash Shop operation responses (buy, coupon, etc.)
 	class CashShopOperationHandler : public PacketHandler

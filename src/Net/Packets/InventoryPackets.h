@@ -24,6 +24,16 @@
 
 namespace ms
 {
+	class DropMesoPacket : public OutPacket
+	{
+	public:
+		DropMesoPacket(int32_t amount) : OutPacket(OutPacket::Opcode::MESO_DROP)
+		{
+			write_time();
+			write_int(amount);
+		}
+	};
+
 	// Packet which requests that the inventory is sorted
 	// Opcode: GATHER_ITEMS(69)
 	class GatherItemsPacket : public OutPacket

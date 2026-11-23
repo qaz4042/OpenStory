@@ -63,6 +63,7 @@ namespace ms
 
 		// Check whether this is a server-sided NPC
 		bool isscripted() const;
+		bool allows_keyboard_talk() const { return !mouseonly; }
 		// Player NPC: renders a character look instead of NX npc art
 		void set_player_look(const LookEntry& look);
 		bool has_player_look() const;

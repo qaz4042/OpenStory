@@ -20,6 +20,7 @@
 #include "../UIElement.h"
 
 #include "../Components/Charset.h"
+#include "../Components/LocalizedArt.h"
 #include "../Components/Gauge.h"
 #include "../Components/Icon.h"
 #include "../Components/MobGage.h"
@@ -302,6 +303,7 @@ namespace ms
 		// 3-piece tiled backdrop for the Menu / System sub-panels
 		// (StatusBar2.img/mainBar/{Menu,System}/backgrnd/0..2).
 		Texture menu_bg_top, menu_bg_mid, menu_bg_bot;
+		LocalizedArt translated_menu_top;
 		Texture sys_bg_top,  sys_bg_mid,  sys_bg_bot;
 		// Fade alpha for each sub-panel (0 hidden .. 1 fully visible).
 		float menu_fade = 0.0f;

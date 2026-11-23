@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UIStatusBar.h"
+#include "../../Localization/Vocabulary.h"
 #include "../Components/LocalizedMapleButton.h"
 
 #include <algorithm>
@@ -519,18 +520,18 @@ namespace ms
 		int16_t menu_panel_top = -(14 + MENU_PANEL_H);
 		int16_t menu_y = menu_panel_top - 26;
 
-		buttons[BT_MENU_STAT]          = std::make_unique<MapleButton>(menu_node["BtStat"],      Point<int16_t>(menu_x, menu_y));
-		buttons[BT_MENU_SKILL]         = std::make_unique<MapleButton>(menu_node["BtSkill"],     Point<int16_t>(menu_x, menu_y + MENU_STEP));
-		buttons[BT_MENU_QUEST]         = std::make_unique<MapleButton>(menu_node["BtQuest"],     Point<int16_t>(menu_x, menu_y + MENU_STEP * 2));
-		buttons[BT_MENU_ITEM]          = std::make_unique<MapleButton>(menu_node["BtItem"],      Point<int16_t>(menu_x, menu_y + MENU_STEP * 3));
-		buttons[BT_MENU_EQUIP]         = std::make_unique<MapleButton>(menu_node["BtEquip"],     Point<int16_t>(menu_x, menu_y + MENU_STEP * 4));
-		buttons[BT_MENU_COMMUNITY]     = std::make_unique<MapleButton>(menu_node["BtCommunity"], Point<int16_t>(menu_x, menu_y + MENU_STEP * 5));
-		buttons[BT_MENU_EVENT]         = std::make_unique<MapleButton>(menu_node["BtEvent"],     Point<int16_t>(menu_x, menu_y + MENU_STEP * 6));
-		buttons[BT_MENU_RANK]          = std::make_unique<MapleButton>(menu_node["BtRank"],      Point<int16_t>(menu_x, menu_y + MENU_STEP * 7));
-		buttons[BT_MENU_EPISODBOOK]    = std::make_unique<MapleButton>(menu_node["BtEpisodBook"],    Point<int16_t>(menu_x, menu_y + MENU_STEP * 8));
-		buttons[BT_MENU_MSN]           = std::make_unique<MapleButton>(menu_node["BtMSN"],       Point<int16_t>(menu_x, menu_y + MENU_STEP * 9));
-		buttons[BT_MENU_MONSTERBATTLE] = std::make_unique<MapleButton>(menu_node["BtMonsterBattle"], Point<int16_t>(menu_x, menu_y + MENU_STEP * 10));
-		buttons[BT_MENU_MONSTERLIFE]   = std::make_unique<MapleButton>(menu_node["BtMonsterLife"], Point<int16_t>(menu_x, menu_y + MENU_STEP * 11));
+		buttons[BT_MENU_STAT]          = std::make_unique<LocalizedMapleButton>(menu_node["BtStat"], localization::Key::ActionSTATS, Point<int16_t>(menu_x, menu_y), 11, 9);
+		buttons[BT_MENU_SKILL]         = std::make_unique<LocalizedMapleButton>(menu_node["BtSkill"], localization::Key::ActionSKILLS, Point<int16_t>(menu_x, menu_y + MENU_STEP), 11, 9);
+		buttons[BT_MENU_QUEST]         = std::make_unique<LocalizedMapleButton>(menu_node["BtQuest"], localization::Key::ActionQUESTLOG, Point<int16_t>(menu_x, menu_y + MENU_STEP * 2), 11, 9);
+		buttons[BT_MENU_ITEM]          = std::make_unique<LocalizedMapleButton>(menu_node["BtItem"], localization::Key::ActionITEMS, Point<int16_t>(menu_x, menu_y + MENU_STEP * 3), 11, 9);
+		buttons[BT_MENU_EQUIP]         = std::make_unique<LocalizedMapleButton>(menu_node["BtEquip"], localization::Key::ActionEQUIPMENT, Point<int16_t>(menu_x, menu_y + MENU_STEP * 4), 11, 9);
+		buttons[BT_MENU_COMMUNITY]     = std::make_unique<LocalizedMapleButton>(menu_node["BtCommunity"], localization::Key::CommunityMenu, Point<int16_t>(menu_x, menu_y + MENU_STEP * 5), 11, 9);
+		buttons[BT_MENU_EVENT]         = std::make_unique<LocalizedMapleButton>(menu_node["BtEvent"], localization::Key::ActionEVENT, Point<int16_t>(menu_x, menu_y + MENU_STEP * 6), 11, 9);
+		buttons[BT_MENU_RANK]          = std::make_unique<LocalizedMapleButton>(menu_node["BtRank"], localization::Key::RankingsMenu, Point<int16_t>(menu_x, menu_y + MENU_STEP * 7), 11, 9);
+		buttons[BT_MENU_EPISODBOOK]    = std::make_unique<LocalizedMapleButton>(menu_node["BtEpisodBook"], localization::Key::AdventureJournal, Point<int16_t>(menu_x, menu_y + MENU_STEP * 8), 11, 9);
+		buttons[BT_MENU_MSN]           = std::make_unique<LocalizedMapleButton>(menu_node["BtMSN"], localization::Key::MessengerMenu, Point<int16_t>(menu_x, menu_y + MENU_STEP * 9), 11, 9);
+		buttons[BT_MENU_MONSTERBATTLE] = std::make_unique<LocalizedMapleButton>(menu_node["BtMonsterBattle"], localization::Key::BattleAlbum, Point<int16_t>(menu_x, menu_y + MENU_STEP * 10), 11, 9);
+		buttons[BT_MENU_MONSTERLIFE]   = std::make_unique<LocalizedMapleButton>(menu_node["BtMonsterLife"], localization::Key::MonsterFarm, Point<int16_t>(menu_x, menu_y + MENU_STEP * 11), 11, 9);
 
 		// Monster Battle / Monster Life / AfreecaTV have no Cosmic counterpart.
 
@@ -579,6 +580,7 @@ namespace ms
 		{
 			nl::node menu_bg_node = mainbar["Menu"]["backgrnd"];
 			menu_bg_top = menu_bg_node["0"];
+			translated_menu_top = LocalizedArt(menu_bg_node["0"], {{10, 5, 59, 13, localization::Key::ActionMAINMENU, Color::Name::YELLOW, 6}});
 			menu_bg_mid = menu_bg_node["1"];
 			menu_bg_bot = menu_bg_node["2"];
 		}
@@ -1256,7 +1258,7 @@ namespace ms
 			// Fade the buttons alongside the backdrop (alpha overload
 			// ignores the `active` flag so the visual fade is smooth).
 			for (uint16_t i = BT_MENU_STAT; i <= BT_MENU_MONSTERLIFE; i++)
-				static_cast<MapleButton*>(buttons.at(i).get())->draw(position, menu_fade);
+				static_cast<LocalizedMapleButton*>(buttons.at(i).get())->draw(position, menu_fade);
 		}
 
 		if (sys_fade > 0.0f)
@@ -1290,7 +1292,9 @@ namespace ms
 
 		// Stretch all three pieces to panel_w so the panel matches the
 		// button row width (sprite is natively 79px).
-		top.draw(DrawArgument(tl, Point<int16_t>(panel_w, top_h)) + fade_alpha);
+		if (&top == &menu_bg_top && Setting<UILanguage>::get().load() == "zh-CN")
+			translated_menu_top.draw(tl, false, fade_alpha);
+		else top.draw(DrawArgument(tl, Point<int16_t>(panel_w, top_h)) + fade_alpha);
 		if (middle_h > 0)
 			mid.draw(DrawArgument(tl + Point<int16_t>(0, top_h),
 				Point<int16_t>(panel_w, middle_h)) + fade_alpha);
@@ -1396,9 +1400,9 @@ namespace ms
 			// The v83 bar has no level plate, so the level rides along with
 			// the job on the second text row.
 			joblabel.change_text("Lv." + std::to_string(stats.get_stat(MapleStat::Id::LEVEL))
-				+ "  " + stats.get_jobname());
+				+ "  " + localization::vocabulary(stats.get_jobname()));
 		else
-			joblabel.change_text(stats.get_jobname());
+			joblabel.change_text(localization::vocabulary(stats.get_jobname()));
 
 		// Update animations
 		ani_hp_gauge.update();

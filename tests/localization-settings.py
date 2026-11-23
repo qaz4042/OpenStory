@@ -19,6 +19,7 @@ source = r'''
 #include "src/Constants.h"
 #include "src/Localization/Locale.h"
 #include "src/IO/UITypes/UINotice.h"
+#include "src/IO/UITypes/UITermsOfService.h"
 #include "src/IO/UITypes/UIJoypad.h"
 #include "src/IO/UITypes/UIStatsInfo.h"
 #include "src/IO/UITypes/UIItemInventory.h"
@@ -26,6 +27,11 @@ source = r'''
 #include "src/IO/UITypes/UILogin.h"
 #include "src/IO/Components/LoginResources.h"
 #include "src/IO/UITypes/UIStatusBar.h"
+#include "src/IO/UITypes/UIEquipInventory.h"
+#include "src/IO/UITypes/UIWorldMap.h"
+#include "src/Localization/Vocabulary.h"
+#include "src/Localization/MapNames.h"
+#include "src/IO/Components/EquipTooltip.h"
 #include "src/IO/UITypes/UISkillBook.h"
 #include "src/Gameplay/Stage.h"
 #include "src/IO/UITypes/UIKeyConfig.h"
@@ -82,6 +88,12 @@ public:
         this->send_cursor(false, at);
     }
 };
+class TestTerms : public UITermsOfService {
+public:
+    using UITermsOfService::UITermsOfService;
+    using UITermsOfService::get_draw_position;
+    bool accepts() const { return buttons.at(0)->get_state() != Button::State::DISABLED; }
+};
 int main(int argc, char** argv) {
     if (argc == 2) { assert(Setting<UILanguage>::get().load() == "zh-CN"); return 0; }
     // Load game files, then isolate every config write from the user's data.
@@ -95,6 +107,25 @@ int main(int argc, char** argv) {
     assert(!Window::get().init());
     assert(std::filesystem::equivalent(std::filesystem::current_path(), std::filesystem::path(argv[2])));
     assert(!Sound::init()); assert(!Music::init());
+    {
+        TestTerms terms([] {});
+        assert(!terms.accepts());
+        render(terms);
+        terms.send_scroll(1); assert(!terms.accepts());
+        for (int i = 0; i < 1000; ++i) terms.send_scroll(-1);
+        assert(terms.accepts()); render(terms);
+        terms.send_scroll(-1); assert(terms.accepts());
+        terms.send_scroll(1); assert(!terms.accepts());
+        for (int i = 0; i < 1000; ++i) terms.send_scroll(1);
+        const auto origin = terms.get_draw_position();
+        // Grab the top thumb, drag down, and release; no wheel events involved.
+        terms.send_cursor(true, origin + Point<int16_t>(578, 90));
+        for (int i = 0; i < 1000; ++i)
+            terms.send_cursor(true, origin + Point<int16_t>(578, 410));
+        terms.send_cursor(false, origin + Point<int16_t>(578, 410));
+        assert(terms.accepts()); render(terms);
+        terms.remove_cursor();
+    }
     // Verify every Chinese catalog codepoint exists in the selected system face.
     FT_Library library; FT_Face face;
     assert(!FT_Init_FreeType(&library));
@@ -155,6 +186,20 @@ int main(int argc, char** argv) {
             [&](int n) { quantity = n; }, 10, 3);
         number.place(); render(number); number.click_button(0);
         assert(quantity == 3 && !number.is_active());
+        quantity = 0;
+        number.makeactive();
+        number.send_key(KeyAction::RETURN, false, false);
+        assert(quantity == 0 && number.is_active());
+        number.send_key(KeyAction::RETURN, true, false);
+        assert(quantity == 3 && !number.is_active());
+        // Meso drops use the server's 10..50000 range rather than the generic 1 minimum.
+        for (int amount : {10, 50000}) {
+            quantity = 0;
+            TestNotice<UIEnterNumber> coins(localization::format(localization::Key::DropMesoPrompt, "50000"),
+                [&](int value) { quantity = value; }, 50000, amount, -41, 0, 0, 10);
+            coins.place(); render(coins); coins.click_button(0);
+            assert(quantity == amount && !coins.is_active());
+        }
         TestNotice<UIEnterText> entry(localization::get(localization::Key::Settings),
             [](const std::string&) {});
         entry.place(); render(entry); entry.send_key(0, true, true);
@@ -172,6 +217,46 @@ int main(int argc, char** argv) {
     }
     Inventory inventory;
     SkillBook skills;
+    auto render_coverage = [&](UIElement& element, const std::string& name) {
+        const auto saved_folder = Setting<ScreenshotFolder>::get().load();
+        Setting<ScreenshotFolder>::get().save(std::string(argv[3]) + "/coverage-" + name);
+        Window::get().begin(); element.draw(1.0f); Window::get().end();
+        Window::get().take_screenshot();
+        Setting<ScreenshotFolder>::get().save(saved_folder);
+    };
+    assert(localization::vocabulary("Pirate", "zh-CN") == "海盗");
+    assert(localization::vocabulary("Pirate", "en") == "Pirate");
+    assert(localization::map_name("Sleepy Dungeon II", "zh-CN") == "沉睡的迷宫 II");
+    assert(localization::map_name("unknown custom map", "zh-CN") == "unknown custom map");
+    assert(localization::map_name("Sleepy Dungeon II", "en") == "Sleepy Dungeon II");
+    assert(localization::vocabulary("玩家的自定义内容", "zh-CN") == "玩家的自定义内容");
+    EnumMap<EquipStat::Id, uint16_t> gear_stats;
+    gear_stats[EquipStat::Id::WATK] = 18;
+    auto& gear_inventory = Stage::get().get_player().get_inventory();
+    gear_inventory.add_equip(InventoryType::EQUIP, 1, 1482000, false, -1, 7, 0,
+        gear_stats, "", 0, 0, 0, 0);
+    EquipTooltip tooltip;
+    for (const auto* language : {"en", "zh-CN"}) {
+        Setting<UILanguage>::get().save(language);
+        tooltip.set_equip(Tooltip::Parent::ITEMINVENTORY, 1);
+        const auto saved_folder = Setting<ScreenshotFolder>::get().load();
+        Setting<ScreenshotFolder>::get().save(std::string(argv[3]) + "/coverage-" + language + "-tooltip");
+        Window::get().begin(); tooltip.draw(Point<int16_t>(360, 150)); Window::get().end();
+        Window::get().take_screenshot(); Setting<ScreenshotFolder>::get().save(saved_folder);
+        TestNotice<UIEquipInventory> equipment(inventory); equipment.place();
+        render_coverage(equipment, std::string(language) + "-equipment");
+        TestNotice<UIWorldMap> world; world.update(); world.place();
+        render_coverage(world, std::string(language) + "-world");
+        TestNotice<UIStatusBar> main_menu(Stage::get().get_player().get_stats());
+        main_menu.press(4);
+        for (int i = 0; i < 30; ++i) main_menu.update();
+        render_coverage(main_menu, std::string(language) + "-menu");
+        const auto map = NxHelper::Map::get_map_info_by_id(104000000);
+        assert(!map.name.empty());
+        if (std::string(language) == "zh-CN") assert(map.name == "明珠港");
+        else assert(map.name == "Lith Harbor");
+    }
+
     for (const auto* language : {"en", "zh-CN"}) {
         Setting<UILanguage>::get().save(language);
         TestNotice<UISkillBook> macros(Stage::get().get_player().get_stats(), skills);

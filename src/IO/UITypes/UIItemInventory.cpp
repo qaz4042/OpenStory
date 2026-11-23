@@ -1,4 +1,5 @@
 #include "../../Localization/Locale.h"
+#include "../../Localization/Vocabulary.h"
 //////////////////////////////////////////////////////////////////////////////////
 //	This file is part of the continued Journey MMORPG client					//
 //	Copyright (C) 2015-2019  Daniel Allendorf, Ryan Payton						//
@@ -38,6 +39,7 @@
 #include "../../Gameplay/MiniRooms.h"
 #include "UIOwl.h"
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -285,20 +287,9 @@ namespace ms
 				update_slot(i);
 	}
 
-	int16_t UIItemInventory::used_rows() const
-	{
-		int16_t last = 0;
-
-		for (int16_t i = 1; i <= inventory.get_slotmax(tab); i++)
-			if (inventory.get_item_id(tab, i))
-				last = i;
-
-		return (last + COLUMNS - 1) / COLUMNS;
-	}
-
 	void UIItemInventory::update_slider()
 	{
-		int16_t rows = used_rows();
+		int16_t rows = (inventory.get_slotmax(tab) + COLUMNS - 1) / COLUMNS;
 		scroll_rows = rows > 6 ? rows : 6;
 
 		// The current scroll offset may sit past the shrunken range
@@ -379,6 +370,22 @@ namespace ms
 			}
 			case Buttons::BT_COIN:
 			case Buttons::BT_COIN_SM:
+			{
+				const int32_t maximum = static_cast<int32_t>(std::min<int64_t>(50000, inventory.get_meso()));
+				if (maximum < 10)
+				{
+					UI::get().emplace<UIOk>(localization::get(localization::Key::DropMesoInsufficient), [](bool) {});
+					return Button::State::NORMAL;
+				}
+				UI::get().emplace<UIEnterNumber>(
+					localization::format(localization::Key::DropMesoPrompt, std::to_string(maximum)),
+					[](int32_t amount) {
+						if (amount >= 10 && amount <= 50000 &&
+							amount <= Stage::get().get_player().get_inventory().get_meso())
+							DropMesoPacket(amount).dispatch();
+					}, maximum, 10, -41, 0, 0, 10);
+				return Button::State::NORMAL;
+			}
 			case Buttons::BT_POINT:
 			case Buttons::BT_POINT_SM:
 			case Buttons::BT_POT:
@@ -909,7 +916,7 @@ namespace ms
 
 		if (alerted)
 		{
-			UI::get().emplace<UIOk>("You cannot complete this action right now.\\nEvade the attack and try again.", [](bool) {});
+			UI::get().emplace<UIOk>(localization::vocabulary("You cannot complete this action right now.\\nEvade the attack and try again."), [](bool) {});
 			return false;
 		}
 
@@ -955,7 +962,7 @@ namespace ms
 
 		if (!stats.get_job().can_equip(reqJOB))
 		{
-			UI::get().emplace<UIOk>("Your current job\\ncannot equip the selected item.", [](bool) {});
+			UI::get().emplace<UIOk>(localization::vocabulary("Your current job\\ncannot equip the selected item."), [](bool) {});
 			return false;
 		}
 
@@ -983,7 +990,7 @@ namespace ms
 
 		if (i > 0)
 		{
-			UI::get().emplace<UIOk>("Your stats are too low to equip this item\\nor you do not meet the job requirement.", [](bool) {});
+			UI::get().emplace<UIOk>(localization::vocabulary("Your stats are too low to equip this item\\nor you do not meet the job requirement."), [](bool) {});
 			return false;
 		}
 

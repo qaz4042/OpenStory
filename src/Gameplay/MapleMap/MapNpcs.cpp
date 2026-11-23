@@ -18,6 +18,7 @@
 #include "MapNpcs.h"
 
 #include "Npc.h"
+#include <cmath>
 
 #include "../../Net/NpcResponseTracker.h"
 #include "../../Net/Packets/NpcInteractionPackets.h"
@@ -108,6 +109,43 @@ namespace ms
 		}
 	}
 
+	int32_t MapNpcs::find_talk_target(Point<int16_t> playerpos) const
+	{
+		int32_t target = 0;
+		int32_t best = 150 * 150 + 80 * 80 + 1;
+		for (const auto& entry : npcs)
+		{
+			const auto* npc = static_cast<const Npc*>(entry.second.get());
+			if (!npc || !npc->is_active() || !npc->allows_keyboard_talk()) continue;
+			const auto pos = npc->get_position();
+			const int32_t dx = int32_t(pos.x()) - playerpos.x();
+			const int32_t dy = int32_t(pos.y()) - playerpos.y();
+			if (std::abs(dx) > 150 || std::abs(dy) > 80) continue;
+			const int32_t distance = dx * dx + dy * dy;
+			if (distance < best || (distance == best && npc->get_oid() < target))
+			{
+				best = distance;
+				target = npc->get_oid();
+			}
+		}
+		return target;
+	}
+
+	void MapNpcs::talk_nearest(Point<int16_t> playerpos)
+	{
+		if (const int32_t oid = find_talk_target(playerpos)) request_talk(oid);
+	}
+
+	void MapNpcs::request_talk(int32_t oid)
+	{
+		auto npc = npcs.get(oid);
+		if (!npc || !npc->is_active() || !NpcResponseTracker::get().can_click_now()) return;
+		// Share the Cosmic cooldown and response tracking with mouse clicks.
+		NpcResponseTracker::get().mark_clicked_now();
+		NpcResponseTracker::get().mark_pending(static_cast<Npc*>(npc.get())->get_npcid());
+		TalkToNPCPacket(oid).dispatch();
+	}
+
 	Cursor::State MapNpcs::send_cursor(bool pressed, Point<int16_t> position, Point<int16_t> viewpos)
 	{
 		for (auto& map_object : npcs)
@@ -118,25 +156,7 @@ namespace ms
 			{
 				if (pressed)
 				{
-					// Cosmic / HeavenMS silently drop a TalkToNPC if it
-					// arrives within 500ms of the previous one (the
-					// BLOCK_NPC_RACE_CONDT cooldown). Mirror that
-					// client-side so rapid re-clicks don't wedge the
-					// server.
-					//
-					// We DON'T also gate on "is a UINpcTalk / UIShop
-					// open" — UI::get_element<T>() returns the element
-					// even after deactivate() (it just flips active to
-					// false but leaves the entry in the registry), so
-					// that check would block every click after the first
-					// dialog closed. The server's own conversation lock
-					// handles the genuine "still talking" case.
-					if (!NpcResponseTracker::get().can_click_now())
-						return Cursor::State::IDLE;
-
-					NpcResponseTracker::get().mark_clicked_now();
-					NpcResponseTracker::get().mark_pending(npc->get_npcid());
-					TalkToNPCPacket(npc->get_oid()).dispatch();
+					request_talk(npc->get_oid());
 
 					return Cursor::State::IDLE;
 				}

@@ -38,6 +38,8 @@ namespace ms
 		void draw_preview(Point<int16_t> position) const;
 
 	private:
+		std::string last_language;
+		Tooltip::Parent last_parent = Tooltip::Parent::ITEMINVENTORY;
 		int16_t invpos;
 		int16_t invpos_preview;
 		int16_t height;
@@ -95,7 +97,7 @@ namespace ms
 		BoolPair<Charset> lvset;
 		BoolPair<Charset> atkincset;
 
-		Texture jobsback;
+		Texture jobsback, translated_jobsback;
 		BoolPair<std::map<uint8_t, Texture>> jobs;
 		std::vector<uint8_t> okjobs;
 		std::vector<uint8_t> okjobs_preview;

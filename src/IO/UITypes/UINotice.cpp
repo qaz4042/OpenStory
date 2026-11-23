@@ -214,10 +214,11 @@ namespace ms
 	}
 
 	UIEnterNumber::UIEnterNumber(std::string message, std::function<void(int32_t)> nh, int32_t m, int32_t quantity,
-		int16_t field_y_offset, int16_t button_x_offset, int16_t button_y_offset) : UINotice(message, NoticeType::ENTERNUMBER)
+		int16_t field_y_offset, int16_t button_x_offset, int16_t button_y_offset, int32_t minimum_value) : UINotice(message, NoticeType::ENTERNUMBER)
 	{
 		numhandler = nh;
 		max = m;
+		minimum = minimum_value;
 
 		int16_t belowtext = box2offset(true) + (legacy_notice ? 0 : field_y_offset);
 		int16_t pos_y = legacy_notice ? box2offset(false) : belowtext + 35 + button_y_offset;
@@ -276,10 +277,11 @@ namespace ms
 
 	void UIEnterNumber::send_key(int32_t keycode, bool pressed, bool escape)
 	{
+		if (!pressed)
+			return;
 		if (keycode == KeyAction::Id::RETURN)
 		{
 			handlestring(numfield.get_text());
-			deactivate();
 		}
 		else if (escape)
 		{
@@ -309,8 +311,8 @@ namespace ms
 
 	void UIEnterNumber::handlestring(std::string numstr)
 	{
-		int num = -1;
-		bool has_only_digits = (numstr.find_first_not_of("0123456789") == std::string::npos);
+		int64_t num = -1;
+		bool has_only_digits = !numstr.empty() && (numstr.find_first_not_of("0123456789") == std::string::npos);
 
 		// okhandler must NOT capture `this` — UIOk and UIEnterNumber
 		// share Type::NOTICE, so `emplace<UIOk>` destroys this very
@@ -325,12 +327,13 @@ namespace ms
 		}
 		else
 		{
-			num = std::stoi(numstr);
+			// Ten digits can exceed int32_t; longer input is always above the limit.
+			num = numstr.size() > 10 ? static_cast<int64_t>(max) + 1 : std::stoll(numstr);
 		}
 
-		if (num < 1)
+		if (num < minimum)
 		{
-			UI::get().emplace<UIOk>(localization::get(localization::Key::NumberMinimum), okhandler);
+			UI::get().emplace<UIOk>(localization::format(localization::Key::NumberMinimumValue, std::to_string(minimum)), okhandler);
 			return;
 		}
 		else if (num > max)

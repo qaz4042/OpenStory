@@ -6,7 +6,7 @@ namespace ms::localization
 {
     // Stable keys for program-drawn UI. NX names, bitmap labels and server text
     // are separate sources and are not translated by this catalog.
-    enum class Key { Settings, Logout, Graphics, Effects, Music, Sound, Mouse, HP, MP, Windowed, Mute, Shake, NormalMap, SimpleMap, Whispers, Chat, Party, GuildChat, AllianceChat, Family, Friend, Trade, Expedition, Guild, Alliance, Follow, OK, Cancel, Language, QuitPrompt, ForfeitQuest, DropQuantity, DropUntradable, CannotDrop, NumbersOnly, NumberMinimum, NumberMaximum, Notice, KeySettings, GamepadSettings, RestoreDefaults, ClearBindings, QuickSlots, Save, Close, KeyHelp, RestorePrompt, ClearPrompt, SavePrompt, ChooseKeys, ClassicKeys, AlternateKeys, ChooseKeysHint, KeysChosen, NoGamepad, Unassigned, Device, BindingWait, GamepadHelp, PartySettings, RecruitSettings, PartyNoOptions, MinimumLevel, MaximumLevel, LevelRangeHint, StartRecruit, ChangeChannel, ExitGame, ActionEQUIPMENT, ActionITEMS, ActionSTATS, ActionSKILLS, ActionFRIENDS, ActionWORLDMAP, ActionMAPLECHAT, ActionMINIMAP, ActionQUESTLOG, ActionKEYBINDINGS, ActionSAY, ActionWHISPER, ActionPARTYCHAT, ActionFRIENDSCHAT, ActionMENU, ActionQUICKSLOTS, ActionTOGGLECHAT, ActionGUILD, ActionGUILDCHAT, ActionPARTY, ActionNOTIFIER, ActionCHARINFO, ActionMONSTERBOOK, ActionCASHSHOP, ActionALLIANCECHAT, ActionCHANGECHANNEL, ActionMEDALS, ActionBOSSPARTY, ActionMAINMENU, ActionSCREENSHOT, ActionPROFESSION, ActionITEMPOT, ActionEVENT, ActionSILENTCRUSADE, ActionMANAGELEGION, ActionBATTLEANALYSIS, ActionBITS, ActionGUIDE, ActionENHANCEEQUIP, ActionMONSTERCOLLECTION, ActionSOULWEAPON, ActionMAPLENEWS, ActionFAMILY, ActionPICKUP, ActionSIT, ActionATTACK, ActionJUMP, ActionINTERACT_HARVEST, ActionFACE1, ActionFACE2, ActionFACE3, ActionFACE4, ActionFACE5, ActionFACE6, ActionFACE7, SkillMacro, MacroName, MacroShout, MacroHelp, LanguageToggle, ScreenshotFolder, MonsterInfo, Allow, Normal, Simple, Resolution, WindowLabel, MinimapMode, CharacterStats, DetailedStats, ItemInventory, SkillInventory, QuestHelper, NoQuestTracked, NameLabel, ClassLabel, GuildLabel, FameLabel, DamageLabel, AbilityPoints, StrengthLabel, DexterityLabel, IntelligenceLabel, LuckLabel, DetailLabel, AttackStats, CriticalChance, MinimumCritical, MaximumCritical, BossAttack, IgnoreDefense, StatusResistance, StanceLabel, WeaponDefense, MagicDefense, WeaponAccuracy, MagicAccuracy, WeaponAvoid, MagicAvoid, SpeedLabel, JumpLabel, HonorLabel, SkillPoints, TabEquip, TabUse, TabEtc, TabSetup, TabCash, AbilityLabel, LockedLabel, ResetLabel, CharacterNameFormat, CharacterNameForbidden, Count };
+    enum class Key { Settings, Logout, Graphics, Effects, Music, Sound, Mouse, HP, MP, Windowed, Mute, Shake, NormalMap, SimpleMap, Whispers, Chat, Party, GuildChat, AllianceChat, Family, Friend, Trade, Expedition, Guild, Alliance, Follow, OK, Cancel, Language, QuitPrompt, ForfeitQuest, DropQuantity, DropUntradable, CannotDrop, NumbersOnly, NumberMinimum, NumberMaximum, Notice, KeySettings, GamepadSettings, RestoreDefaults, ClearBindings, QuickSlots, Save, Close, KeyHelp, RestorePrompt, ClearPrompt, SavePrompt, ChooseKeys, ClassicKeys, AlternateKeys, ChooseKeysHint, KeysChosen, NoGamepad, Unassigned, Device, BindingWait, GamepadHelp, PartySettings, RecruitSettings, PartyNoOptions, MinimumLevel, MaximumLevel, LevelRangeHint, StartRecruit, ChangeChannel, ExitGame, ActionEQUIPMENT, ActionITEMS, ActionSTATS, ActionSKILLS, ActionFRIENDS, ActionWORLDMAP, ActionMAPLECHAT, ActionMINIMAP, ActionQUESTLOG, ActionKEYBINDINGS, ActionSAY, ActionWHISPER, ActionPARTYCHAT, ActionFRIENDSCHAT, ActionMENU, ActionQUICKSLOTS, ActionTOGGLECHAT, ActionGUILD, ActionGUILDCHAT, ActionPARTY, ActionNOTIFIER, ActionCHARINFO, ActionMONSTERBOOK, ActionCASHSHOP, ActionALLIANCECHAT, ActionCHANGECHANNEL, ActionMEDALS, ActionBOSSPARTY, ActionMAINMENU, ActionSCREENSHOT, ActionPROFESSION, ActionITEMPOT, ActionEVENT, ActionSILENTCRUSADE, ActionMANAGELEGION, ActionBATTLEANALYSIS, ActionBITS, ActionGUIDE, ActionENHANCEEQUIP, ActionMONSTERCOLLECTION, ActionSOULWEAPON, ActionMAPLENEWS, ActionFAMILY, ActionPICKUP, ActionSIT, ActionATTACK, ActionJUMP, ActionINTERACT_HARVEST, ActionFACE1, ActionFACE2, ActionFACE3, ActionFACE4, ActionFACE5, ActionFACE6, ActionFACE7, SkillMacro, MacroName, MacroShout, MacroHelp, LanguageToggle, ScreenshotFolder, MonsterInfo, Allow, Normal, Simple, Resolution, WindowLabel, MinimapMode, CharacterStats, DetailedStats, ItemInventory, SkillInventory, QuestHelper, NoQuestTracked, NameLabel, ClassLabel, GuildLabel, FameLabel, DamageLabel, AbilityPoints, StrengthLabel, DexterityLabel, IntelligenceLabel, LuckLabel, DetailLabel, AttackStats, CriticalChance, MinimumCritical, MaximumCritical, BossAttack, IgnoreDefense, StatusResistance, StanceLabel, WeaponDefense, MagicDefense, WeaponAccuracy, MagicAccuracy, WeaponAvoid, MagicAvoid, SpeedLabel, JumpLabel, HonorLabel, SkillPoints, TabEquip, TabUse, TabEtc, TabSetup, TabCash, AbilityLabel, LockedLabel, ResetLabel, CharacterNameFormat, CharacterNameForbidden, EquipmentInventory, CommunityMenu, RankingsMenu, AdventureJournal, MessengerMenu, BattleAlbum, MonsterFarm, EnableNavigation, AutoPilotReady, OpenMapSearch, SearchLabel, MapSearchHint, SlotBook, SlotHat, SlotBadge, SlotAndroid, SlotHeart, SlotMedal, SlotFace, SlotRing, SlotEye, SlotEar, SlotShoulder, SlotCape, SlotTop, SlotPendant, SlotWeapon, SlotShield, SlotGloves, SlotBottom, SlotBelt, SlotShoes, SlotMount, SlotSaddle, SlotMountEquip, WorldMapTitle, DropMesoPrompt, DropMesoInsufficient, NumberMinimumValue, Count };
     struct Message { const char* en; const char* zh; };
     inline constexpr Message messages[] = {
         {"System Settings", "系统设置"},
@@ -190,6 +190,45 @@ namespace ms::localization
         {"Reset", "重置"},
         {"Use 3-12 English letters or digits. Chinese, spaces and symbols are not supported by this server.", "角色名须为 3–12 位英文字母或数字。当前服务器不支持中文、空格或符号。"},
         {"This name contains a restricted word. Please choose another name.", "角色名包含禁用词，请换一个名字。"},
+        {"Equipment Inventory", "角色装备"},
+        {"Community", "社区"},
+        {"Rankings", "排行榜"},
+        {"Adventure journal", "冒险日志"},
+        {"Messenger", "聊天工具"},
+        {"Battle album", "战斗图鉴"},
+        {"Monster farm", "怪物农场"},
+        {"Enable navigation", "开启导航"},
+        {"Auto-pilot ready", "自动飞行"},
+        {"Open search window", "地图搜索"},
+        {"Search", "搜索"},
+        {"Enter the name of the map or monster that you would like to find.", "输入要查找的地图或怪物名称。"},
+        {"Monster book", "图鉴"},
+        {"Hat", "帽子"},
+        {"Badge", "徽章"},
+        {"Android", "安卓"},
+        {"Heart", "心脏"},
+        {"Medal", "勋章"},
+        {"Face", "脸饰"},
+        {"Ring", "戒指"},
+        {"Eye accessory", "眼饰"},
+        {"Earring", "耳饰"},
+        {"Shoulder", "肩饰"},
+        {"Cape", "披风"},
+        {"Top", "上衣"},
+        {"Pendant", "吊坠"},
+        {"Weapon", "武器"},
+        {"Shield", "盾牌"},
+        {"Gloves", "手套"},
+        {"Bottom", "裤裙"},
+        {"Belt", "腰带"},
+        {"Shoes", "鞋子"},
+        {"Mount", "骑宠"},
+        {"Saddle", "鞍具"},
+        {"Mount equipment", "骑装"},
+        {"World Map", "世界地图"},
+        {"How many mesos would you like to drop? (10 - {value})", "要丢弃多少金币？（10～{value}）"},
+        {"You need at least 10 mesos to drop coins.", "至少持有 10 金币才能丢钱。"},
+        {"Please enter at least {value}.", "请输入不小于 {value} 的数值。"},
     };
     static_assert(sizeof(messages) / sizeof(messages[0]) == static_cast<unsigned>(Key::Count));
 

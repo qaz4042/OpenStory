@@ -157,6 +157,12 @@ namespace ms
 
 	void UIMiniMap::update()
 	{
+		const auto language = Setting<UILanguage>::get().load();
+		if (display_language != language)
+		{
+			display_language = language;
+			update_text();
+		}
 		int32_t mid = Stage::get().get_mapid();
 
 		if (mid != mapid)
@@ -373,9 +379,9 @@ namespace ms
 				{
 					nl::node portal_tm = Map["portal"][sprite.first]["tm"];
 					std::string portal_cat = NxHelper::Map::get_map_category(portal_tm);
-					nl::node portal_name = nl::nx::string["Map.img"][portal_cat][portal_tm]["mapName"];
+					std::string portal_name = NxHelper::Map::get_map_info_by_id(portal_tm).name;
 
-					if (portal_name)
+					if (!portal_name.empty())
 					{
 						found = true;
 

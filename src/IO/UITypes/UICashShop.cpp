@@ -22,6 +22,9 @@
 #include "../Window.h"
 
 #include "../Components/MapleButton.h"
+#include "../../Graphics/Geometry.h"
+#include <algorithm>
+#include <cctype>
 
 #include "../../Constants.h"
 #include "../../Gameplay/Stage.h"
@@ -160,8 +163,8 @@ namespace ms
 			[&](bool upwards)
 			{
 				int16_t shift = upwards ? -GRID_COLS : GRID_COLS;
-				bool above = list_offset >= 0;
-				bool below = list_offset + shift < items.size();
+				bool above = list_offset + shift >= 0;
+				bool below = list_offset + shift <= std::max<int>(0, ((static_cast<int>(items.size()) + GRID_COLS - 1) / GRID_COLS - GRID_ROWS) * GRID_COLS);
 
 				if (above && below)
 				{
@@ -172,7 +175,12 @@ namespace ms
 			}
 		);
 
-		update_items();
+		for (const auto& item : items) catalog.push_back(item);
+		search = Textfield(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::BLACK,
+			Rectangle<int16_t>(Point<int16_t>(478, 6), Point<int16_t>(710, 23)), 60);
+		search.set_state(Textfield::State::NORMAL);
+		search.set_enter_callback([this](std::string) { filter_catalog(); search.set_state(Textfield::State::NORMAL); UI::get().remove_textfield(); });
+		filter_catalog();
 
 		// === Sub-panel backgrounds (English — CashShopGL/Popup) ===
 		// Popup/Gift/background and Popup/Cupon/background are the English
@@ -224,8 +232,22 @@ namespace ms
 
 		UIElement::draw_sprites(inter);
 
-		// Korean menu_tabs / promotion_sprites / mvp_sprites / charge_charset
-		// draws removed — those elements have no English equivalent.
+		search.draw(position);
+		if (search.empty() && search.get_state() != Textfield::State::FOCUSED)
+			Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::GRAY,
+				Setting<UILanguage>::get().load() == "zh-CN" ? "搜索商品名称 / ID" : "Search item name / ID").draw(position + Point<int16_t>(482, 7));
+		const bool chinese = Setting<UILanguage>::get().load() == "zh-CN";
+		const char* en[] = {"All items", "Hats", "Clothing", "Accessories", "Weapons", "Pets", "Pet equips", "Cash items", "Other"};
+		const char* zh[] = {"全部商品", "帽子", "服饰", "饰品", "武器", "宠物", "宠物装备", "现金道具", "其他"};
+		for (int i = 0; i < CATEGORY_COUNT; ++i)
+		{
+			const auto at = position + Point<int16_t>(9, 58 + i * 33);
+			ColorBox(118, 29, i == category ? Color::Name::SILVERCHALICE : Color::Name::WHITE, 0.9f).draw(at);
+			Text(Text::Font::A12B, Text::Alignment::LEFT, Color::Name::MINESHAFT,
+				chinese ? zh[i] : en[i]).draw(at + Point<int16_t>(10, 7));
+		}
+		Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::GRAY,
+			std::to_string(items.size()) + (chinese ? " 件商品" : " items")).draw(position + Point<int16_t>(12, 365));
 
 		// NX balances beside the baked labels: NX Prepaid / NX Credit /
 		// Maple Pts (query result order: credit, points, prepaid)
@@ -243,7 +265,8 @@ namespace ms
 		name_label.draw(label_pos + Point<int16_t>(length + 10, 0));
 
 		if (items.empty())
-			item_none.draw(position + Point<int16_t>(430, 360) - item_none.get_dimensions() / 2, inter);
+			Text(Text::Font::A12B, Text::Alignment::CENTER, Color::Name::GRAY,
+				chinese ? "没有匹配的商品" : "No matching items").draw(position + Point<int16_t>(450, 320));
 
 		for (size_t i = 0; i < MAX_ITEMS; i++)
 		{
@@ -310,28 +333,23 @@ namespace ms
 			break;
 		}
 
-		// Player's cash items rendered into the baked CASH INVENTORY
-		// panel in the right column (7x2 slot grid)
-		const Inventory& inventory = Stage::get().get_player().get_inventory();
-		uint8_t slotmax = inventory.get_slotmax(InventoryType::Id::CASH);
-		int16_t shown = 0;
-
-		for (int16_t slot = 1; slot <= slotmax && shown < 14; slot++)
+		// Account cash locker comes from CASHSHOP_OPERATION, not the
+		// character's CASH tab (cash equipment is not in that tab either).
+		const auto& owned = get_cash_inventory();
+		const int max_cash_offset = std::max<int>(0, ((static_cast<int>(owned.size()) + 6) / 7 - 2) * 7);
+		const int first = std::min<int>(cash_offset, max_cash_offset);
+		for (int i = 0; i < 14 && first + i < owned.size(); ++i)
 		{
-			int32_t item_id = inventory.get_item_id(InventoryType::Id::CASH, slot);
-
-			if (item_id == 0)
-				continue;
-
-			div_t sdiv = std::div(shown, 7);
-			Point<int16_t> slot_pos = position + Point<int16_t>(771 + 34 * sdiv.rem, 513 + 34 * sdiv.quot);
-
-			// v83 item icons carry a (0, 32) origin, so draw at the
-			// slot's bottom edge to land the 32x32 icon inside it.
-			ItemData::get(item_id).get_icon(false).draw(DrawArgument(slot_pos + Point<int16_t>(0, 32)));
-
-			shown++;
+			const auto& item = owned[first + i];
+			const auto at = position + Point<int16_t>(771 + 34 * (i % 7), 513 + 34 * (i / 7));
+			ItemData::get(item.item_id).get_icon(false).draw(at + Point<int16_t>(0, 32));
+			if (item.count > 1)
+				Text(Text::Font::A11B, Text::Alignment::RIGHT, Color::Name::BLACK,
+					std::to_string(item.count)).draw(at + Point<int16_t>(30, 21));
 		}
+		Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE,
+			(chinese ? "已购买 " : "Purchased ") + std::to_string(owned.size())).draw(position + Point<int16_t>(866, 491));
+
 	}
 
 	void UICashShop::send_key(int32_t keycode, bool pressed, bool escape)
@@ -358,6 +376,8 @@ namespace ms
 
 	void UICashShop::update()
 	{
+		search.update(position);
+		if (search.get_text() != search_query) filter_catalog();
 		UIElement::update();
 
 		preview_look.update(Constants::TIMESTEP);
@@ -509,6 +529,20 @@ namespace ms
 	Cursor::State UICashShop::send_cursor(bool clicked, Point<int16_t> cursorpos)
 	{
 		Point<int16_t> cursor_relative = cursorpos - position;
+		last_cursor = cursor_relative;
+		if (search.get_bounds().contains(cursor_relative))
+			return search.send_cursor(cursor_relative, clicked);
+		if (clicked)
+		{
+			if (search.get_state() == Textfield::State::FOCUSED) UI::get().remove_textfield();
+			if (cursor_relative.x() >= 9 && cursor_relative.x() <= 127
+				&& cursor_relative.y() >= 58 && cursor_relative.y() < 58 + CATEGORY_COUNT * 33)
+			{
+				category = (cursor_relative.y() - 58) / 33;
+				filter_catalog();
+				return Cursor::State::IDLE;
+			}
+		}
 
 		if (list_slider.isenabled())
 		{
@@ -599,6 +633,51 @@ namespace ms
 		ui.enable();
 		Timer::get().start();
 		GraphicsGL::get().unlock();
+	}
+
+	int UICashShop::category_for(int32_t id)
+	{
+		const int group = id / 10000;
+		if (group == 100) return 1;
+		if (group >= 104 && group <= 110) return 2;
+		if ((group >= 101 && group <= 103) || group == 111 || group == 112 || group == 113 || group == 114) return 3;
+		if (group >= 121 && group <= 170) return 4;
+		if (id / 1000 == 5000) return 5;
+		if (group == 180 || group == 181) return 6;
+		if (id / 1000000 == 5) return 7;
+		return 8;
+	}
+
+	void UICashShop::filter_catalog()
+	{
+		auto lower = [](std::string text) {
+			for (char& c : text) if (static_cast<unsigned char>(c) < 128) c = std::tolower(static_cast<unsigned char>(c));
+			return text;
+		};
+		search_query = search.get_text();
+		const auto query = lower(search_query);
+		items.clear();
+		for (const auto& item : catalog)
+			if ((!category || category_for(item.get_itemid()) == category)
+				&& (query.empty() || lower(item.get_name()).find(query) != std::string::npos
+					|| std::to_string(item.get_itemid()).find(query) != std::string::npos))
+				items.push_back(item);
+		list_offset = 0;
+		selected_item = -1;
+		list_slider.setrows(0, GRID_ROWS, (items.size() + GRID_COLS - 1) / GRID_COLS);
+		list_slider.setenabled(items.size() > MAX_ITEMS);
+		update_items();
+	}
+
+	void UICashShop::send_scroll(double yoffset)
+	{
+		if (last_cursor.x() >= 768 && last_cursor.y() >= 505 && last_cursor.y() <= 598)
+		{
+			const int max_offset = std::max<int>(0, ((static_cast<int>(get_cash_inventory().size()) + 6) / 7 - 2) * 7);
+			cash_offset = std::clamp<int>(cash_offset + (yoffset < 0 ? 7 : yoffset > 0 ? -7 : 0), 0, max_offset);
+		}
+		else if (last_cursor.x() >= GRID_X && last_cursor.x() <= 780 && list_slider.isenabled())
+			list_slider.send_scroll(yoffset);
 	}
 
 	void UICashShop::update_items()

@@ -162,8 +162,15 @@ namespace ms
 
 				// The cursor is still over the button, so land on MOUSEOVER rather than
 				// NORMAL -- otherwise the matching release re-fires the hover sound.
-				hit->set_state(after == Button::State::NORMAL
-					? Button::State::MOUSEOVER : after);
+				// A callback may rebuild its buttons (world-map region links).
+				// IDENTITY means it owns the resulting state; never touch the old hit.
+				if (after != Button::State::IDENTITY)
+				{
+					auto current = buttons.find(hitid);
+					if (current != buttons.end() && current->second)
+						current->second->set_state(after == Button::State::NORMAL
+							? Button::State::MOUSEOVER : after);
+				}
 
 				ret = Cursor::State::IDLE;
 			}

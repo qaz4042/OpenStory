@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../UIDragElement.h"
+#include "../Components/LocalizedArt.h"
 
 namespace ms
 {
@@ -95,6 +96,7 @@ namespace ms
 
 		uint16_t tab;
 		std::string tab_source[Buttons::BT_TABE];
+		LocalizedArt translated_frame, translated_slots;
 		Texture tabbar;
 		Texture background[Buttons::BT_TABE];
 		Texture disabled;

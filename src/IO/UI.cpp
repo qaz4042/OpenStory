@@ -428,7 +428,15 @@ namespace ms
 			auto whisper = UI::get().get_element<UIWhisper>();
 			auto cashshop = UI::get().get_element<UICashShop>();
 
-			if (cashshop && cashshop->is_active())
+			// Confirmation dialogs must receive Enter/Escape before the shop
+			// underneath them consumes the key.
+			auto notice = state->get_front({UIElement::Type::NOTICE});
+			if ((enter || escape) && notice && notice->is_active())
+			{
+				notice->send_key(mapping.action, pressed, escape);
+				sent = true;
+			}
+			else if (cashshop && cashshop->is_active())
 			{
 				// The cash shop stage character takes the movement keys
 				cashshop->send_key(mapping.action, pressed, escape);
