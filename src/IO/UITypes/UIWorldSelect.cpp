@@ -22,6 +22,7 @@
 #include "../UI.h"
 
 #include "../Components/MapleButton.h"
+#include "../Components/LoginResources.h"
 #include "../Components/TwoSpriteButton.h"
 
 #include "../UIScale.h"
@@ -70,10 +71,10 @@ namespace ms
 		constexpr Point<int16_t> TITLE_OFF(52, 135);      // world/N decoration
 		constexpr Point<int16_t> EVENT_TITLE_OFF(185, 146);
 		constexpr int16_t CH_COLS = 4;
-		constexpr Point<int16_t> CH_GRID_OFF(55, 205);    // channel button grid
-		constexpr Point<int16_t> CH_STRIDE(106, 35);
+		constexpr Point<int16_t> CH_GRID_OFF(55, 195);    // channel button grid
+		constexpr Point<int16_t> CH_STRIDE(106, 30);
 		constexpr Point<int16_t> CHSELECT_OFF(46, 15);    // highlight anchor in a button
-		constexpr Point<int16_t> GOWORLD_OFF(361, 344);   // Enter Channel button
+		constexpr Point<int16_t> GOWORLD_OFF(361, 350);   // Enter Channel button
 
 		// EVENT balloon above an event-flagged world's plank
 		constexpr Point<int16_t> EVENT_PLANK_OFF(-1, -16);
@@ -125,7 +126,7 @@ namespace ms
 		world_pos = WORLD_POS;
 
 		nl::node login = nl::nx::ui["Login.img"];
-		world_select = login["WorldSelect"];
+		world_select = login_world_resources();
 		world_src = world_select["BtWorld"];
 		channel_src = world_select["channel"];
 		nl::node common = login["Common"];

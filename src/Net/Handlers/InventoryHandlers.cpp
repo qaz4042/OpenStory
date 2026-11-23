@@ -71,9 +71,11 @@ namespace ms
 
 		std::vector<Mod> mods;
 
-		int8_t size = recv.read_byte();
+		// v83 encodes an unsigned count. Sorting 96 slots emits 192
+		// remove/add operations; interpreting that as int8_t drops the update.
+		uint8_t size = static_cast<uint8_t>(recv.read_byte());
 
-		for (int8_t i = 0; i < size; i++)
+		for (uint16_t i = 0; i < size; i++)
 		{
 			Mod mod;
 			mod.mode = recv.read_byte();

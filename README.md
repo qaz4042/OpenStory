@@ -110,7 +110,7 @@ objects and local NX assets without connecting to a server. Screenshots are in
 
 Use v83 game data in `wz/` and a compatible interface archive as `UI.nx`. The v154 interface archive supplies `UIWindow2.img`, `UIWindow4.img`, and `StatusBar2.img`, which the equipment, inventory, skill, stats, and status bar views use.
 The optional `UI.Login.nx` archive in the data directory supplies v83 login
-buttons, the save-ID checkbox, and the three-class race selection screen. This avoids v154 login controls clashing with
+buttons, the save-ID checkbox, the three-class race selection screen, and matching world/channel selection controls. This avoids v154 login controls clashing with
 the wooden v83 signboard. If absent, the existing UI.nx login art is used.
 See `docs/localization/login-resource.md` for the local resource record.
 

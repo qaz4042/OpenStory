@@ -188,7 +188,7 @@ namespace ms::localization
         {"Ability", "特殊能力"},
         {"Locked", "未解锁"},
         {"Reset", "重置"},
-        {"Use 3-12 English letters or digits. Chinese, spaces and symbols are not supported by this server.", "角色名须为 3–12 位英文字母或数字。当前服务器不支持中文、空格或符号。"},
+        {"Use Chinese, English letters or digits: at least 3 characters, at most 12 UTF-8 bytes (4 Chinese characters).", "角色名支持中文、英文或数字；至少3个字符，最多12字节（4个中文），不含空格或符号。"},
         {"This name contains a restricted word. Please choose another name.", "角色名包含禁用词，请换一个名字。"},
         {"Equipment Inventory", "角色装备"},
         {"Community", "社区"},

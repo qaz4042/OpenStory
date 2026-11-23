@@ -45,7 +45,7 @@ int main(int argc,char** argv) {
  Creation page;
  for(const char* language : {"en", "zh-CN"}) {
   Setting<UILanguage>::get().save(language);
-  for(const char* name : {"卡卡寂312", "ab", "abc def", "abc!"}) {
+  for(const char* name : {"卡卡", "ab", "abc def", "abc!"}) {
    page.reject(name);
    auto notice=UI::get().get_element<UIOk>(); assert(notice);
    Window::get().begin(); page.draw(1.0f); notice->draw(1.0f); Window::get().end();

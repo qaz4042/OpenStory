@@ -2,8 +2,8 @@
 #include <cassert>
 int main() {
     using ms::valid_character_name_format;
-    for (auto name : {"abc", "Kaka312", "ABC123xyz789", "123"})
+    for (auto name : {"abc", "Kaka312", "ABC123xyz789", "123", "卡卡寂", "卡卡寂312", "中文名字"})
         assert(valid_character_name_format(name));
-    for (auto name : {"", "ab", "ABCDEFGHIJKLM", "卡卡寂312", "abc def", "abc_123", "abc!", "ＡＢＣ", "abc\n"})
+    for (auto name : {"", "ab", "ABCDEFGHIJKLM", "卡卡", "中文名字啊", "abc def", "abc_123", "abc!", "ＡＢＣ", "abc\n"})
         assert(!valid_character_name_format(name));
 }

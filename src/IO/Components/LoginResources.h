@@ -38,4 +38,25 @@ namespace ms
             return race;
         return nl::nx::ui["Login.img"]["RaceSelect"];
     }
+
+    inline nl::node login_world_resources()
+    {
+        auto world = retained_login_resources()["WorldSelect"];
+        if (world["scroll"]["0"]["3"]
+            && world["BtWorld"]["0"]["normal"]["0"]
+            && world["channel"]["0"]["normal"]
+            && world["chBackgrn"] && world["BtGoworld"]["normal"]["0"])
+            return world;
+        return nl::nx::ui["Login.img"]["WorldSelect"];
+    }
+    inline nl::node login_character_resources()
+    {
+        auto page = retained_login_resources()["CharSelect"];
+        if (page["scroll"]["0"]["3"] && page["charInfo"]
+            && page["BtSelect"]["normal"]["0"] && page["BtNew"]["normal"]["0"]
+            && page["BtDelete"]["normal"]["0"])
+            return page;
+        return nl::nx::ui["Login.img"]["CharSelect"];
+    }
+
 }

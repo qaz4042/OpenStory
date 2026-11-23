@@ -3,11 +3,12 @@
 
 namespace ms {
 inline void draw_sell_lock(Point<int16_t> at) {
-    // Small gold padlock, legible over both inventory cells and item icons.
-    ColorBox(8, 7, Color::Name::BLACK, 1).draw(at + Point<int16_t>(2, 0));
-    ColorBox(4, 5, Color::Name::YELLOW, 1).draw(at + Point<int16_t>(4, 1));
-    ColorBox(12, 9, Color::Name::BLACK, 1).draw(at + Point<int16_t>(0, 5));
-    ColorBox(10, 7, Color::Name::YELLOW, 1).draw(at + Point<int16_t>(1, 6));
-    ColorBox(2, 4, Color::Name::BLACK, 1).draw(at + Point<int16_t>(5, 7));
+    // Quiet 8 x 10 sale-protection badge, without the old bright yellow block.
+    auto box=[&](int x,int y,int w,int h) {
+        ColorBox(w,h,Color::TOBACCOBROWN,0.92f).draw(at+Point<int16_t>(x,y));
+    };
+    box(2,0,4,1); box(1,1,1,3); box(6,1,1,3);
+    box(0,4,8,6);
+    ColorBox(1,3,Color::GALLERY,0.9f).draw(at+Point<int16_t>(3,5));
 }
 }

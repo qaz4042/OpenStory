@@ -57,28 +57,40 @@ namespace ms
     namespace {
         class InventoryActionButton : public Button {
         public:
-            InventoryActionButton(const char* chinese, const char* english) : chinese(chinese), english(english) {
+            enum Action { TIDY, LOCK, DROP };
+            explicit InventoryActionButton(Action action) : action(action) {
                 active=true; pressed=false; state=NORMAL;
-                const char* names[]={"normal","disabled","mouseOver","pressed"};
-                for (int i=0;i<4;++i) skins[i]=Texture(nl::nx::ui["Basic.img"]["BtOK"][names[i]]["0"]);
             }
+            void select(bool value) { selected=value; }
             void draw(Point<int16_t> parent) const override {
                 if (!active) return;
-                const auto& skin=skins[state<=PRESSED ? state : NORMAL];
-                skin.draw(DrawArgument(parent+position,30.0f/skin.width(),18.0f/skin.height()));
-                Text(Text::A11M,Text::CENTER,Color::Name::WHITE,
-                    Setting<UILanguage>::get().load()=="zh-CN" ? chinese : english)
-                    .draw(parent+position+Point<int16_t>(15,-4));
+                auto at=parent+position;
+                bool hover=state==MOUSEOVER || state==KEYFOCUSED;
+                if (hover || selected)
+                    ColorBox(18,18,selected ? Color::GRAYOLIVE : Color::GALLERY,selected ? 0.18f : 0.75f).draw(at);
+                auto color=selected ? Color::TOBACCOBROWN : (hover ? Color::EMPEROR : Color::BOULDER);
+                auto box=[&](int x,int y,int w,int h) {
+                    ColorBox(w,h,color,state==DISABLED ? 0.35f : 0.95f).draw(at+Point<int16_t>(x,y));
+                };
+                if (action==TIDY) {
+                    for(int y=3;y<=13;y+=5) for(int x=3;x<=13;x+=5) box(x,y,3,3);
+                } else if (action==LOCK) {
+                    box(6,3,6,2);box(5,5,2,4);box(11,5,2,4);
+                    box(4,8,10,7);
+                    ColorBox(2,3,Color::GALLERY,1).draw(at+Point<int16_t>(8,10));
+                } else {
+                    box(3,3,7,1);box(2,4,1,6);box(10,4,1,6);box(3,10,7,1);box(6,5,1,4);
+                    box(12,9,2,5);box(10,12,6,1);box(11,13,4,1);box(12,14,2,1);
+                }
             }
             void update() override {}
-            Rectangle<int16_t> bounds(Point<int16_t> parent) const override { return {parent+position,parent+position+Point<int16_t>(30,18)}; }
-            int16_t width() const override { return 30; }
+            Rectangle<int16_t> bounds(Point<int16_t> parent) const override { return {parent+position,parent+position+Point<int16_t>(18,18)}; }
+            int16_t width() const override { return 18; }
             Point<int16_t> origin() const override { return {}; }
             Cursor::State send_cursor(bool,Point<int16_t>) override { return Cursor::IDLE; }
         private:
-            Texture skins[4];
-            const char* chinese;
-            const char* english;
+            Action action;
+            bool selected=false;
         };
     }
 
@@ -112,9 +124,9 @@ namespace ms
 
 		nl::node close = nl::nx::ui["Basic.img"]["BtClose3"];
 		buttons[Buttons::BT_CLOSE] = std::make_unique<MapleButton>(close);
-        buttons[Buttons::BT_TIDY] = std::make_unique<InventoryActionButton>("整理", "Tidy");
-        buttons[Buttons::BT_DROP_MESO] = std::make_unique<InventoryActionButton>("丢币", "Drop");
-        buttons[Buttons::BT_SELL_LOCK] = std::make_unique<LabeledButton>("售卖锁", "Lock", 48);
+        buttons[Buttons::BT_TIDY] = std::make_unique<InventoryActionButton>(InventoryActionButton::TIDY);
+        buttons[Buttons::BT_DROP_MESO] = std::make_unique<InventoryActionButton>(InventoryActionButton::DROP);
+        buttons[Buttons::BT_SELL_LOCK] = std::make_unique<InventoryActionButton>(InventoryActionButton::LOCK);
 
 		buttons[Buttons::BT_TAB_EQUIP] = std::make_unique<LocalizedTabButton>(tabdis["0"], taben["0"], localization::Key::TabEquip);
 		buttons[Buttons::BT_TAB_USE] = std::make_unique<LocalizedTabButton>(tabdis["1"], taben["1"], localization::Key::TabUse);
@@ -266,7 +278,7 @@ namespace ms
 
 	void UIItemInventory::update()
 	{
-		buttons[Buttons::BT_SELL_LOCK]->set_state(sell_lock_mode ? Button::PRESSED : Button::NORMAL);
+		static_cast<InventoryActionButton*>(buttons[Buttons::BT_SELL_LOCK].get())->select(sell_lock_mode);
 		UIElement::update();
 
 		newitemtab.update(6);
@@ -353,6 +365,7 @@ namespace ms
 		{
 			case Buttons::BT_SELL_LOCK:
 				sell_lock_mode = !sell_lock_mode;
+                static_cast<InventoryActionButton*>(buttons[Buttons::BT_SELL_LOCK].get())->select(sell_lock_mode);
 				if (auto messages = UI::get().get_element<UIStatusMessenger>())
 					messages->show_status(Color::Name::YELLOW, Setting<UILanguage>::get().load() == "zh-CN"
 						? (sell_lock_mode ? "售卖锁模式：点击物品加锁或解锁；再次点击售卖锁退出。" : "已退出售卖锁模式。")
@@ -680,6 +693,18 @@ namespace ms
 		}
 
 		Point<int16_t> cursor_relative = cursorpos - position;
+        for (auto id : {Buttons::BT_TIDY, Buttons::BT_SELL_LOCK, Buttons::BT_DROP_MESO}) {
+            if (buttons[id]->is_active() && buttons[id]->bounds(position).contains(cursorpos)) {
+                const bool zh=Setting<UILanguage>::get().load()=="zh-CN";
+                const char* label=id==Buttons::BT_TIDY ? (zh ? "整理背包" : "Tidy inventory")
+                    : id==Buttons::BT_DROP_MESO ? (zh ? "丢弃金币" : "Drop mesos")
+                    : (zh ? (sell_lock_mode ? "售卖锁已开启：点击物品加锁／解锁，再点此处退出" : "售卖锁：点击后选择要保护的物品")
+                          : (sell_lock_mode ? "Sale lock on: click items to lock/unlock; click here to finish" : "Sale lock: protect items from NPC sales"));
+                UI::get().show_text(Tooltip::Parent::ITEMINVENTORY,label);
+                return dstate;
+            }
+        }
+
 
 		if (!full_enabled && slider.isenabled())
 		{
@@ -1173,10 +1198,10 @@ namespace ms
 		int16_t adj_x = full_enabled ? 20 : 22;
 		buttons[Buttons::BT_CLOSE]->set_position(Point<int16_t>(dimension.x() - adj_x, 6));
         // Keep action buttons outside the title drag area and beside the meso field.
-        const int16_t meso_y = full_enabled ? 336 : 266;
-        buttons[Buttons::BT_TIDY]->set_position(Point<int16_t>(12, meso_y));
-        buttons[Buttons::BT_DROP_MESO]->set_position(Point<int16_t>(full_enabled ? 142 : dimension.x()-40, meso_y));
-        buttons[Buttons::BT_SELL_LOCK]->set_position(full_enabled ? Point<int16_t>(220, 29) : Point<int16_t>(48, meso_y));
+        const int16_t meso_y = 266;
+        buttons[Buttons::BT_TIDY]->set_position(full_enabled ? Point<int16_t>(220,29) : Point<int16_t>(10,meso_y));
+        buttons[Buttons::BT_DROP_MESO]->set_position(full_enabled ? Point<int16_t>(264,29) : Point<int16_t>(dimension.x()-26,meso_y));
+        buttons[Buttons::BT_SELL_LOCK]->set_position(full_enabled ? Point<int16_t>(242,29) : Point<int16_t>(32,meso_y));
 
 		buttons[Buttons::BT_COIN]->set_active(false);
 		buttons[Buttons::BT_POINT]->set_active(!enabled);

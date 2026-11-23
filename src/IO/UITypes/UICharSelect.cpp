@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "UICharSelect.h"
+#include "../Components/LoginResources.h"
 
 #include "UILoginNotice.h"
 #include "UIRaceSelect.h"
@@ -101,15 +102,17 @@ namespace ms
 
 		nl::node Login = nl::nx::ui["Login.img"];
 		nl::node Common = Login["Common"];
-		nl::node CharSelect = Login["CharSelect"];
+		nl::node CharSelect = login_character_resources();
 		nl::node selectWorld = Common["selectWorld"];
-		nl::node selectedWorld = CharSelect["selectedWorld"];
+		// The world plate uses Common/selectWorld from the main archive;
+		// keep its matching icon/name/channel overlays together.
+		nl::node selectedWorld = Login["CharSelect"]["selectedWorld"];
 		nl::node pageNew = CharSelect["pageNew"];
 
 		world_dimensions = Texture(selectWorld).get_dimensions();
 
-		uint16_t world;
 		uint8_t world_id = Configuration::get().get_worldid();
+		uint16_t world = world_id;
 		uint8_t channel_id = Configuration::get().get_channelid();
 
 		if (auto worldselect = UI::get().get_element<UIWorldSelect>())

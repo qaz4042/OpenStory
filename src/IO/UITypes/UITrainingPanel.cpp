@@ -144,14 +144,15 @@ namespace ms
 
     void UITrainingPanel::layout()
     {
-        dimension = expanded_ ? Point<int16_t>(300, 314) : Point<int16_t>(132, 30);
+        const Point<int16_t> collapsed_size(104, 24);
+        dimension = expanded_ ? Point<int16_t>(300, 314) : collapsed_size;
         position = Point<int16_t>(std::max<int>(0, screen_width - dimension.x() - 16),
             std::max<int>(0, std::min<int>(56, screen_height - dimension.y() - 44)));
         buttons.clear();
         auto add = [&](int id, int x, int y, int w, int h) {
             buttons[id] = std::make_unique<PanelButton>(Point<int16_t>(x,y), Point<int16_t>(w,h), expanded_ && id==0, (id>=1 && id<=4) || id==6 || id==7 || id==12 || id==14);
         };
-        if (!expanded_) { add(0,0,0,132,30); return; }
+        if (!expanded_) { add(0,0,0,collapsed_size.x(),collapsed_size.y()); return; }
         add(0,276,5,16,16);
         if (rotation_view) {
             for (int row=0;row<4;++row) {
