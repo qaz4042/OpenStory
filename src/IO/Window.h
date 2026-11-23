@@ -67,6 +67,7 @@ namespace ms
 
 	private:
 		void updateopc();
+		void update_viewport() const;
 
 #ifndef PLATFORM_IOS
 		GLFWwindow* glwnd;
@@ -80,5 +81,7 @@ namespace ms
 		std::function<void()> fadeprocedure;
 		int16_t width;
 		int16_t height;
+		int windowed_x = 0, windowed_y = 0;
+		int windowed_width = 0, windowed_height = 0;
 	};
 }

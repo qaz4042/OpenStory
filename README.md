@@ -70,6 +70,12 @@ cmake --build build --config Debug --target OpenStory
 
 Place the NX files described in Configuration in the `wz/` directory.
 
+Windowed mode fits and centers the window inside the desktop work area and
+allows resizing. Alt+Enter switches to fullscreen and restores the previous
+window size and position when switching back. Both modes preserve the game's
+aspect ratio (with black bars where necessary), including on Retina displays;
+desktop fitting does not overwrite the saved game resolution.
+
 Fonts are compiled in via the generated `src/Graphics/EmbeddedFonts.{h,cpp}`, which are
 committed — no extra build step.
 
@@ -103,8 +109,8 @@ objects and local NX assets without connecting to a server. Screenshots are in
 ## Configuration
 
 Use v83 game data in `wz/` and a compatible interface archive as `UI.nx`. The v154 interface archive supplies `UIWindow2.img`, `UIWindow4.img`, and `StatusBar2.img`, which the equipment, inventory, skill, stats, and status bar views use.
-The optional `UI.Login.nx` archive in the data directory supplies only v83 login
-buttons and the save-ID checkbox. This avoids v154 login controls clashing with
+The optional `UI.Login.nx` archive in the data directory supplies v83 login
+buttons, the save-ID checkbox, and the three-class race selection screen. This avoids v154 login controls clashing with
 the wooden v83 signboard. If absent, the existing UI.nx login art is used.
 See `docs/localization/login-resource.md` for the local resource record.
 

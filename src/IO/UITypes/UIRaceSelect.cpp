@@ -25,6 +25,7 @@
 
 #include "../Components/AreaButton.h"
 #include "../Components/MapleButton.h"
+#include "../Components/LoginResources.h"
 
 #include "../../Configuration.h"
 #include "../../Constants.h"
@@ -58,7 +59,7 @@ namespace ms
 
 		nl::node Login = nl::nx::ui["Login.img"];
 		nl::node Common = Login["Common"];
-		nl::node RaceSelect = Login["RaceSelect"];
+		nl::node RaceSelect = login_race_resources();
 
 		// v83 login sky, stretched over the whole view (matches char select).
 		backdrop = Texture(nl::nx::map["Back"]["login.img"]["back"]["11"]);

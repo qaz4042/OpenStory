@@ -61,6 +61,21 @@ namespace ms
 		return false;
 	}
 
+	bool Job::can_equip(int16_t required_jobs) const
+	{
+		// Equipment reqJob is a bitmask, not a skill-tree job ID:
+		// warrior=1, magician=2, bowman=4, thief=8, pirate=16.
+		if (id == 900 || id == 910 || required_jobs == 0)
+			return true;
+
+		if (required_jobs == -1)
+			return id == 0 || id == 1000 || id == 2000;
+
+		const uint16_t family = (id / 100) % 10;
+		return required_jobs > 0 && family >= 1 && family <= 5
+			&& (required_jobs & (1 << (family - 1))) != 0;
+	}
+
 	bool Job::can_use(int32_t skill_id) const
 	{
 		uint16_t required = static_cast<uint16_t>(skill_id / 10000);

@@ -18,6 +18,9 @@
 #include "UICreationBase.h"
 
 #include "UICharSelect.h"
+#include "UINotice.h"
+#include "../../Character/CharacterName.h"
+#include "../../Localization/Locale.h"
 #include "UILoginNotice.h"
 #include "UIRaceSelect.h"
 
@@ -131,67 +134,41 @@ namespace ms
 
 	Button::State UICreationBase::naming_ok_pressed()
 	{
-		if (!named)
+		if (named || namechar.get_state() == Textfield::State::DISABLED)
+			return Button::State::IDENTITY;
+
+		const std::string name = namechar.get_text();
+		if (name.empty())
+			return Button::State::NORMAL;
+
+		namechar.set_state(Textfield::State::DISABLED);
+		buttons[Buttons::BT_CHARC_OK]->set_state(Button::State::DISABLED);
+		buttons[Buttons::BT_CHARC_CANCEL]->set_state(Button::State::DISABLED);
+
+		auto restore = [this](bool)
 		{
-			std::string name = namechar.get_text();
+			namechar.set_state(Textfield::State::FOCUSED);
+			buttons[Buttons::BT_CHARC_OK]->set_state(Button::State::NORMAL);
+			buttons[Buttons::BT_CHARC_CANCEL]->set_state(Button::State::NORMAL);
+		};
 
-			if (name.size() <= 0)
+		if (!valid_character_name_format(name))
+		{
+			UI::get().emplace<UIOk>(localization::get(localization::Key::CharacterNameFormat), restore);
+			return Button::State::IDENTITY;
+		}
+
+		if (auto raceselect = UI::get().get_element<UIRaceSelect>())
+		{
+			if (raceselect->check_name(name))
 			{
-				return Button::State::NORMAL;
-			}
-			else if (name.size() >= 4)
-			{
-				namechar.set_state(Textfield::State::DISABLED);
-
-				buttons[Buttons::BT_CHARC_OK]->set_state(Button::State::DISABLED);
-				buttons[Buttons::BT_CHARC_CANCEL]->set_state(Button::State::DISABLED);
-
-				if (auto raceselect = UI::get().get_element<UIRaceSelect>())
-				{
-					if (raceselect->check_name(name))
-					{
-						NameCharPacket(name).dispatch();
-
-						return Button::State::IDENTITY;
-					}
-				}
-
-				std::function<void()> okhandler = [&]()
-				{
-					namechar.set_state(Textfield::State::FOCUSED);
-
-					buttons[Buttons::BT_CHARC_OK]->set_state(Button::State::NORMAL);
-					buttons[Buttons::BT_CHARC_CANCEL]->set_state(Button::State::NORMAL);
-				};
-
-				UI::get().emplace<UILoginNotice>(UILoginNotice::Message::ILLEGAL_NAME, okhandler);
-
-				return Button::State::NORMAL;
-			}
-			else
-			{
-				namechar.set_state(Textfield::State::DISABLED);
-
-				buttons[Buttons::BT_CHARC_OK]->set_state(Button::State::DISABLED);
-				buttons[Buttons::BT_CHARC_CANCEL]->set_state(Button::State::DISABLED);
-
-				std::function<void()> okhandler = [&]()
-				{
-					namechar.set_state(Textfield::State::FOCUSED);
-
-					buttons[Buttons::BT_CHARC_OK]->set_state(Button::State::NORMAL);
-					buttons[Buttons::BT_CHARC_CANCEL]->set_state(Button::State::NORMAL);
-				};
-
-				UI::get().emplace<UILoginNotice>(UILoginNotice::Message::ILLEGAL_NAME, okhandler);
-
+				NameCharPacket(name).dispatch();
 				return Button::State::IDENTITY;
 			}
 		}
-		else
-		{
-			return Button::State::NORMAL;
-		}
+
+		UI::get().emplace<UIOk>(localization::get(localization::Key::CharacterNameForbidden), restore);
+		return Button::State::IDENTITY;
 	}
 
 	const std::string& UICreationBase::get_equipname(EquipSlot::Id slot) const

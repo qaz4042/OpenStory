@@ -223,6 +223,36 @@ namespace ms
 		Stage::get().get_player().recalc_stats(false);
 	}
 
+	void ApplyBuffHandler::handle(InPacket& recv) const
+	{
+		// Cosmic givePirateBuff: short header, then value/source/padding/seconds.
+		InPacket probe = recv;
+		const auto first = static_cast<uint64_t>(probe.read_long());
+		const auto second = probe.read_long();
+		const auto mask = Buffstat::first_codes.at(Buffstat::DASH2)
+			| Buffstat::first_codes.at(Buffstat::DASH);
+		if (first != mask || second != 0)
+		{
+			BuffHandler::handle(recv);
+			return;
+		}
+		if (probe.length() < 32) return;
+		probe.skip(2);
+		auto& player = Stage::get().get_player();
+		// Server explicitly writes speed before jump, not hash-map order.
+		for (auto stat : {Buffstat::DASH2, Buffstat::DASH})
+		{
+			const auto value = static_cast<int16_t>(probe.read_int());
+			const auto skill = probe.read_int();
+			probe.skip(5);
+			const int32_t duration = static_cast<uint16_t>(probe.read_short()) * 1000;
+			player.give_buff({stat, value, skill, duration});
+			if (auto list = UI::get().get_element<UIBuffList>())
+				list->add_buff(skill, duration);
+		}
+		player.recalc_stats(false);
+	}
+
 	void ApplyBuffHandler::handle_buff(InPacket& recv, Buffstat::Id bs) const
 	{
 		// Each stat consumes one 10-byte record. If the server flagged a stat

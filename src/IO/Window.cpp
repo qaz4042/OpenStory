@@ -18,6 +18,7 @@
 #include "../../platform/shared/PlatformConfig.h"
 
 #include "Window.h"
+#include "WindowLayout.h"
 
 #include <algorithm>
 #include <iostream>
@@ -71,86 +72,16 @@ namespace ms
 		glfwTerminate();
 	}
 
-	// Constants defaults to a 1920x1080 window. That is larger than the usable
-	// area of plenty of displays -- a 14" MacBook Pro is 1512x982 points -- and a
-	// window bigger than the screen gets created but never composited, so the
-	// client appears to start with no visible window at all. The existing
-	// oversize handling in check_events() cannot catch this: it only runs when
-	// the size *changes*, and at startup width already equals physicalwidth.
-	//
-	// Shrink to the largest standard size that fits the monitor work area, and
-	// settle the resolution for the whole session so the logical view never
-	// changes underneath the UI (see the comment on Setting<Width> below).
-	static void fit_window_to_monitor()
+	// Keep the saved game resolution independent of the desktop window size.
+	// Map loads use the same settings, so fitting a window must not rewrite them.
+	static void configure_resolution()
 	{
-		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-
-		if (!monitor)
-			return;
-
-		int wx = 0, wy = 0, ww = 0, wh = 0;
-		glfwGetMonitorWorkarea(monitor, &wx, &wy, &ww, &wh);
-
-		if (ww <= 0 || wh <= 0)
-			return;
-
-		// Leave room for the title bar and a little breathing space.
-		const int avail_w = ww - 32;
-		const int avail_h = wh - 64;
-
-		// Start from the saved setting rather than the Constants default,
-		// because SetFieldHandler re-reads Setting<Width>/<Height> on every map
-		// load and pushes them back into Constants. Resolving both to the same
-		// numbers here means the logical view never changes mid-session, so no
-		// UI element is left laid out for a size that no longer applies.
-		int phys_w = Setting<Width>::get().load();
-		int phys_h = Setting<Height>::get().load();
-
-		if (phys_w <= 0 || phys_h <= 0)
-		{
-			phys_w = Constants::Constants::get().get_physicalwidth();
-			phys_h = Constants::Constants::get().get_physicalheight();
-		}
-
-		if (phys_w > avail_w || phys_h > avail_h)
-		{
-			static const int candidates[][2] = {
-				{ 1920, 1080 }, { 1600, 900 }, { 1440, 900 }, { 1366, 768 },
-				{ 1280, 720 }, { 1024, 768 }, { 800, 600 },
-			};
-
-			phys_w = avail_w;
-			phys_h = avail_h;
-
-			for (const auto& candidate : candidates)
-			{
-				if (candidate[0] <= avail_w && candidate[1] <= avail_h)
-				{
-					phys_w = candidate[0];
-					phys_h = candidate[1];
-					break;
-				}
-			}
-		}
-
-		// Mirror SetFieldHandler's formula exactly so the logical view it
-		// computes on a map load matches the one used here.
-		float ui_scale = phys_w / 1280.0f;
-		ui_scale = std::clamp(ui_scale, 1.0f, 4.0f);
-
+		const int phys_w = Setting<Width>::get().load();
+		const int phys_h = Setting<Height>::get().load();
+		const float ui_scale = std::clamp(phys_w / 1280.0f, 1.0f, 4.0f);
 		Constants::Constants::get().set_ui_scale(ui_scale);
-		Constants::Constants::get().set_viewwidth(static_cast<int16_t>(phys_w));
-		Constants::Constants::get().set_viewheight(static_cast<int16_t>(phys_h));
-
-		// Written back so the map-load path reads these and not a stale size.
-		Setting<Width>::get().save(static_cast<uint16_t>(phys_w));
-		Setting<Height>::get().save(static_cast<uint16_t>(phys_h));
-
-		std::cout << "[Init] Window " << phys_w << "x" << phys_h
-		          << " (monitor work area " << ww << "x" << wh << "), UI scale "
-		          << ui_scale << ", logical view "
-		          << Constants::Constants::get().get_viewwidth() << "x"
-		          << Constants::Constants::get().get_viewheight() << std::endl;
+		Constants::Constants::get().set_viewwidth(phys_w);
+		Constants::Constants::get().set_viewheight(phys_h);
 	}
 
 	void error_callback(int, const char*)
@@ -212,7 +143,7 @@ namespace ms
 		}
 	}
 
-	// Viewport parameters for cursor mapping (set in initwindow).
+	// Viewport parameters for cursor mapping (refreshed for every frame).
 	// s_vp_y_top is the top offset in screen coords (GLFW uses top-left origin).
 	// IMPORTANT: these are in LOGICAL WINDOW coordinates, not framebuffer
 	// pixels. glfwGetCursorPos reports logical window coordinates, and on a
@@ -356,7 +287,7 @@ namespace ms
 		if (!glfwInit())
 			return Error::Code::GLFW;
 
-		fit_window_to_monitor();
+		configure_resolution();
 
 		// The constructor cached these before the monitor was known.
 		width = Constants::Constants::get().get_physicalwidth();
@@ -369,7 +300,7 @@ namespace ms
 		glfwMakeContextCurrent(context);
 		glfwSetErrorCallback(error_callback);
 		glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
-		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 		if (Error error = GraphicsGL::get().init())
 			return error;
@@ -385,21 +316,33 @@ namespace ms
 		int wnd_width = width;
 		int wnd_height = height;
 
-		if (fullscreen)
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		int wx = 0, wy = 0, ww = width, wh = height;
+		if (monitor)
+			glfwGetMonitorWorkarea(monitor, &wx, &wy, &ww, &wh);
+		if (fullscreen && monitor)
 		{
-			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 			if (mode)
 			{
 				wnd_width = mode->width;
 				wnd_height = mode->height;
+				glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 			}
-			glfwWindowHint(GLFW_DECORATED, GL_FALSE);
 		}
 		else
 		{
-			glfwWindowHint(GLFW_DECORATED, GL_TRUE);
+			// Leave room for the menu bar, Dock, title bar and desktop margins.
+			if (windowed_width > 0 && windowed_height > 0)
+			{
+				wnd_width = windowed_width;
+				wnd_height = windowed_height;
+			}
+			const double scale = std::min({1.0, (ww - 48.0) / wnd_width, (wh - 80.0) / wnd_height});
+			wnd_width = std::max(1, static_cast<int>(wnd_width * scale));
+			wnd_height = std::max(1, static_cast<int>(wnd_height * scale));
 		}
+		glfwWindowHint(GLFW_DECORATED, GL_TRUE);
 
 		apply_gl_context_hints();
 
@@ -407,15 +350,21 @@ namespace ms
 			wnd_width,
 			wnd_height,
 			Configuration::get().get_title().c_str(),
-			nullptr,
+			fullscreen ? monitor : nullptr,
 			context
 		);
 
 		if (!glwnd)
 			return Error::Code::WINDOW;
 
-		if (fullscreen)
-			glfwSetWindowPos(glwnd, 0, 0);
+		if (!fullscreen)
+		{
+			const int x = windowed_width > 0 ? std::clamp(windowed_x, wx, wx + ww - wnd_width)
+				: wx + (ww - wnd_width) / 2;
+			const int y = windowed_height > 0 ? std::clamp(windowed_y, wy + 32, wy + wh - wnd_height)
+				: wy + (wh - wnd_height) / 2;
+			glfwSetWindowPos(glwnd, x, y);
+		}
 
 		glfwMakeContextCurrent(glwnd);
 
@@ -427,29 +376,8 @@ namespace ms
 		bool vsync = Setting<VSync>::get().load();
 		glfwSwapInterval(vsync ? 1 : 0);
 
-		// glViewport wants framebuffer PIXELS.
-		int fb_width, fb_height;
-		glfwGetFramebufferSize(glwnd, &fb_width, &fb_height);
+		update_viewport();
 
-		// Cursor mapping wants LOGICAL WINDOW coordinates, which is what
-		// glfwGetCursorPos reports. These are equal on Windows but differ by
-		// the content scale on a Retina display (framebuffer is 2x window).
-		int win_width = fb_width;
-		int win_height = fb_height;
-		glfwGetWindowSize(glwnd, &win_width, &win_height);
-
-		if (win_width <= 0 || win_height <= 0)
-		{
-			win_width = fb_width;
-			win_height = fb_height;
-		}
-
-		// Stretch to fill entire screen — no black bars
-		s_vp_x = 0;
-		s_vp_y_top = 0;
-		s_vp_w = win_width;
-		s_vp_h = win_height;
-		glViewport(0, 0, fb_width, fb_height);
 #ifndef PLATFORM_MACOS
 		// Fixed-function matrix stack; removed in a 4.1 Core profile.
 		glMatrixMode(GL_PROJECTION);
@@ -544,8 +472,6 @@ namespace ms
 
 	void Window::check_events()
 	{
-		int16_t max_width = Configuration::get().get_max_width();
-		int16_t max_height = Configuration::get().get_max_height();
 		int16_t new_width = Constants::Constants::get().get_physicalwidth();
 		int16_t new_height = Constants::Constants::get().get_physicalheight();
 
@@ -553,9 +479,6 @@ namespace ms
 		{
 			width = new_width;
 			height = new_height;
-
-			if (new_width >= max_width || new_height >= max_height)
-				fullscreen = true;
 
 			initwindow();
 		}
@@ -565,8 +488,25 @@ namespace ms
 		Gamepad::get().poll();
 	}
 
+	void Window::update_viewport() const
+	{
+		int fw = 0, fh = 0, ww = 0, wh = 0;
+		glfwGetFramebufferSize(glwnd, &fw, &fh);
+		glfwGetWindowSize(glwnd, &ww, &wh);
+		if (fw <= 0 || fh <= 0 || ww <= 0 || wh <= 0) return;
+		const auto& dimensions = fit_viewport(fw, fh,
+			Constants::Constants::get().get_viewwidth(), Constants::Constants::get().get_viewheight());
+		glViewport(dimensions.x, dimensions.y, dimensions.width, dimensions.height);
+		// Derive mouse coordinates from the exact pixel viewport, including rounding.
+		s_vp_x = dimensions.x * ww / fw;
+		s_vp_y_top = (fh - dimensions.y - dimensions.height) * wh / fh;
+		s_vp_w = dimensions.width * ww / fw;
+		s_vp_h = dimensions.height * wh / fh;
+	}
+
 	void Window::begin() const
 	{
+		update_viewport();
 		GraphicsGL::get().clearscene();
 	}
 
@@ -679,16 +619,14 @@ namespace ms
 
 	void Window::toggle_fullscreen()
 	{
-		int16_t max_width = Configuration::get().get_max_width();
-		int16_t max_height = Configuration::get().get_max_height();
-
-		if (width < max_width && height < max_height)
+		if (!fullscreen && glwnd)
 		{
-			fullscreen = !fullscreen;
-			Setting<Fullscreen>::get().save(fullscreen);
-
-			initwindow();
-			glfwPollEvents();
+			glfwGetWindowPos(glwnd, &windowed_x, &windowed_y);
+			glfwGetWindowSize(glwnd, &windowed_width, &windowed_height);
 		}
+		fullscreen = !fullscreen;
+		Setting<Fullscreen>::get().save(fullscreen);
+		initwindow();
+		glfwPollEvents();
 	}
 }

@@ -16,6 +16,7 @@ subprocess.run(['cmake', '--build', str(build), '-j', '8'], cwd=root, check=True
                stdout=subprocess.DEVNULL)
 source = r'''
 #include "src/Configuration.h"
+#include "src/Constants.h"
 #include "src/Localization/Locale.h"
 #include "src/IO/UITypes/UINotice.h"
 #include "src/IO/UITypes/UIJoypad.h"
@@ -35,6 +36,7 @@ source = r'''
 #include "src/IO/KeyAction.h"
 #include "src/IO/UITypes/UIOptionMenu.h"
 #include "src/IO/Window.h"
+#include "src/IO/WindowLayout.h"
 #include "src/Audio/Audio.h"
 #include "src/Util/NxFiles.h"
 #include <ft2build.h>
@@ -219,8 +221,35 @@ int main(int argc, char** argv) {
     render(login);
     std::filesystem::current_path(argv[2]);
     Setting<UILanguage>::get().save("zh-CN"); Configuration::get().save();
+    // A resized/Retina/fullscreen viewport keeps its aspect ratio, and window
+    // fitting never overwrites the user's configured game resolution.
+    auto verify_viewport = [] {
+        Window::get().begin();
+        auto* window = glfwGetCurrentContext();
+        int fw = 0, fh = 0; GLint viewport[4];
+        glfwGetFramebufferSize(window, &fw, &fh);
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        auto expected = fit_viewport(fw, fh,
+            Constants::Constants::get().get_viewwidth(), Constants::Constants::get().get_viewheight());
+        assert(viewport[0] == expected.x && viewport[1] == expected.y);
+        assert(viewport[2] == expected.width && viewport[3] == expected.height);
+        assert(Setting<Width>::get().load() == 1024 && Setting<Height>::get().load() == 768);
+    };
+    glfwSetWindowSize(glfwGetCurrentContext(), 900, 600);
+    glfwPollEvents(); verify_viewport();
+    int saved_w = 0, saved_h = 0;
+    glfwGetWindowSize(glfwGetCurrentContext(), &saved_w, &saved_h);
+    Window::get().toggle_fullscreen();
+    assert(glfwGetWindowMonitor(glfwGetCurrentContext()) != nullptr);
+    verify_viewport();
+    Window::get().toggle_fullscreen();
+    assert(glfwGetWindowMonitor(glfwGetCurrentContext()) == nullptr);
+    verify_viewport();
+    int restored_w = 0, restored_h = 0;
+    glfwGetWindowSize(glfwGetCurrentContext(), &restored_w, &restored_h);
+    assert(restored_w == saved_w && restored_h == saved_h);
     Sound::close();
-    std::cout << "PASS: catalog fallback, Chinese glyphs, immediate language save, Escape/Cancel, Settings reload and bilingual notice callbacks\n";
+    std::cout << "PASS: localization, notice callbacks, resize/Retina viewport, fullscreen round trip and resolution persistence\n";
 }
 '''
 with tempfile.TemporaryDirectory(prefix='openstory-locale-') as directory:

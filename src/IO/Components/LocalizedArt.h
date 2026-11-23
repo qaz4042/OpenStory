@@ -15,7 +15,8 @@ namespace ms
     public:
         struct Caption { int16_t x, y, width, height; localization::Key key; Color::Name color; int16_t sample_x = -1; };
         LocalizedArt() = default;
-        LocalizedArt(nl::node source, std::vector<Caption> captions) : original(source), captions(std::move(captions))
+        LocalizedArt(nl::node source, std::vector<Caption> captions, bool embossed = false)
+            : original(source), captions(std::move(captions))
         {
             nl::bitmap bitmap = source;
             if (!bitmap) return;
@@ -44,12 +45,16 @@ namespace ms
                 }
                 labels.emplace_back(Text::A11M, Text::CENTER, caption.color,
                     localization::text(caption.key, "zh-CN"), caption.width, false);
+                if (embossed)
+                    shadows.emplace_back(Text::A11M, Text::CENTER, Color::Name::DARKGREY,
+                        localization::text(caption.key, "zh-CN"), caption.width, false);
             }
             std::string key = "localized-art/" + std::to_string(bitmap.id());
             for (const auto& c : this->captions) key += "/" + std::to_string(static_cast<unsigned>(c.key));
             translated = Texture::from_pixels(key, bitmap.width(), bitmap.height(), std::move(pixels), source["origin"]);
         }
-        void draw(Point<int16_t> at, bool force_translated = false, float alpha = 1.0f) const
+        void draw(Point<int16_t> at, bool force_translated = false, float alpha = 1.0f,
+            Point<int16_t> caption_offset = {}) const
         {
             if ((!force_translated && Setting<UILanguage>::get().load() != "zh-CN") || !translated.is_valid()) { original.draw(DrawArgument(at, alpha)); return; }
             translated.draw(DrawArgument(at, alpha));
@@ -57,12 +62,17 @@ namespace ms
             for (size_t i = 0; i < captions.size(); ++i)
             {
                 const auto& c = captions[i];
-                labels[i].draw(DrawArgument(at + Point<int16_t>(c.x + c.width / 2, c.y + (c.height - 12) / 2 - 6), alpha));
+                const auto label_at = at + caption_offset
+                    + Point<int16_t>(c.x + c.width / 2, c.y + (c.height - 12) / 2 - 6);
+                if (!shadows.empty())
+                    shadows[i].draw(DrawArgument(label_at + Point<int16_t>(1, 1), alpha));
+                labels[i].draw(DrawArgument(label_at, alpha));
             }
         }
     private:
         Texture original, translated;
         std::vector<Caption> captions;
         std::vector<Text> labels;
+        std::vector<Text> shadows;
     };
 }

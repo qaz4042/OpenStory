@@ -169,40 +169,13 @@ namespace ms
 
 					okjobs_preview.clear();
 
-					switch (equipdata.get_reqstat(MapleStat::Id::JOB))
+					const int16_t required_jobs = equipdata.get_reqstat(MapleStat::Id::JOB);
+					canequip_preview[MapleStat::Id::JOB] = stats.get_job().can_equip(required_jobs);
+					for (int family = 0; family <= 5; ++family)
 					{
-					case 0:
-						okjobs_preview.push_back(0);
-						okjobs_preview.push_back(1);
-						okjobs_preview.push_back(2);
-						okjobs_preview.push_back(3);
-						okjobs_preview.push_back(4);
-						okjobs_preview.push_back(5);
-						canequip_preview[MapleStat::Id::JOB] = true;
-						break;
-					case 1:
-						okjobs_preview.push_back(1);
-						canequip_preview[MapleStat::Id::JOB] = (stats.get_stat(MapleStat::Id::JOB) / 100 == 1) || (stats.get_stat(MapleStat::Id::JOB) / 100 >= 20);
-						break;
-					case 2:
-						okjobs_preview.push_back(2);
-						canequip_preview[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 2;
-						break;
-					case 4:
-						okjobs_preview.push_back(3);
-						canequip_preview[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 3;
-						break;
-					case 8:
-						okjobs_preview.push_back(4);
-						canequip_preview[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 4;
-						break;
-					case 16:
-						okjobs_preview.push_back(5);
-						canequip_preview[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 5;
-						break;
-					default:
-						canequip_preview[MapleStat::Id::JOB] = false;
-						break;
+						if (required_jobs == 0 || (required_jobs == -1 && family == 0)
+							|| (required_jobs > 0 && family > 0 && (required_jobs & (1 << (family - 1)))))
+							okjobs_preview.push_back(family);
 					}
 
 					prank_preview = equip.get_potrank();
@@ -382,40 +355,13 @@ namespace ms
 
 		okjobs.clear();
 
-		switch (equipdata.get_reqstat(MapleStat::Id::JOB))
+		const int16_t required_jobs = equipdata.get_reqstat(MapleStat::Id::JOB);
+		canequip[MapleStat::Id::JOB] = stats.get_job().can_equip(required_jobs);
+		for (int family = 0; family <= 5; ++family)
 		{
-		case 0:
-			okjobs.push_back(0);
-			okjobs.push_back(1);
-			okjobs.push_back(2);
-			okjobs.push_back(3);
-			okjobs.push_back(4);
-			okjobs.push_back(5);
-			canequip[MapleStat::Id::JOB] = true;
-			break;
-		case 1:
-			okjobs.push_back(1);
-			canequip[MapleStat::Id::JOB] = (stats.get_stat(MapleStat::Id::JOB) / 100 == 1) || (stats.get_stat(MapleStat::Id::JOB) / 100 >= 20);
-			break;
-		case 2:
-			okjobs.push_back(2);
-			canequip[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 2;
-			break;
-		case 4:
-			okjobs.push_back(3);
-			canequip[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 3;
-			break;
-		case 8:
-			okjobs.push_back(4);
-			canequip[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 4;
-			break;
-		case 16:
-			okjobs.push_back(5);
-			canequip[MapleStat::Id::JOB] = stats.get_stat(MapleStat::Id::JOB) / 100 == 5;
-			break;
-		default:
-			canequip[MapleStat::Id::JOB] = false;
-			break;
+			if (required_jobs == 0 || (required_jobs == -1 && family == 0)
+				|| (required_jobs > 0 && family > 0 && (required_jobs & (1 << (family - 1)))))
+				okjobs.push_back(family);
 		}
 
 		prank = equip.get_potrank();

@@ -59,6 +59,9 @@ namespace ms
 		buffs[Buffstat::Id::MATK] = std::make_unique<SimpleStatBuff<EquipStat::Id::MAGIC>>();
 		buffs[Buffstat::Id::MDEF] = std::make_unique<SimpleStatBuff<EquipStat::Id::MDEF>>();
 		buffs[Buffstat::Id::SPEED] = std::make_unique<SimpleStatBuff<EquipStat::Id::SPEED>>();
+		// Cosmic Dash x/y are additive speed/jump bonuses.
+		buffs[Buffstat::Id::DASH2] = std::make_unique<SimpleStatBuff<EquipStat::Id::SPEED>>();
+		buffs[Buffstat::Id::DASH] = std::make_unique<SimpleStatBuff<EquipStat::Id::JUMP>>();
 		buffs[Buffstat::Id::JUMP] = std::make_unique<SimpleStatBuff<EquipStat::Id::JUMP>>();
 		buffs[Buffstat::Id::HYPERBODYHP] = std::make_unique<PercentageStatBuff<EquipStat::Id::HP>>();
 		buffs[Buffstat::Id::HYPERBODYMP] = std::make_unique<PercentageStatBuff<EquipStat::Id::MP>>();

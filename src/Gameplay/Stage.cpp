@@ -86,6 +86,7 @@ namespace ms
 	void Stage::clear()
 	{
 		held_attack_skill = 0;
+		dash_tap_direction = -1;
 		stop_training_auto("Map changed / disconnected", false);
 		training_status.clear();
 		player.set_training_invulnerable(false);
@@ -438,7 +439,27 @@ namespace ms
 		switch (type)
 		{
 			case KeyType::Id::ACTION:
-				playable->send_action(KeyAction::actionbyid(action), down);
+				{
+					const auto key = KeyAction::actionbyid(action);
+					const bool fresh = down && !player.is_key_down(key);
+					playable->send_action(key, down);
+					if (fresh && (key == KeyAction::Id::LEFT || key == KeyAction::Id::RIGHT))
+					{
+						const auto now = std::chrono::steady_clock::now();
+						const bool twice = dash_tap_direction == action
+							&& now - dash_tap_time <= std::chrono::milliseconds(300);
+						dash_tap_direction = twice ? -1 : action;
+						dash_tap_time = now;
+						if (twice && !player.is_key_down(key == KeyAction::Id::LEFT
+							? KeyAction::Id::RIGHT : KeyAction::Id::LEFT))
+							for (int32_t skill : {5001005, 15001003})
+								if (player.get_skilllevel(skill) > 0)
+								{
+									combat.use_move(skill);
+									break;
+								}
+					}
+				}
 				break;
 			case KeyType::Id::SKILL:
 				if (!down)

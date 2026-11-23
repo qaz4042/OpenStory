@@ -7,7 +7,7 @@
 #include <iostream>
 namespace ms
 {
-    inline nl::node login_title_resources()
+    inline nl::node retained_login_resources()
     {
         // Optional, separately retained v83 UI archive. Keep it alive for all
         // Texture/Animation nodes; never replace the compatible in-game UI.nx.
@@ -19,8 +19,23 @@ namespace ms
                 return std::unique_ptr<nl::file>();
             }
         }();
-        if (archive && archive->root()["Login.img"]["Title"]["BtLogin"]["normal"]["0"])
-            return archive->root()["Login.img"]["Title"];
+        return archive ? archive->root()["Login.img"] : nl::node();
+    }
+    inline nl::node login_title_resources()
+    {
+        auto title = retained_login_resources()["Title"];
+        if (title["BtLogin"]["normal"]["0"]) return title;
         return nl::nx::ui["Login.img"]["Title"];
+    }
+
+    inline nl::node login_race_resources()
+    {
+        auto race = retained_login_resources()["RaceSelect"];
+        if (race["normal"]["BtNormal"]["normal"]["0"]
+            && race["knight"]["BtKnight"]["normal"]["0"]
+            && race["aran"]["BtAran"]["normal"]["0"]
+            && race["BtSelect"]["normal"]["0"])
+            return race;
+        return nl::nx::ui["Login.img"]["RaceSelect"];
     }
 }
