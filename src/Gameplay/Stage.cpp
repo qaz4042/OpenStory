@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "Stage.h"
+#include "../Data/SkillData.h"
 
 #include "MapleTVBroadcast.h"
 #include "HiredMerchants.h"
@@ -84,6 +85,7 @@ namespace ms
 
 	void Stage::clear()
 	{
+		held_attack_skill = 0;
 		stop_training_auto("Map changed / disconnected", false);
 		training_status.clear();
 		player.set_training_invulnerable(false);
@@ -230,6 +232,19 @@ namespace ms
 
 	bool Stage::training_auto_notice(const std::string& notice)
 	{
+		if (training_status.accept_vacuum_count(notice, get_mapid())) return true;
+		const std::string pin_prefix = "[TrainingAssist:pin:v1] ";
+		if (notice.compare(0, pin_prefix.size(), pin_prefix) == 0) {
+			std::istringstream input(notice.substr(pin_prefix.size()));
+			int32_t map, oid, enabled, x, y;
+			std::string extra;
+			if ((input >> map >> oid >> enabled >> x >> y) && !(input >> extra)
+				&& map == get_mapid() && (enabled == 0 || enabled == 1)
+				&& x >= -32768 && x <= 32767 && y >= -32768 && y <= 32767)
+				mobs.set_training_pin(oid, enabled != 0, {static_cast<int16_t>(x), static_cast<int16_t>(y)});
+			return true;
+		}
+
 		if (training_status.accept(notice, get_mapid())) {
 			// The confirmed flag lasts until an off acknowledgement or map clear,
 			// independent of the panel freshness timer when the panel is collapsed.
@@ -304,6 +319,13 @@ namespace ms
 				if (!combat.auto_use_move(training_auto.skill(), reason)) stop_training_auto(reason);
 			}
 		}
+
+		if (held_attack_skill && !UI::get().is_skill_key_down(held_attack_skill))
+			held_attack_skill = 0;
+		if (held_attack_skill && !UI::get().blocks_training_attack()
+			&& !player.is_climbing() && !player.is_sitting()
+			&& player.get_stats().get_stat(MapleStat::Id::HP) > 0)
+			combat.repeat_attack(held_attack_skill);
 
 		portals.update(player.get_position());
 		camera.update(player.get_position());
@@ -419,13 +441,16 @@ namespace ms
 				playable->send_action(KeyAction::actionbyid(action), down);
 				break;
 			case KeyType::Id::SKILL:
-				// Press only, matching ITEM and MACRO below. Firing on release
-				// too made a buff skill cast twice, and the second cast hit the
-				// cooldown the first one had just started -- which is where the
-				// "you cannot use this skill" line on key-up came from. Holding
-				// the key still repeats: GLFW_REPEAT arrives as another press.
-				if (down)
+				if (!down)
+				{
+					if (held_attack_skill == action) held_attack_skill = 0;
+				}
+				else if (held_attack_skill != action)
+				{
+					// Attack continuation follows game frames, never OS key repeat.
+					if (SkillData::get(action).is_attack()) held_attack_skill = action;
 					combat.use_move(action);
+				}
 				break;
 			case KeyType::Id::MACRO:
 				if (down)

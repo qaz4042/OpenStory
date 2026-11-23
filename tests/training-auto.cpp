@@ -47,4 +47,13 @@ int main() {
     assert(status.revision==revision);
     status.clear(); assert(!status.known && !status.fresh());
 
+    status.accept("[TrainingAssist:state:v1] 100 1 0 0 1 -1 0 0",100);
+    assert(status.known && status.radius==0 && status.limit==0);
+    status.accept_vacuum_count("[TrainingAssist:vac-count:v1] 100 125 130",100);
+    assert(status.vacuum_pinned==125 && status.vacuum_eligible==130);
+    status.accept_vacuum_count("[TrainingAssist:vac-count:v1] 101 1 2",100);
+    status.accept_vacuum_count("[TrainingAssist:vac-count:v1] 100 3 2",100);
+    assert(status.vacuum_pinned==125);
+    status.clear(); assert(status.vacuum_pinned==-1);
+
 }

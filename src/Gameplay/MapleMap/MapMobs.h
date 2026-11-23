@@ -27,6 +27,7 @@
 
 #include <queue>
 #include <unordered_map>
+#include <vector>
 
 namespace ms
 {
@@ -45,6 +46,11 @@ namespace ms
 		void remove(int32_t oid, int8_t effect);
 		// Remove all mobs.
 		void clear();
+
+		// Keep ordinary mobile mobs gathered at a fixed training point.
+		// Enabling again preserves the original anchor and only refreshes the
+		// radius/limit settings.
+		void set_training_pin(int32_t oid, bool enabled, Point<int16_t> anchor);
 
 		// Update who a mob is controlled by.
 		void set_control(int32_t oid, bool control);
@@ -84,5 +90,8 @@ namespace ms
 		// the kill to update() lets a matching spawn cancel it, so mobs
 		// don't visibly die+respawn every time you enter a map.
 		std::unordered_map<int32_t, int8_t> pending_kills;
+		std::unordered_map<int32_t, Point<int16_t>> training_pins;
+		void update_training_vacuum();
+
 	};
 }

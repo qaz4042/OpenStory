@@ -212,6 +212,21 @@ namespace ms
 		effects.update();
 		showhp.update();
 
+		if (training_pinned)
+		{
+			// A pinned mob must not dead-reckon, receive knockback, or keep a
+			// walk animation moving away from the vacuum point. Animations
+			// still advance so hit/death effects remain alive, but physics and
+			// controller movement are disabled completely.
+			set_position(training_position);
+			phobj.hspeed = 0.0;
+			phobj.vspeed = 0.0;
+			phobj.hforce = 0.0;
+			phobj.vforce = 0.0;
+			phobj.normalize();
+			return phobj.fhlayer;
+		}
+
 		if (!dying)
 		{
 			// Stunned/frozen/webbed mobs can't move
@@ -480,6 +495,12 @@ namespace ms
 
 	void Mob::set_control(int8_t mode)
 	{
+		if (training_pinned)
+		{
+			control_after_training = mode;
+			return;
+		}
+
 		bool had_control = control;
 		control = mode > 0;
 		aggro = mode == 2;
@@ -493,7 +514,7 @@ namespace ms
 
 	void Mob::send_movement(Point<int16_t> start, std::vector<Movement>&& in_movements)
 	{
-		if (control)
+		if (control || training_pinned)
 			return;
 
 		movements = std::forward<decltype(in_movements)>(in_movements);
@@ -573,6 +594,39 @@ namespace ms
 		// integrate the mob away from the authoritative position.
 		phobj.hspeed = 0.0;
 		phobj.vspeed = 0.0;
+	}
+
+	void Mob::pin_training_position(Point<int16_t> position)
+	{
+		if (training_pinned && training_position == position) return;
+		if (!training_pinned)
+		{
+			control_after_training = control ? (aggro ? 2 : 1) : 0;
+			training_pinned = true;
+		}
+
+		control = false;
+		aggro = false;
+		control_acked = false;
+		training_position = position;
+		server_reposition(position, value_of(Stance::STAND, flip));
+	}
+
+	void Mob::release_training_position()
+	{
+		if (!training_pinned)
+			return;
+
+		training_pinned = false;
+		int8_t resume_control = control_after_training;
+		control_after_training = 0;
+		if (resume_control > 0)
+			set_control(resume_control);
+	}
+
+	bool Mob::is_training_pinned() const
+	{
+		return training_pinned;
 	}
 
 	bool Mob::is_controlled() const
@@ -773,6 +827,11 @@ namespace ms
 	bool Mob::is_boss() const
 	{
 		return boss;
+	}
+
+	bool Mob::is_mobile() const
+	{
+		return canmove;
 	}
 
 	const std::string& Mob::get_name() const

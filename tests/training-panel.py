@@ -7,6 +7,7 @@ import shlex, subprocess, tempfile, argparse
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--build-dir', default='build-training')
+parser.add_argument('--compile-only', action='store_true', help='Compile production checks without starting a window')
 args = parser.parse_args()
 build = root / args.build_dir
 subprocess.run(['cmake', '--build', str(build), '-j', '6'], check=True, stdout=subprocess.DEVNULL)
@@ -15,6 +16,9 @@ source = r'''
 #include "src/IO/Window.h"
 #include "src/Character/Player.h"
 #include "src/Configuration.h"
+#include "src/Gameplay/MapleMap/MapMobs.h"
+#include "src/Gameplay/Physics/Physics.h"
+#include "src/Gameplay/Spawn.h"
 #include "src/Audio/Audio.h"
 #include "src/Util/NxFiles.h"
 #include <cassert>
@@ -54,6 +58,45 @@ int main(int argc,char**argv) {
     assert(player.get_phobj().hspeed==hspeed && player.get_phobj().vforce==vforce);
     player.set_training_invulnerable(false);
     assert(!player.is_training_invulnerable());
+
+    // Only authoritative per-monster messages pin a mob. Stale movement,
+    // control assignment, impulses, and repeated confirmations cannot move it.
+    Physics physics;
+    MapMobs vacuum_mobs;
+    vacuum_mobs.spawn({1001, 100100, 0, 4, 0, false, 0, {200, 0}});
+    vacuum_mobs.spawn({1002, 100100, 0, 4, 0, false, 0, {300, 0}});
+    vacuum_mobs.set_training_pin(1001, true, {0, 0});
+    vacuum_mobs.update(physics);
+    auto* first = static_cast<Mob*>(vacuum_mobs.get_mobs()->get(1001).get());
+    auto* second = static_cast<Mob*>(vacuum_mobs.get_mobs()->get(1002).get());
+    assert(first->is_training_pinned() && first->get_position()==Point<int16_t>(0,0));
+    assert(!second->is_training_pinned());
+    vacuum_mobs.send_movement(1001, {999,999}, {Movement(999,999,0,0,4,0)});
+    vacuum_mobs.update(physics);
+    assert(first->get_position()==Point<int16_t>(0,0));
+    first->set_control(2);
+    first->apply_damage(10,true);
+    for (int tick=0;tick<120;++tick) vacuum_mobs.update(physics);
+    assert(first->get_position()==Point<int16_t>(0,0));
+    assert(!first->is_controlled());
+    vacuum_mobs.set_training_pin(1001, true, {0, 0});
+    vacuum_mobs.set_training_pin(1002, true, {0, 0});
+    vacuum_mobs.update(physics);
+    assert(first->get_position()==Point<int16_t>(0,0));
+    assert(second->is_training_pinned() && second->get_position()==Point<int16_t>(0,0));
+    vacuum_mobs.set_training_pin(1001, false, {});
+    vacuum_mobs.set_training_pin(1002, false, {});
+    assert(!first->is_training_pinned() && !second->is_training_pinned());
+    // The network pin can precede the queued spawn or concern a different viewer.
+    vacuum_mobs.set_training_pin(1003,true,{45,20});
+    vacuum_mobs.spawn({1003,100100,0,4,0,false,0,{300,0}});
+    vacuum_mobs.update(physics);
+    auto* delayed=static_cast<Mob*>(vacuum_mobs.get_mobs()->get(1003).get());
+    assert(delayed->is_training_pinned() && delayed->get_position()==Point<int16_t>(45,20));
+    vacuum_mobs.clear();
+    assert(vacuum_mobs.get_mobs()->size()==0);
+
+
     TrainingAssistStatus status;
     std::vector<std::string> commands;
     Panel panel(status,[&](const std::string&cmd){commands.push_back(cmd);});
@@ -82,10 +125,8 @@ int main(int argc,char**argv) {
     ack("1 1 1 1 5001001 800 20"); render();
     panel.click(4); assert(commands.back()=="@assist auto off");
     ack("1 1 1 1 -1 800 20");
-    panel.click(6); assert(commands.back()=="@assist vac settings 200 20");
-    ack("1 1 1 1 -1 200 20");
-    panel.click(7); assert(commands.back()=="@assist vac settings 200 5");
-    ack("1 1 1 1 -1 200 5"); render();
+    status.accept_vacuum_count("[TrainingAssist:vac-count:v1] 100 42 42",100);
+    ack("1 1 1 1 -1 0 0"); render();
     panel.click(9); assert(commands.back()=="@assist off");
     ack("1 0 0 0 -1 200 5");
     panel.click(10); assert(!panel.expanded()); render();
@@ -104,4 +145,7 @@ with tempfile.TemporaryDirectory(prefix='maple-panel-') as directory:
     link+=['-std=c++17','-UNDEBUG','-I'+str(root),*shlex.split(includes),str(cpp),'-Wl,-rpath,'+str(root/'vendor/bass24/macos')]
     subprocess.run(link,cwd=build,check=True)
     output=build/'panel-check';output.mkdir(exist_ok=True)
-    subprocess.run([str(executable),str(root/'wz'),str(work),str(output)],cwd=work,check=True)
+    if args.compile_only:
+        print('PASS: production UI/mob regression harness compiled; window was not started')
+    else:
+        subprocess.run([str(executable),str(root/'wz'),str(work),str(output)],cwd=work,check=True)

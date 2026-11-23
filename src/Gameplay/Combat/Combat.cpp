@@ -139,6 +139,14 @@ namespace ms
 		}
 	}
 
+	void Combat::repeat_attack(int32_t move_id)
+	{
+		if (!player.can_attack()) return;
+		const auto& move = get_move(move_id);
+		if (move.is_attack() && player.can_use(move) == SpecialMove::FBR_NONE)
+			apply_move(move);
+	}
+
 	bool Combat::auto_use_move(int32_t move_id, std::string& stop_reason)
 	{
 		if (!player.get_look().get_equips().has_weapon())

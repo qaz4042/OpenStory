@@ -301,6 +301,18 @@ namespace ms
 		return false;
 	}
 
+	bool UI::is_skill_key_down(int32_t skill)
+	{
+		for (const auto& entry : is_key_down)
+			if (entry.second)
+			{
+				const auto mapping = keyboard.get_mapping(entry.first);
+				if (mapping.type == KeyType::Id::SKILL && mapping.action == skill)
+					return true;
+			}
+		return false;
+	}
+
 	void UI::send_key(int32_t keycode, bool pressed)
 	{
 		if (keycode == GLFW_KEY_F8) {

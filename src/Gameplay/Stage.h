@@ -163,6 +163,7 @@ namespace ms
 
 		TrainingAssistStatus training_status;
 		TrainingAutoAttack training_auto;
+		int32_t held_attack_skill = 0;
 		Camera camera;
 		PetAI petai;
 		Physics physics;

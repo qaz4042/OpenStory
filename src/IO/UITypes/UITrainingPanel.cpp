@@ -108,7 +108,7 @@ namespace ms
         add(0,416,5,16,16);
         for (int row=0; row<4; ++row) add(row+1,320,86+row*38,96,26);
         add(5,184,238,232,26);
-        add(6,184,274,108,26); add(7,308,274,108,26);
+
         add(8,16,410,88,28); add(9,116,410,208,28); add(10,336,410,80,28);
     }
 
@@ -138,7 +138,8 @@ namespace ms
             if (!enabled) button.set_state(Button::DISABLED);
             else if (button.get_state()==Button::DISABLED) button.set_state(Button::NORMAL);
         };
-        set(0, expanded_ ? "收起 F8" : "辅助设置 · F8");
+        set(0, expanded_ ? "收起 F8" : status.vacuum_pinned >= 0
+            ? "已吸 " + std::to_string(status.vacuum_pinned) + " 只 · F8" : "辅助设置 · F8");
         if (!expanded_) return;
         bool enabled = status.fresh() && status.allowed && !pending_;
         for (int id=1; id<=4; ++id)
@@ -149,8 +150,6 @@ namespace ms
         if (status.auto_skill>=0)
             for (int i=0;i<4;++i) if (skills[i]==status.auto_skill) selected_skill=i;
         set(5, std::string(skill_names[selected_skill])+"  ›", enabled && status.auto_skill<0);
-        set(6, "范围 "+std::to_string(status.radius)+"  ›", enabled);
-        set(7, "数量 "+std::to_string(status.limit)+"  ›", enabled);
         set(8,"刷新状态"); set(9,"一键停止全部辅助"); set(10,"收起");
     }
     void UITrainingPanel::draw(float alpha) const
@@ -162,7 +161,7 @@ namespace ms
         Text(Text::A12B,Text::CENTER,Color::Name::YELLOW,"训练辅助 · F8").draw(position+Point<int16_t>(220,6));
         label(position+Point<int16_t>(16,42), !status.fresh() ? "尚未取得服务端状态" : status.allowed ? "当前地图：允许训练辅助" : "当前地图：未开放训练辅助");
         label(position+Point<int16_t>(16,62),"开关以服务端确认为准；沉默影响整张地图。",Color::Name::DUSTYGRAY);
-        const char* rows[]={"角色无敌（训练免伤）","怪物沉默（包括 Boss）","定点吸怪（普通怪物）","原地在线挂机"};
+        const char* rows[]={"角色无敌（训练免伤）","怪物沉默（包括 Boss）","全图定点吸怪","原地在线挂机"};
         const bool checked[]={status.invincible,status.silence,status.vacuum,status.auto_skill>=0};
         for(int i=0;i<4;++i) {
             auto& icon=checks_[!status.fresh() || !status.allowed ? 2 : checked[i] ? 1 : 0];
@@ -170,7 +169,10 @@ namespace ms
             label(position+Point<int16_t>(38,90+i*38),rows[i]);
         }
         label(position+Point<int16_t>(16,242),"挂机技能");
-        label(position+Point<int16_t>(16,278),"吸怪设置");
+        label(position+Point<int16_t>(16,274),"全图吸怪 · 数量不限");
+        label(position+Point<int16_t>(184,274), status.vacuum_pinned < 0 ? "数量待同步"
+            : "已吸入 " + std::to_string(status.vacuum_pinned) + " / 可吸 " + std::to_string(status.vacuum_eligible) + " 只");
+        label(position+Point<int16_t>(184,294),"Boss、固定机关怪不计入",Color::Name::DUSTYGRAY);
         label(position+Point<int16_t>(16,316),"快速战斗 / 无延迟");
         label(position+Point<int16_t>(320,316),"待实现",Color::Name::DUSTYGRAY);
         label(position+Point<int16_t>(16,344),!feedback.empty() ? feedback : !status.stop_reason.empty()
@@ -191,8 +193,6 @@ namespace ms
             if (id==3) request(std::string("vac ")+(status.vacuum ? "off":"on"));
             if (id==4) request(status.auto_skill>=0 ? "auto off" : "auto on "+std::to_string(skills[selected_skill]));
             if (id==5 && status.auto_skill<0) selected_skill=(selected_skill+1)%4;
-            if (id==6) request("vac settings "+std::to_string(status.radius<400 ? 400 : status.radius<800 ? 800 : 200)+" "+std::to_string(status.limit));
-            if (id==7) request("vac settings "+std::to_string(status.radius)+" "+std::to_string(status.limit<5 ? 5 : status.limit<10 ? 10 : status.limit<20 ? 20 : 5));
         }
         // Keep button objects alive until the cursor dispatcher has returned.
         return Button::NORMAL;

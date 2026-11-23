@@ -148,6 +148,12 @@ namespace ms
 		// mob, so a stale local position can't show it teleporting when the
 		// server hands control over (e.g. right after we attack it).
 		void server_reposition(Point<int16_t> position, int8_t stancebyte);
+		// Keep a training-vacuum mob at one stable point. The mob is detached
+		// from local control while pinned and resumes normal control when
+		// released.
+		void pin_training_position(Point<int16_t> position);
+		void release_training_position();
+		bool is_training_pinned() const;
 		// Whether this client currently controls (drives) this mob.
 		bool is_controlled() const;
 		// Display the hp percentage above the mob
@@ -175,6 +181,9 @@ namespace ms
 		bool is_alive() const;
 		// Whether this mob is a boss (info/boss) — drives the boss HP gauge.
 		bool is_boss() const;
+		// Whether ordinary mob AI can move this mob. Fixed scripted objects
+		// stay outside training vacuum selection.
+		bool is_mobile() const;
 		// The mob's display name.
 		const std::string& get_name() const;
 		// Return the head position
@@ -260,6 +269,9 @@ namespace ms
 		bool dying;
 		bool dead;
 		bool control;
+		bool training_pinned = false;
+		int8_t control_after_training = 0;
+		Point<int16_t> training_position;
 		// Set false whenever we gain control; the first control-update then
 		// immediately reports the mob's position to "claim" it with the
 		// server, the way a normal client does. Without this the server can

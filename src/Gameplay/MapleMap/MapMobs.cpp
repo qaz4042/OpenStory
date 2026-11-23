@@ -69,9 +69,11 @@ namespace ms
 		{
 			if (Optional<Mob> mob = mobs.get(oid))
 				mob->kill(animation);
+			training_pins.erase(oid);
 		}
 		pending_kills.clear();
 
+		update_training_vacuum();
 		mobs.update(physics);
 	}
 
@@ -95,6 +97,7 @@ namespace ms
 
 	void MapMobs::clear()
 	{
+		training_pins.clear();
 		mobs.clear();
 
 		// A queued spawn (or a kill still waiting for its cancelling spawn)
@@ -103,6 +106,25 @@ namespace ms
 		// left in place, an old map's mob materialised on the new one.
 		spawns = {};
 		pending_kills.clear();
+	}
+
+	void MapMobs::set_training_pin(int32_t oid, bool enabled, Point<int16_t> anchor)
+	{
+		if (enabled) training_pins[oid] = anchor;
+		else training_pins.erase(oid);
+		if (Optional<Mob> mob = mobs.get(oid)) {
+			if (enabled) mob->pin_training_position(anchor);
+			else mob->release_training_position();
+		}
+	}
+
+	void MapMobs::update_training_vacuum()
+	{
+		// A pin may arrive before the queued monster spawn. Apply it after spawns,
+		// never pick targets or derive coordinates locally from the player.
+		for (auto& entry : training_pins)
+			if (Optional<Mob> mob = mobs.get(entry.first))
+				if (mob->is_alive()) mob->pin_training_position(entry.second);
 	}
 
 	void MapMobs::set_control(int32_t oid, bool control)

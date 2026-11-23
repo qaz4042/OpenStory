@@ -41,6 +41,7 @@ namespace ms
 
 		// Make the player use a special move
 		void use_move(int32_t move_id);
+		void repeat_attack(int32_t move_id);
 		// Returns false only for a terminal skill/resource failure; no target means wait.
 		bool auto_use_move(int32_t move_id, std::string& stop_reason);
 
