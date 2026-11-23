@@ -117,6 +117,8 @@ namespace ms
 			BT_TAB_CASH,
 			BT_COIN,
 			BT_POINT,
+			BT_TIDY,
+			BT_DROP_MESO,
 			BT_GATHER,
 			BT_SORT,
 			BT_FULL,
@@ -139,10 +141,13 @@ namespace ms
 			BT_EXTRACT_SM,
 			BT_DISASSEMBLE_SM,
 			BT_TOAD_SM,
-			BT_CASHSHOP
+			BT_CASHSHOP,
+			BT_SELL_LOCK
 		};
 
 		const Inventory& inventory;
+		bool sell_lock_mode = false;
+		bool lock_press_handled = false;
 
 		Animation newitemslot;
 		Animation newitemtab;

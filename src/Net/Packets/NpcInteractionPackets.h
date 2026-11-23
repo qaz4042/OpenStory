@@ -18,9 +18,33 @@
 #pragma once
 
 #include "../OutPacket.h"
+#include <vector>
 
 namespace ms
 {
+	struct ShopSale { int8_t type; int16_t slot; int32_t id; int16_t count; };
+
+	// OpenStory/Cosmic extension: confirmed snapshot, not a stream of single-sale requests.
+	class ShopSellAllPacket : public OutPacket
+	{
+	public:
+		ShopSellAllPacket(int32_t npc, const std::vector<ShopSale>& items) : OutPacket(Opcode::NPC_SHOP_ACTION)
+		{
+			write_byte(4); write_int(npc); write_short(static_cast<int16_t>(items.size()));
+			for (const auto& item : items) {
+				write_byte(item.type); write_short(item.slot); write_int(item.id); write_short(item.count);
+			}
+		}
+	};
+
+	class SetSellLockPacket : public OutPacket
+	{
+	public:
+		SetSellLockPacket(int8_t type, int16_t slot, int32_t id, bool locked) : OutPacket(Opcode::NPC_SHOP_ACTION)
+		{
+			write_byte(5); write_byte(type); write_short(slot); write_int(id); write_byte(locked ? 1 : 0);
+		}
+	};
 	// Packet which requests a dialog with a server-sided NPC
 	// Opcode: TALK_TO_NPC(58)
 	class TalkToNPCPacket : public OutPacket

@@ -108,6 +108,13 @@ namespace ms
         screen_height = Constants::Constants::get().get_viewheight();
         refresh_skills(); layout(); update();
     }
+    void UITrainingPanel::job_changed() {
+        rotation_skills = {{0, -1, -1, -1}};
+        selected_skill = 0;
+        use_rotation = false;
+        refresh_skills();
+        feedback = "职业已变更，请重新选择挂机技能";
+    }
     void UITrainingPanel::refresh_skills() {
         available_skills={0};
         for (const auto& item : Stage::get().get_player().get_skills().get_entries())
@@ -142,7 +149,7 @@ namespace ms
             std::max<int>(0, std::min<int>(56, screen_height - dimension.y() - 44)));
         buttons.clear();
         auto add = [&](int id, int x, int y, int w, int h) {
-            buttons[id] = std::make_unique<PanelButton>(Point<int16_t>(x,y), Point<int16_t>(w,h), expanded_ && id==0, (id>=1 && id<=4) || id==6 || id==7 || id==12);
+            buttons[id] = std::make_unique<PanelButton>(Point<int16_t>(x,y), Point<int16_t>(w,h), expanded_ && id==0, (id>=1 && id<=4) || id==6 || id==7 || id==12 || id==14);
         };
         if (!expanded_) { add(0,0,0,132,30); return; }
         add(0,276,5,16,16);
@@ -155,7 +162,7 @@ namespace ms
         for (int row=0; row<4; ++row) add(row+1,16,52+row*26,268,24);
         add(5,88,158,152,24); add(13,244,158,40,24);
         add(6,16,186,128,24); add(7,156,186,128,24);
-        add(12,16,234,268,24);
+        add(12,16,234,128,24); add(14,156,234,128,24);
         add(8,16,278,68,24); add(9,94,278,112,24); add(10,216,278,68,24);
     }
 
@@ -213,8 +220,10 @@ namespace ms
         set(6,"虚拟飞 1–5×"); set(7,"真实飞 2×");
         static_cast<PanelButton*>(buttons.at(6).get())->checked(flight==1);
         static_cast<PanelButton*>(buttons.at(7).get())->checked(flight==2);
-        set(12,"宠吸（全屏物品 / 金币）", enabled && status.pet_vacuum_known);
-        static_cast<PanelButton*>(buttons.at(12).get())->checked(status.fresh() && status.pet_vacuum);
+        set(12,"宠吸·金币", enabled && status.pet_vacuum_split_known);
+        set(14,"宠吸·物品", enabled && status.pet_vacuum_split_known);
+        static_cast<PanelButton*>(buttons.at(12).get())->checked(status.fresh() && status.pet_vacuum_mesos);
+        static_cast<PanelButton*>(buttons.at(14).get())->checked(status.fresh() && status.pet_vacuum_items);
         set(8,"刷新"); set(9,"全部停止"); set(10,"收起");
     }
     void UITrainingPanel::draw(float alpha) const
@@ -269,7 +278,8 @@ namespace ms
         else if (id==6 || id==7 || id==11) Stage::get().set_flight_mode(Stage::get().get_flight_mode()==(id==6 ? 1 : 2) ? 0 : id==6 ? 1 : 2);
         else if (!pending_ && status.fresh() && status.allowed)
         {
-            if (id==12 && status.pet_vacuum_known) request(std::string("petvac ")+(status.pet_vacuum ? "off":"on"));
+            if (id==12 && status.pet_vacuum_split_known) request(std::string("petvac mesos ")+(status.pet_vacuum_mesos ? "off":"on"));
+            if (id==14 && status.pet_vacuum_split_known) request(std::string("petvac items ")+(status.pet_vacuum_items ? "off":"on"));
             if (id==1) request(std::string("invincible ")+(status.invincible ? "off":"on"));
             if (id==2) request(std::string("silence ")+(status.silence ? "off":"on"));
             if (id==3) request(std::string("vac ")+(status.vacuum ? "off":"on"));

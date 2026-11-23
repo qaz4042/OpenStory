@@ -43,6 +43,10 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include "../Components/LabeledButton.h"
+#include "../Components/SellLockBadge.h"
+#include "../../Net/Packets/NpcInteractionPackets.h"
+#include "UIStatusMessenger.h"
 
 #ifdef USE_NX
 #include <nlnx/nx.hpp>
@@ -50,6 +54,34 @@
 
 namespace ms
 {
+    namespace {
+        class InventoryActionButton : public Button {
+        public:
+            InventoryActionButton(const char* chinese, const char* english) : chinese(chinese), english(english) {
+                active=true; pressed=false; state=NORMAL;
+                const char* names[]={"normal","disabled","mouseOver","pressed"};
+                for (int i=0;i<4;++i) skins[i]=Texture(nl::nx::ui["Basic.img"]["BtOK"][names[i]]["0"]);
+            }
+            void draw(Point<int16_t> parent) const override {
+                if (!active) return;
+                const auto& skin=skins[state<=PRESSED ? state : NORMAL];
+                skin.draw(DrawArgument(parent+position,30.0f/skin.width(),18.0f/skin.height()));
+                Text(Text::A11M,Text::CENTER,Color::Name::WHITE,
+                    Setting<UILanguage>::get().load()=="zh-CN" ? chinese : english)
+                    .draw(parent+position+Point<int16_t>(15,-4));
+            }
+            void update() override {}
+            Rectangle<int16_t> bounds(Point<int16_t> parent) const override { return {parent+position,parent+position+Point<int16_t>(30,18)}; }
+            int16_t width() const override { return 30; }
+            Point<int16_t> origin() const override { return {}; }
+            Cursor::State send_cursor(bool,Point<int16_t>) override { return Cursor::IDLE; }
+        private:
+            Texture skins[4];
+            const char* chinese;
+            const char* english;
+        };
+    }
+
 	UIItemInventory::UIItemInventory(const Inventory& invent) : UIDragElement<PosINV>(Point<int16_t>(172, 20)), inventory(invent), ignore_tooltip(false), tab(InventoryType::Id::EQUIP), sort_enabled(false)
 	{
 		nl::node Item = nl::nx::ui["UIWindow2.img"]["Item"];
@@ -80,6 +112,9 @@ namespace ms
 
 		nl::node close = nl::nx::ui["Basic.img"]["BtClose3"];
 		buttons[Buttons::BT_CLOSE] = std::make_unique<MapleButton>(close);
+        buttons[Buttons::BT_TIDY] = std::make_unique<InventoryActionButton>("整理", "Tidy");
+        buttons[Buttons::BT_DROP_MESO] = std::make_unique<InventoryActionButton>("丢币", "Drop");
+        buttons[Buttons::BT_SELL_LOCK] = std::make_unique<LabeledButton>("售卖锁", "Lock", 48);
 
 		buttons[Buttons::BT_TAB_EQUIP] = std::make_unique<LocalizedTabButton>(tabdis["0"], taben["0"], localization::Key::TabEquip);
 		buttons[Buttons::BT_TAB_USE] = std::make_unique<LocalizedTabButton>(tabdis["1"], taben["1"], localization::Key::TabUse);
@@ -200,7 +235,11 @@ namespace ms
 				auto& icon = icons.at(i);
 
 				if (icon && i >= firstslot && i <= lastslot)
+				{
 					icon->draw(position + slotpos);
+					if (inventory.is_sell_locked(tab, i))
+						draw_sell_lock(position + slotpos + Point<int16_t>(21, 0));
+				}
 			}
 			else
 			{
@@ -227,6 +266,7 @@ namespace ms
 
 	void UIItemInventory::update()
 	{
+		buttons[Buttons::BT_SELL_LOCK]->set_state(sell_lock_mode ? Button::PRESSED : Button::NORMAL);
 		UIElement::update();
 
 		newitemtab.update(6);
@@ -311,6 +351,13 @@ namespace ms
 
 		switch (buttonid)
 		{
+			case Buttons::BT_SELL_LOCK:
+				sell_lock_mode = !sell_lock_mode;
+				if (auto messages = UI::get().get_element<UIStatusMessenger>())
+					messages->show_status(Color::Name::YELLOW, Setting<UILanguage>::get().load() == "zh-CN"
+						? (sell_lock_mode ? "售卖锁模式：点击物品加锁或解锁；再次点击售卖锁退出。" : "已退出售卖锁模式。")
+						: (sell_lock_mode ? "Click items to lock/unlock NPC sales. Click Lock again to finish." : "Sale lock mode off."));
+				return sell_lock_mode ? Button::PRESSED : Button::NORMAL;
 			case Buttons::BT_CLOSE:
 			{
 				toggle_active();
@@ -342,6 +389,7 @@ namespace ms
 				tab = InventoryType::Id::CASH;
 				break;
 			}
+			case Buttons::BT_TIDY:
 			case Buttons::BT_GATHER:
 			case Buttons::BT_GATHER_SM:
 			{
@@ -368,6 +416,7 @@ namespace ms
 
 				return Button::State::NORMAL;
 			}
+			case Buttons::BT_DROP_MESO:
 			case Buttons::BT_COIN:
 			case Buttons::BT_COIN_SM:
 			{
@@ -427,6 +476,7 @@ namespace ms
 
 	void UIItemInventory::doubleclick(Point<int16_t> cursorpos)
 	{
+		if (sell_lock_mode) return;
 		int16_t slot = slot_by_position(cursorpos - position);
 
 		if (icons.count(slot) && is_visible(slot))
@@ -465,6 +515,12 @@ namespace ms
 					}
 					case InventoryType::Id::CASH:
 					{
+						if (item_id == 5450000)
+						{
+							UseTravelingStorePacket(slot).dispatch();
+							break;
+						}
+
 						if (item_id / 10000 == 503)
 						{
 							MiniRooms::get().set_pending_permit(item_id);
@@ -613,6 +669,7 @@ namespace ms
 
 	Cursor::State UIItemInventory::send_cursor(bool pressed, Point<int16_t> cursorpos)
 	{
+		if (!pressed) lock_press_handled = false;
 		Cursor::State dstate = UIDragElement::send_cursor(pressed, cursorpos);
 
 		if (dragged)
@@ -644,6 +701,16 @@ namespace ms
 		{
 			if (pressed)
 			{
+				if (sell_lock_mode)
+				{
+					if (lock_press_handled) return Cursor::IDLE;
+					lock_press_handled = true;
+					if (tab >= InventoryType::EQUIP && tab <= InventoryType::ETC)
+						SetSellLockPacket(tab, slot, inventory.get_item_id(tab, slot),
+							(inventory.get_item_flags(tab, slot) & 0x400) == 0).dispatch();
+					clear_tooltip();
+					return Cursor::IDLE;
+				}
 				Point<int16_t> slotpos = get_slotpos(slot);
 				icon->start_drag(cursor_relative - slotpos);
 				UI::get().drag_icon(icon);
@@ -669,7 +736,8 @@ namespace ms
 		{
 			clear_tooltip();
 
-			Cursor::State ret = UIElement::send_cursor(pressed, cursorpos);
+			// UIDragElement already dispatched this event to the buttons.
+			Cursor::State ret = dstate;
 
 			// UIElement::send_cursor flips the active tab to MOUSEOVER on
 			// hover and back to NORMAL on leave, wiping the PRESSED state
@@ -1104,8 +1172,13 @@ namespace ms
 
 		int16_t adj_x = full_enabled ? 20 : 22;
 		buttons[Buttons::BT_CLOSE]->set_position(Point<int16_t>(dimension.x() - adj_x, 6));
+        // Keep action buttons outside the title drag area and beside the meso field.
+        const int16_t meso_y = full_enabled ? 336 : 266;
+        buttons[Buttons::BT_TIDY]->set_position(Point<int16_t>(12, meso_y));
+        buttons[Buttons::BT_DROP_MESO]->set_position(Point<int16_t>(full_enabled ? 142 : dimension.x()-40, meso_y));
+        buttons[Buttons::BT_SELL_LOCK]->set_position(full_enabled ? Point<int16_t>(220, 29) : Point<int16_t>(48, meso_y));
 
-		buttons[Buttons::BT_COIN]->set_active(!enabled);
+		buttons[Buttons::BT_COIN]->set_active(false);
 		buttons[Buttons::BT_POINT]->set_active(!enabled);
 		buttons[Buttons::BT_POT]->set_active(!enabled);
 		buttons[Buttons::BT_UPGRADE]->set_active(!enabled);
@@ -1115,7 +1188,7 @@ namespace ms
 		buttons[Buttons::BT_TOAD]->set_active(!enabled);
 		buttons[Buttons::BT_CASHSHOP]->set_active(!enabled);
 
-		buttons[Buttons::BT_COIN_SM]->set_active(enabled);
+		buttons[Buttons::BT_COIN_SM]->set_active(false);
 		buttons[Buttons::BT_POINT_SM]->set_active(enabled);
 		buttons[Buttons::BT_POT_SM]->set_active(enabled);
 		buttons[Buttons::BT_UPGRADE_SM]->set_active(enabled);

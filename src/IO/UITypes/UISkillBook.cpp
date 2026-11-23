@@ -604,7 +604,9 @@ namespace ms
 
 				if (inrange)
 				{
-					if (clicked)
+					// Keep row-wide tooltips, but only pick up the 32x32 skill icon.
+					constexpr Rectangle<int16_t> icon_bounds = Rectangle<int16_t>(0, 32, 0, 32);
+					if (clicked && icon_bounds.contains(cursorpos - icon_pos))
 					{
 						clear_tooltip();
 						grabbing = true;

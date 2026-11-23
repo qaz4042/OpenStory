@@ -25,6 +25,8 @@
 #include "../Components/AreaButton.h"
 #include "../Components/Charset.h"
 #include "../Components/MapleButton.h"
+#include "../Components/LabeledButton.h"
+#include "../Components/SellLockBadge.h"
 
 #include "../../Graphics/Geometry.h"
 
@@ -58,6 +60,8 @@ namespace ms
 		buttons[Buttons::BUY_ITEM] = std::make_unique<MapleButton>(src["BtBuy"]);
 		buttons[Buttons::SELL_ITEM] = std::make_unique<MapleButton>(src["BtSell"]);
 		buttons[Buttons::EXIT] = std::make_unique<MapleButton>(src["BtExit"]);
+		buttons[Buttons::SELL_ALL] = std::make_unique<LabeledButton>("批量售卖", "Sell all", 80);
+		buttons[Buttons::SELL_ALL]->set_position(Point<int16_t>(345, 73));
 
 		Texture cben = src["checkBox"][0];
 		Texture cbdis = src["checkBox"][1];
@@ -201,13 +205,19 @@ namespace ms
 
 		// Flipped=false → faces the NPC on the left (the default
 		// CharLook facing is right, so false mirrors it leftward).
-		charlook.draw(position + Point<int16_t>(338, 85), /*flipped*/ false,
+		charlook.draw(position + Point<int16_t>(308, 85), /*flipped*/ false,
 			Stance::Id::STAND1, Expression::Id::DEFAULT);
 
 		mesolabel.draw(position + Point<int16_t>(493, 51));
 
 		buystate.draw(position, buy_selection);
 		sellstate.draw(position, sell_selection);
+		for (int row = 0; row < 9; ++row) {
+			int index = sellstate.offset + row;
+			if (index >= sellstate.lastslot) break;
+			if (inventory.is_sell_locked(sellstate.tab, sellstate.items[index].get_slot()))
+				draw_sell_lock(position + Point<int16_t>(298, 124 + 42 * row));
+		}
 
 
 		buyslider.draw(position);
@@ -276,6 +286,9 @@ namespace ms
 			case Buttons::SELL_ITEM:
 				sellstate.sell(false);
 
+				return Button::State::NORMAL;
+			case Buttons::SELL_ALL:
+				sell_all();
 				return Button::State::NORMAL;
 			case Buttons::EXIT:
 				exit_shop();
@@ -606,6 +619,7 @@ namespace ms
 
 	void UIShop::changeselltab(InventoryType::Id type)
 	{
+		const int16_t previous_offset = type == sellstate.tab ? sellstate.offset : 0;
 		uint16_t oldtab = tabbyinventory(sellstate.tab);
 
 		if (oldtab > 0)
@@ -617,8 +631,9 @@ namespace ms
 			buttons[newtab]->set_state(Button::State::PRESSED);
 
 		sellstate.change_tab(inventory, type, meso);
+		sellstate.offset = std::min<int16_t>(previous_offset, std::max<int16_t>(0, sellstate.lastslot - 9));
 
-		sellslider.setrows(9, sellstate.lastslot);
+		sellslider.setrows(sellstate.offset, 9, sellstate.lastslot);
 		sellslider.setenabled(sellstate.lastslot > 9);
 
 		for (size_t i = Buttons::SELL0; i < Buttons::SELL8; i++)
@@ -632,6 +647,7 @@ namespace ms
 
 	void UIShop::reset(int32_t npcid)
 	{
+		shop_npc = npcid;
 		currency_item = 0;
 		currency_name.clear();
 
@@ -1057,6 +1073,31 @@ namespace ms
 			selection = slot;
 	}
 
+	void UIShop::sell_all()
+	{
+		std::vector<ShopSale> sales;
+		for (int8_t type = InventoryType::EQUIP; type <= InventoryType::ETC; ++type) {
+			auto tab = static_cast<InventoryType::Id>(type);
+			for (int16_t slot = 1; slot <= inventory.get_slotmax(tab); ++slot) {
+				int32_t id = inventory.get_item_id(tab, slot);
+				if (!id || inventory.is_sell_locked(tab, slot)) continue;
+				const auto& data = ItemData::get(id);
+				if (data.is_cashitem() || data.is_unsellable() || data.get_price() <= 0) continue;
+				int16_t count = inventory.get_item_count(tab, slot);
+				if (count > 0) sales.push_back({type, slot, id, count});
+			}
+		}
+		bool zh = Setting<UILanguage>::get().load() == "zh-CN";
+		std::string question = zh
+			? "出售所有背包分类中未加锁的可售物品（含药水、卷轴、弹药）？共 "
+			: "Sell unlocked items in ALL inventory tabs (including potions, scrolls, ammo)? Up to ";
+		question += std::to_string(sales.size()) + (zh ? " 格。售出无法撤销。" : " slots. This cannot be undone.");
+		int32_t npc = shop_npc;
+		UI::get().emplace<UIYesNo>(question, [npc, sales](bool yes) {
+			if (yes && !sales.empty()) ShopSellAllPacket(npc, sales).dispatch();
+		}, Text::CENTER, -60, 14);
+	}
+
 	void UIShop::SellState::reset()
 	{
 		items.clear();
@@ -1069,6 +1110,7 @@ namespace ms
 
 	void UIShop::SellState::change_tab(const Inventory& inventory, InventoryType::Id newtab, Texture meso)
 	{
+		this->inventory = &inventory;
 		tab = newtab;
 
 		offset = 0;
@@ -1132,6 +1174,7 @@ namespace ms
 			return;
 
 		const SellItem& item = items[selection];
+		if (inventory && inventory->is_sell_locked(tab, item.get_slot())) return;
 		int32_t itemid = item.get_id();
 		int16_t sellable = item.get_sellable();
 		int16_t slot = item.get_slot();
@@ -1148,7 +1191,8 @@ namespace ms
 			};
 
 			// Same layout as the buy prompt for consistency.
-			UI::get().emplace<UIEnterNumber>(question, onenter, sellable, 1, -23, -50, 0);
+			const int16_t default_quantity = tab == InventoryType::Id::USE ? sellable : 1;
+			UI::get().emplace<UIEnterNumber>(question, onenter, sellable, default_quantity, -23, -50, 0);
 		}
 		else if (sellable > 0)
 		{

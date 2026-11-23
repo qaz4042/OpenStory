@@ -748,6 +748,10 @@ namespace ms
 
 	void UIStateGame::drag_icon(Icon* drgic)
 	{
+		// Icon pickup takes over the gesture from the window. Otherwise a
+		// cursor move while the drop click is still held re-enters the old
+		// window's pressed handler and immediately picks the item up again.
+		dragged = nullptr;
 		draggedicon = drgic;
 	}
 

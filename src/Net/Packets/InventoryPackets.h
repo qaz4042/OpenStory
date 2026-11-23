@@ -177,6 +177,17 @@ namespace ms
 		}
 	};
 
+	// Miu Miu's traveling store: Cosmic expects slot + item ID, without a tick.
+	class UseTravelingStorePacket : public OutPacket
+	{
+	public:
+		UseTravelingStorePacket(int16_t slot) : OutPacket(OutPacket::Opcode::USE_CASH_ITEM)
+		{
+			write_short(slot);
+			write_int(5450000);
+		}
+	};
+
 	// Rename the first summoned pet with a Pet Name Tag.
 	// Opcode: USE_CASH_ITEM(79) — short slot, int itemid, string name
 	class UsePetNameTagPacket : public OutPacket

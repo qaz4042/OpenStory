@@ -108,6 +108,8 @@ namespace ms
 
 		// Return a pointer to an equip
 		Optional<const Equip> get_equip(InventoryType::Id type, int16_t slot) const;
+		int16_t get_item_flags(InventoryType::Id type, int16_t slot) const;
+		bool is_sell_locked(InventoryType::Id type, int16_t slot) const { return (get_item_flags(type, slot) & 0x401) != 0; }
 
 	private:
 		// Add an inventory slot and return the unique_id

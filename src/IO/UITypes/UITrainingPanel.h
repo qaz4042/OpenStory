@@ -21,6 +21,7 @@ namespace ms
         void remove_cursor() override;
         Type get_type() const override { return TYPE; }
         void toggle();
+        void job_changed();
         bool expanded() const { return expanded_; }
     protected:
         Button::State button_pressed(uint16_t id) override;

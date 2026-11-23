@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "PlayerHandlers.h"
+#include "../../IO/UITypes/UITrainingPanel.h"
 
 #include "Helpers/LoginParser.h"
 
@@ -103,7 +104,10 @@ namespace ms
 			player.change_level(static_cast<uint8_t>(recv.read_byte()));
 			break;
 		case MapleStat::Id::JOB:
+			Stage::get().stop_training_auto("Job changed");
 			player.change_job(recv.read_short());
+			if (auto panel = UI::get().get_element<UITrainingPanel>())
+				panel->job_changed();
 			break;
 		case MapleStat::Id::EXP:
 			player.get_stats().set_exp(recv.read_int());

@@ -359,6 +359,20 @@ namespace ms
 		return equip_iter->second;
 	}
 
+	int16_t Inventory::get_item_flags(InventoryType::Id type, int16_t slot) const
+	{
+		auto found = inventories[type].find(slot);
+		if (found == inventories[type].end()) return 0;
+		auto uid = found->second.unique_id;
+		if (type == InventoryType::EQUIP || type == InventoryType::EQUIPPED)
+		{
+			auto item = equips.find(uid);
+			return item == equips.end() ? 0 : item->second.get_flags();
+		}
+		auto item = items.find(uid);
+		return item == items.end() ? 0 : item->second.get_flags();
+	}
+
 	Inventory::Movement Inventory::movementbyvalue(int8_t value)
 	{
 		if (value >= Inventory::Movement::MOVE_INTERNAL && value <= Inventory::Movement::MOVE_EQUIP)

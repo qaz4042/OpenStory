@@ -219,10 +219,21 @@ int main(int argc,char**argv) {
     ack("1 0 0 0 -1 800 20"); render();
     auto pet_before=commands.size(); panel.click(12); assert(commands.size()==pet_before);
     status.accept_pet_vacuum("[TrainingAssist:petvac:v1] 100000000 0",100000000); panel.update();
-    panel.click(12); assert(commands.back()=="@assist petvac on");
-    status.accept_pet_vacuum("[TrainingAssist:petvac:v1] 100000000 1",100000000); panel.update();
-    panel.click(12); assert(commands.back()=="@assist petvac off");
-    status.accept_pet_vacuum("[TrainingAssist:petvac:v1] 100000000 0",100000000); panel.update();
+    panel.click(12); assert(commands.size()==pet_before); // old server cannot split
+    status.accept_pet_vacuum("[TrainingAssist:petvac:v2] 100000000 0",100000000); panel.update();
+    panel.click(12); assert(commands.back()=="@assist petvac mesos on");
+    status.accept_pet_vacuum("[TrainingAssist:petvac:v2] 100000000 1",100000000); panel.update();
+    assert(status.pet_vacuum_mesos && !status.pet_vacuum_items);
+    panel.click(14); assert(commands.back()=="@assist petvac items on");
+    status.accept_pet_vacuum("[TrainingAssist:petvac:v2] 100000000 3",100000000); panel.update();
+    panel.click(12); assert(commands.back()=="@assist petvac mesos off");
+    status.accept_pet_vacuum("[TrainingAssist:petvac:v2] 100000000 2",100000000); panel.update();
+    assert(!status.pet_vacuum_mesos && status.pet_vacuum_items);
+    panel.click(14); assert(commands.back()=="@assist petvac items off");
+    status.accept_pet_vacuum("[TrainingAssist:petvac:v2] 100000000 0",100000000); panel.update();
+    status.accept_pet_vacuum("[TrainingAssist:petvac:v2] 100000000 9",100000000);
+    status.accept_pet_vacuum("[TrainingAssist:petvac:v2] 999 3",100000000);
+    assert(!status.pet_vacuum_mesos && !status.pet_vacuum_items);
     panel.click(1); assert(commands.back()=="@assist invincible on");
     before=commands.size(); panel.click(1); assert(commands.size()==before); // pending: no repeat
     ack("1 1 0 0 -1 800 20");

@@ -70,6 +70,7 @@ namespace ms
 		uint16_t buy_tab_by_inventory(InventoryType::Id type);
 		void changebuytab(InventoryType::Id type);
 		void exit_shop();
+		void sell_all();
 
 		enum Buttons : int16_t
 		{
@@ -106,6 +107,7 @@ namespace ms
 			SELL6,
 			SELL7,
 			SELL8,
+			SELL_ALL,
 			NUM_BUTTONS
 		};
 
@@ -113,6 +115,7 @@ namespace ms
 		const Inventory& inventory;
 
 		Animation npc;
+		int32_t shop_npc = 0;
 		Texture buy_selection;
 		Texture sell_selection;
 		Texture meso;
@@ -217,6 +220,7 @@ namespace ms
 
 		struct SellState
 		{
+			const Inventory* inventory = nullptr;
 			std::vector<SellItem> items;
 			int16_t offset;
 			InventoryType::Id tab;

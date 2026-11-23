@@ -80,6 +80,14 @@ namespace ms
 				height += 29;
 		}
 		dimension = Point<int16_t>(top.width(), top.height() + height + bottom.height());
+		if (!legacy_notice)
+		{
+			// Match the assembled frame, including its input/button panels.
+			int16_t content_height = type == NoticeType::ENTERNUMBER
+				? center.height() + centerbox.height() - 1 + box2.height() + 29
+				: std::max<int16_t>(height, 32) + centerbox.height() + box.height();
+			dimension = Point<int16_t>(top.width(), top.height() + content_height + bottombox.height());
+		}
 
 		// Settings store the top-left corner already (that's what
 		// UIDragElement saves). Re-centring on every open caused the
@@ -146,13 +154,19 @@ namespace ms
 		if (legacy_notice)
 			return top.height() + height + (textfield ? -25 : 23);
 
-		int16_t offset = top.height() + centerbox.height() + box.height() + height - (textfield ? 0 : 16);
+		if (textfield)
+			return top.height() + centerbox.height() + box.height() + height;
+		return top.height() + std::max<int16_t>(height, 32) + centerbox.height();
+	}
 
-		if (type == NoticeType::OK)
-			if (height < 34)
-				offset += 15;
+	int16_t UINotice::number_field_y() const
+	{
+		return legacy_notice ? box2offset(true) : top.height() + center.height() + centerbox.height() - 8;
+	}
 
-		return offset;
+	int16_t UINotice::number_buttons_y() const
+	{
+		return legacy_notice ? box2offset(false) : number_field_y() + box2.height() + 15;
 	}
 
 	UIYesNo::UIYesNo(std::string message, std::function<void(bool yes)> yh, Text::Alignment alignment,
@@ -162,8 +176,9 @@ namespace ms
 
 		int16_t belowtext = box2offset(false) + (legacy_notice ? 0 : button_y_offset);
 
-		buttons[Buttons::YES] = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK, Point<int16_t>(legacy_notice ? 135 : 156 + button_x_offset, belowtext));
-		buttons[Buttons::NO] = std::make_unique<LocalizedMapleButton>(notice_button("BtCancel4", "BtCancel"), localization::Key::Cancel, Point<int16_t>(legacy_notice ? 193 : 198 + button_x_offset, belowtext));
+		int16_t pair_x = legacy_notice ? 135 : (dimension.x() - 88) / 2;
+		buttons[Buttons::YES] = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK, Point<int16_t>(pair_x, belowtext));
+		buttons[Buttons::NO] = std::make_unique<LocalizedMapleButton>(notice_button("BtCancel4", "BtCancel"), localization::Key::Cancel, Point<int16_t>(pair_x + (legacy_notice ? 58 : 48), belowtext));
 	}
 
 	UIYesNo::UIYesNo(std::string message, std::function<void(bool yes)> yesnohandler) : UIYesNo(message, yesnohandler, Text::Alignment::CENTER) {}
@@ -220,13 +235,14 @@ namespace ms
 		max = m;
 		minimum = minimum_value;
 
-		int16_t belowtext = box2offset(true) + (legacy_notice ? 0 : field_y_offset);
-		int16_t pos_y = legacy_notice ? box2offset(false) : belowtext + 35 + button_y_offset;
+		int16_t belowtext = number_field_y();
+		int16_t pos_y = number_buttons_y();
+		int16_t pair_x = legacy_notice ? 135 : (dimension.x() - 88) / 2;
 
-		buttons[Buttons::OK] = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK, legacy_notice ? 135 : 156 + button_x_offset, pos_y);
-		buttons[Buttons::CANCEL] = std::make_unique<LocalizedMapleButton>(notice_button("BtCancel4", "BtCancel"), localization::Key::Cancel, legacy_notice ? 193 : 198 + button_x_offset, pos_y);
+		buttons[Buttons::OK] = std::make_unique<LocalizedMapleButton>(notice_button("BtOK4", "BtOK"), localization::Key::OK, pair_x, pos_y);
+		buttons[Buttons::CANCEL] = std::make_unique<LocalizedMapleButton>(notice_button("BtCancel4", "BtCancel"), localization::Key::Cancel, pair_x + (legacy_notice ? 58 : 48), pos_y);
 
-		numfield = Textfield(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::LIGHTGREY, Rectangle<int16_t>(24, 232, belowtext, belowtext + 20), 10);
+		numfield = Textfield(Text::Font::A11M, Text::Alignment::LEFT, legacy_notice ? Color::Name::LIGHTGREY : Color::Name::BLACK, Rectangle<int16_t>(24, 232, belowtext, belowtext + 20), 10);
 		numfield.change_text(std::to_string(quantity));
 
 		numfield.set_enter_callback(

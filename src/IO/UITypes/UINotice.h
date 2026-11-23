@@ -44,6 +44,8 @@ namespace ms
 		void draw(bool textfield) const;
 
 		int16_t box2offset(bool textfield) const;
+		int16_t number_field_y() const;
+		int16_t number_buttons_y() const;
 
 		bool legacy_notice;
 
