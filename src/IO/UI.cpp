@@ -233,11 +233,7 @@ namespace ms
 
 	void UI::send_cursor(bool pressed)
 	{
-		if (pressed) {
-			auto panel = get_element<UITrainingPanel>();
-			if (!panel || !panel->is_in_range(cursor.get_position()))
-				Stage::get().stop_training_auto("Manual mouse input");
-		}
+		// Manual clicks keep automation enabled; blocking dialogs pause its attacks.
 		mouse_held = pressed;
 		Cursor::State cursorstate = (pressed && enabled) ? Cursor::State::CLICKING : Cursor::State::IDLE;
 		Point<int16_t> cursorpos = cursor.get_position();
@@ -268,6 +264,7 @@ namespace ms
 
 	void UI::rightclick()
 	{
+		if (Stage::get().get_flight_mode() != 0) return;
 		Point<int16_t> pos = cursor.get_position();
 		state->rightclick(pos);
 	}
@@ -321,7 +318,6 @@ namespace ms
 			is_key_down[keycode] = pressed;
 			return;
 		}
-		if (pressed) Stage::get().stop_training_auto("Manual keyboard input");
 		if ((is_key_down[GLFW_KEY_LEFT_ALT] || is_key_down[GLFW_KEY_RIGHT_ALT]) && (is_key_down[GLFW_KEY_ENTER] || is_key_down[GLFW_KEY_KP_ENTER]))
 		{
 			Window::get().toggle_fullscreen();

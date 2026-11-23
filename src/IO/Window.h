@@ -44,6 +44,7 @@ namespace ms
 		Error initwindow();
 
 		bool not_closed() const;
+		bool flight_pointer_active() const;
 		void update();
 		void begin() const;
 		void end() const;

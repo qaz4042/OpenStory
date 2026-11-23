@@ -206,8 +206,19 @@ namespace ms
 		password.update(get_draw_position());
 	}
 
+	void UILogin::send_key(int32_t action, bool pressed, bool escape)
+	{
+		if (pressed && !escape && action == KeyAction::Id::RETURN)
+			login();
+	}
+
 	void UILogin::login()
 	{
+		if (account.get_state() == Textfield::State::DISABLED
+			|| password.get_state() == Textfield::State::DISABLED)
+			return;
+		// Unfocus first: removing a focused field otherwise changes DISABLED back to NORMAL.
+		UI::get().remove_textfield();
 		account.set_state(Textfield::State::DISABLED);
 		password.set_state(Textfield::State::DISABLED);
 

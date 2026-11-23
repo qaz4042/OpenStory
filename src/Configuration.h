@@ -798,16 +798,26 @@ namespace ms
 		ScreenshotFolder() : StringEntry("ScreenshotFolder", "screenshots") {}
 	};
 
-	// HP warning threshold slider (0-100)
+	// HP warning / pet potion threshold slider (0-95)
 	struct HPWarning : public Configuration::ByteEntry
 	{
 		HPWarning() : ByteEntry("HPWarning", "50") {}
 	};
 
-	// MP warning threshold slider (0-100)
+	// MP warning / pet potion threshold slider (0-95)
 	struct MPWarning : public Configuration::ByteEntry
 	{
 		MPWarning() : ByteEntry("MPWarning", "50") {}
+	};
+
+	// Local pickup preferences; server pet equipment checks still apply.
+	struct PetLootMesos : public Configuration::BoolEntry
+	{
+		PetLootMesos() : BoolEntry("PetLootMesos", "true") {}
+	};
+	struct PetLootItems : public Configuration::BoolEntry
+	{
+		PetLootItems() : BoolEntry("PetLootItems", "true") {}
 	};
 
 	// Social filter settings — true means ALLOW

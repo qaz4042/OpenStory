@@ -449,6 +449,20 @@ namespace ms
 		updateopc();
 	}
 
+	bool Window::flight_pointer_active() const
+	{
+#ifndef PLATFORM_IOS
+		if (!glwnd || !glfwGetWindowAttrib(glwnd, GLFW_FOCUSED)) return false;
+        double x, y;
+        int w, h;
+        glfwGetCursorPos(glwnd, &x, &y);
+        glfwGetWindowSize(glwnd, &w, &h);
+        return x >= 0 && y >= 0 && x < w && y < h;
+#else
+		return false;
+#endif
+	}
+
 	void Window::updateopc()
 	{
 		if (opcstep != 0.0f)

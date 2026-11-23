@@ -31,6 +31,11 @@ namespace ms
 		void expire(int8_t, const PhysicsObject*);
 
 		Rectangle<int16_t> bounds() const;
+        // Pet targets must have landed and must not be player-discarded drops.
+        bool can_pet_loot(bool mesos, bool items) const {
+            return is_active() && state == FLOATING && !playerdrop && (is_meso() ? mesos : items);
+        }
+        virtual bool is_meso() const { return false; }
 
 		// Draw a small scaled copy of the drop at a minimap screen point.
 		// Default no-op; item/meso drops override with their icon.

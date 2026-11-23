@@ -3,6 +3,7 @@
 #include "../../Gameplay/TrainingAssistStatus.h"
 #include <functional>
 #include <array>
+#include <vector>
 
 namespace ms
 {
@@ -25,6 +26,13 @@ namespace ms
         Button::State button_pressed(uint16_t id) override;
     private:
         void layout();
+        void refresh_skills();
+        void start_rotation();
+        std::string skill_label(int id) const;
+        std::vector<int> available_skills{0};
+        std::array<int,4> rotation_skills{{0,-1,-1,-1}};
+        std::array<int,4> rotation_ms{{1000,60000,60000,60000}};
+        bool rotation_view=false, use_rotation=false;
         void request(const std::string& command);
         Texture frame_, interior_;
         std::array<Texture, 4> checks_;

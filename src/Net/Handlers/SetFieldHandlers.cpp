@@ -55,7 +55,7 @@ namespace ms
 			});
 
 		GraphicsGL::get().lock();
-		Stage::get().clear();
+		Stage::get().clear(true);
 		Timer::get().start();
 	}
 

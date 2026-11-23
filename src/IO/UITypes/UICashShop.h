@@ -42,6 +42,7 @@ namespace ms
 			void draw(float inter) const;
 		void update() override;
 		void send_scroll(double yoffset) override;
+		void doubleclick(Point<int16_t> cursorpos) override;
 		void filter_catalog();
 		void send_key(int32_t keycode, bool pressed, bool escape) override;
 
@@ -210,6 +211,8 @@ namespace ms
 		std::string search_query;
 		uint8_t category = 0;
 		int16_t cash_offset = 0;
+		int16_t game_inventory_offset = 0;
+		std::vector<int32_t> character_cash_items() const;
 		Point<int16_t> last_cursor;
 		static constexpr uint8_t CATEGORY_COUNT = 9;
 		static int category_for(int32_t itemid);

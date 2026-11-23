@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
 #include "Combat.h"
+#include "../TrainingSkillSupport.h"
 
 #include "../../Character/SkillId.h"
 #include "../../Data/SkillData.h"
@@ -149,21 +150,25 @@ namespace ms
 
 	bool Combat::auto_use_move(int32_t move_id, std::string& stop_reason)
 	{
-		if (!player.get_look().get_equips().has_weapon())
+		if (!training_buff(move_id) && !player.get_look().get_equips().has_weapon())
 		{
-			stop_reason = "No weapon equipped";
+			stop_reason = "未装备武器";
 			return false;
 		}
-		if (!player.can_attack()) return true;
+		if (!player.can_attack()) { stop_reason="等待动作结束"; return false; }
 		const auto& move = get_move(move_id);
-		if (!move.is_attack()) { stop_reason = "Not an attack skill"; return false; }
+		if (!move.is_attack() && !training_buff(move_id)) { stop_reason="技能不支持自动施放"; return false; }
 		const auto reason = player.can_use(move);
-		if (reason == SpecialMove::FBR_COOLDOWN) return true;
+		if (reason == SpecialMove::FBR_COOLDOWN) { stop_reason="等待技能冷却"; return false; }
 		if (reason != SpecialMove::FBR_NONE)
 		{
-			stop_reason = "Skill unavailable (MP, ammunition, weapon or skill requirements)";
+			stop_reason = reason == SpecialMove::FBR_BULLETCOST ? "弹药不足"
+                : reason == SpecialMove::FBR_MPCOST ? "MP不足"
+                : reason == SpecialMove::FBR_WEAPONTYPE ? "武器类型不符"
+                : "等级、职业或HP条件不足";
 			return false;
 		}
+        if (training_buff(move_id)) { use_move(move_id); return true; }
 		const bool melee = move.is_skill() && SkillData::get(move_id).is_melee();
 		Attack preview = player.prepare_attack(move.is_skill(), melee);
 		move.apply_stats(player, preview);
@@ -183,6 +188,9 @@ namespace ms
 			}
 			preview.toleft = !preview.toleft;
 		}
+        // Behave like holding the attack key even when acquisition finds no target.
+        // The actual cast still owns hit detection, action delay and server validation.
+        use_move(move_id);
 		return true;
 	}
 

@@ -333,6 +333,7 @@ namespace ms
 		static const GLshort MINLOSIZE = 32;
 
 		bool locked;
+		bool frame_rendered = false;
 
 		std::vector<Quad> quads;
 		GLuint VBO;

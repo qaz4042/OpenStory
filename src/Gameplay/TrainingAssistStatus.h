@@ -8,6 +8,7 @@ namespace ms
 {
     struct TrainingAssistStatus
     {
+        bool pet_vacuum = false, pet_vacuum_known = false;
         bool known = false, allowed = false, invincible = false, silence = false, vacuum = false;
         int auto_skill = -1, radius = 0, limit = 0;
         int vacuum_pinned = -1, vacuum_eligible = -1;
@@ -30,6 +31,17 @@ namespace ms
             received = std::chrono::steady_clock::now(); ++revision;
             return true;
         }
+        bool accept_pet_vacuum(const std::string& message, int current_map)
+        {
+            const std::string prefix = "[TrainingAssist:petvac:v1] ";
+            if (message.compare(0, prefix.size(), prefix) != 0) return false;
+            int map, on; std::string extra;
+            std::istringstream input(message.substr(prefix.size()));
+            if ((input >> map >> on) && !(input >> extra) && map == current_map && (on == 0 || on == 1)) {
+                pet_vacuum = on; pet_vacuum_known = true; ++revision;
+            }
+            return true;
+        }
         bool accept_vacuum_count(const std::string& message, int current_map)
         {
             const std::string prefix = "[TrainingAssist:vac-count:v1] ";
@@ -47,6 +59,6 @@ namespace ms
         {
             return known && std::chrono::steady_clock::now() - received < std::chrono::seconds(6);
         }
-        void clear() { known = false; vacuum_pinned = vacuum_eligible = -1; stop_reason.clear(); ++revision; }
+        void clear() { pet_vacuum = pet_vacuum_known = false; known = false; vacuum_pinned = vacuum_eligible = -1; stop_reason.clear(); ++revision; }
     };
 }

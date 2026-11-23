@@ -348,7 +348,14 @@ namespace ms
 					std::to_string(item.count)).draw(at + Point<int16_t>(30, 21));
 		}
 		Text(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::WHITE,
-			(chinese ? "已购买 " : "Purchased ") + std::to_string(owned.size())).draw(position + Point<int16_t>(866, 491));
+			(chinese ? "已购 / 双击取出 " : "Owned / double-click ") + std::to_string(owned.size())).draw(position + Point<int16_t>(850, 491));
+
+		const auto character_items = character_cash_items();
+		const int max_game_offset = std::max<int>(0, ((static_cast<int>(character_items.size()) + 3) / 4 - 3) * 4);
+		const int game_first = std::min<int>(game_inventory_offset, max_game_offset);
+		for (int i = 0; i < 12 && game_first + i < character_items.size(); ++i)
+			ItemData::get(character_items[game_first + i]).get_icon(false).draw(
+				position + Point<int16_t>(772 + (i % 4) * 36, 646 + (i / 4) * 36 + 32));
 
 	}
 
@@ -651,6 +658,7 @@ namespace ms
 	void UICashShop::filter_catalog()
 	{
 		auto lower = [](std::string text) {
+			text.erase(std::remove(text.begin(), text.end(), '\0'), text.end());
 			for (char& c : text) if (static_cast<unsigned char>(c) < 128) c = std::tolower(static_cast<unsigned char>(c));
 			return text;
 		};
@@ -669,12 +677,41 @@ namespace ms
 		update_items();
 	}
 
+	std::vector<int32_t> UICashShop::character_cash_items() const
+	{
+		std::vector<int32_t> result;
+		const auto& inventory = Stage::get().get_player().get_inventory();
+		for (auto type : {InventoryType::EQUIP, InventoryType::USE, InventoryType::SETUP, InventoryType::ETC, InventoryType::CASH})
+			for (int16_t slot = 1; slot <= inventory.get_slotmax(type); ++slot)
+			{
+				const int32_t id = inventory.get_item_id(type, slot);
+				if (id && ItemData::get(id).is_cashitem()) result.push_back(id);
+			}
+		return result;
+	}
+
+	void UICashShop::doubleclick(Point<int16_t> cursorpos)
+	{
+		const auto off = cursorpos - position - Point<int16_t>(771, 513);
+		if (off.x() < 0 || off.y() < 0 || off.x() >= 238 || off.y() >= 68
+			|| off.x() % 34 >= 32 || off.y() % 34 >= 32) return;
+		const auto& owned = get_cash_inventory();
+		const int max_offset = std::max<int>(0, ((static_cast<int>(owned.size()) + 6) / 7 - 2) * 7);
+		const int index = std::min<int>(cash_offset, max_offset) + off.x() / 34 + off.y() / 34 * 7;
+		if (index < owned.size()) TakeCashItemPacket(owned[index].cash_id).dispatch();
+	}
+
 	void UICashShop::send_scroll(double yoffset)
 	{
 		if (last_cursor.x() >= 768 && last_cursor.y() >= 505 && last_cursor.y() <= 598)
 		{
 			const int max_offset = std::max<int>(0, ((static_cast<int>(get_cash_inventory().size()) + 6) / 7 - 2) * 7);
 			cash_offset = std::clamp<int>(cash_offset + (yoffset < 0 ? 7 : yoffset > 0 ? -7 : 0), 0, max_offset);
+		}
+		else if (last_cursor.x() >= 768 && last_cursor.y() >= 620)
+		{
+			const int max_offset = std::max<int>(0, ((static_cast<int>(character_cash_items().size()) + 3) / 4 - 3) * 4);
+			game_inventory_offset = std::clamp<int>(game_inventory_offset + (yoffset < 0 ? 4 : yoffset > 0 ? -4 : 0), 0, max_offset);
 		}
 		else if (last_cursor.x() >= GRID_X && last_cursor.x() <= 780 && list_slider.isenabled())
 			list_slider.send_scroll(yoffset);

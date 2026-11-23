@@ -51,6 +51,9 @@ namespace ms
 
 	private:
 		void show_equip(EquipSlot::Id slot);
+		int potion_slot(Point<int16_t> cursorpos) const;
+        void use_pet_accessory(int index);
+		void set_potion(bool mp, int32_t itemid);
 		void clear_tooltip();
 		void load_icons();
 		void update_slot(EquipSlot::Id slot);
@@ -98,6 +101,9 @@ namespace ms
 		std::string tab_source[Buttons::BT_TABE];
 		LocalizedArt translated_frame, translated_slots;
 		Texture tabbar;
+        Texture pet_panel, pet_card, pet_slot;
+        Texture pet_checks[2], pet_adjust[3], pet_tabs[2];
+        Point<int16_t> pet_hover = Point<int16_t>(-1,-1);
 		Texture background[Buttons::BT_TABE];
 		Texture disabled;
 		Texture disabled2;

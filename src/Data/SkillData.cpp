@@ -159,6 +159,9 @@ namespace ms
 			{ SkillId::FIRE_DEMON, ATTACK },
 			{ SkillId::PARALYZE, ATTACK | RANGED },
 			{ SkillId::METEOR_SHOWER, ATTACK },
+            { 3001004, ATTACK | RANGED }, { 3001005, ATTACK | RANGED },
+            { 4001334, ATTACK | MELEE }, { 4001344, ATTACK | RANGED },
+            { 5101002, ATTACK | MELEE }, { 5201001, ATTACK | RANGED },
 			// Pirate
 			{ SkillId::FLASH_FIST, ATTACK | MELEE },
 			{ SkillId::SOMERSAULT_KICK, ATTACK | MELEE },

@@ -178,3 +178,270 @@ TabCash,Cash,特殊,属性/背包/技能/任务追踪等客户端界面,OpenStor
 AbilityLabel,Ability,特殊能力,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
 LockedLabel,Locked,未解锁,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
 ResetLabel,Reset,重置,属性/背包/技能/任务追踪等客户端界面,OpenStory,项目自有,src/Localization/Messages.h,项目自译,依据当前字段语义；未与国服原资源逐节点核对
+Display:Beginner,Beginner,初心者,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Swordsman,Swordsman,剑士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Fighter,Fighter,剑客,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Crusader,Crusader,勇士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Hero,Hero,英雄,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Page,Page,准骑士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:White Knight,White Knight,骑士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Paladin,Paladin,圣骑士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Spearman,Spearman,枪战士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Dragon Knight,Dragon Knight,龙骑士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Dark Knight,Dark Knight,黑骑士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Magician,Magician,魔法师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Wizard (F/P),Wizard (F/P),火毒法师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Mage (F/P),Mage (F/P),火毒巫师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Archmage (F/P),Archmage (F/P),火毒魔导师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Wizard (I/L),Wizard (I/L),冰雷法师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Mage (I/L),Mage (I/L),冰雷巫师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Archmage (I/L),Archmage (I/L),冰雷魔导师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Cleric,Cleric,牧师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Priest,Priest,祭司,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Bishop,Bishop,主教,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Archer,Archer,弓箭手,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Hunter,Hunter,猎人,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Ranger,Ranger,射手,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Bowmaster,Bowmaster,神射手,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Crossbowman,Crossbowman,弩弓手,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Sniper,Sniper,游侠,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Marksman,Marksman,箭神,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Rogue,Rogue,飞侠,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Assassin,Assassin,刺客,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Hermit,Hermit,无影人,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Nightlord,Nightlord,隐士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Bandit,Bandit,侠客,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Chief Bandit,Chief Bandit,独行客,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Shadower,Shadower,侠盗,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Pirate,Pirate,海盗,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Brawler,Brawler,拳手,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Marauder,Marauder,斗士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Buccaneer,Buccaneer,冲锋队长,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Gunslinger,Gunslinger,火枪手,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Outlaw,Outlaw,大副,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Corsair,Corsair,船长,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Noblesse,Noblesse,贵族,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Dawn Warrior,Dawn Warrior,魂骑士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Blaze Wizard,Blaze Wizard,炎术士,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Wind Archer,Wind Archer,风灵使者,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Night Walker,Night Walker,夜行者,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Thunder Breaker,Thunder Breaker,奇袭者,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Aran,Aran,战神,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Sage,Sage,贤者,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Elementalist,Elementalist,元素使,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Arcanum,Arcanum,奥术师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Archsage,Archsage,大贤者,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Necromancer,Necromancer,死灵法师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Dark Acolyte,Dark Acolyte,黑暗侍从,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Soul Reaper,Soul Reaper,灵魂收割者,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Lich King,Lich King,巫妖王,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Summoner,Summoner,召唤师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Beastmaster,Beastmaster,驯兽师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Warcaller,Warcaller,战场唤师,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Primal Alpha,Primal Alpha,原初领主,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:ATT INCREASE,ATT INCREASE,攻击提升,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Type: ,Type: ,类型：,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Attack Speed: ,Attack Speed: ,攻击速度：,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Remaining Enhancements: ,Remaining Enhancements: ,剩余升级次数：,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Hammers Applied: ,Hammers Applied: ,金锤使用次数：,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:STR,STR,力量,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:DEX,DEX,敏捷,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:INT,INT,智力,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:LUK,LUK,运气,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:MaxHP,MaxHP,最大 HP,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:MaxMP,MaxMP,最大 MP,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Attack Power,Attack Power,物理攻击,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Magic Attack,Magic Attack,魔法攻击,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Defense,Defense,物理防御,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:MAGIC DEFENSE,MAGIC DEFENSE,魔法防御,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:ACCURACY,ACCURACY,命中率,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:AVOID,AVOID,回避率,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:HANDS,HANDS,手技,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Speed,Speed,移动速度,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Jump,Jump,跳跃力,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:HAT,HAT,帽子,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:FACE ACCESSORY,FACE ACCESSORY,脸部饰品,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:EYE ACCESSORY,EYE ACCESSORY,眼部饰品,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:EARRINGS,EARRINGS,耳环,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:TOP,TOP,上衣,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:OVERALL,OVERALL,套服,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:BOTTOM,BOTTOM,裤裙,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:SHOES,SHOES,鞋子,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:GLOVES,GLOVES,手套,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:SHIELD,SHIELD,盾牌,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:CAPE,CAPE,披风,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:RING,RING,戒指,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:PENDANT,PENDANT,吊坠,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:BELT,BELT,腰带,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:MEDAL,MEDAL,勋章,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:PET EQUIP,PET EQUIP,宠物装备,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:TAMING MOB,TAMING MOB,骑宠,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:SADDLE,SADDLE,鞍具,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:CASH,CASH,特殊装备,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:ONE-HANDED SWORD,ONE-HANDED SWORD,单手剑,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:ONE-HANDED AXE,ONE-HANDED AXE,单手斧,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:ONE-HANDED MACE,ONE-HANDED MACE,单手钝器,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:DAGGER,DAGGER,短刀,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:WAND,WAND,短杖,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:STAFF,STAFF,长杖,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:TWO-HANDED SWORD,TWO-HANDED SWORD,双手剑,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:TWO-HANDED AXE,TWO-HANDED AXE,双手斧,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:TWO-HANDED MACE,TWO-HANDED MACE,双手钝器,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:SPEAR,SPEAR,枪,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:POLEARM,POLEARM,矛,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:BOW,BOW,弓,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:CROSSBOW,CROSSBOW,弩,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:CLAW,CLAW,拳套,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:KNUCKLE,KNUCKLE,指节,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:GUN,GUN,短枪,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:(Hidden Potential),(Hidden Potential),（潜能未鉴定）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:(Rare Item),(Rare Item),（稀有装备）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:(Epic Item),(Epic Item),（史诗装备）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:(Unique Item),(Unique Item),（独特装备）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:(Legendary Item),(Legendary Item),（传说装备）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display: (M), (M),（男）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display: (F), (F),（女）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You cannot use this skill with this weapon.,You cannot use this skill with this weapon.,当前武器无法使用这个技能。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You do not have enough hp to use this skill.,You do not have enough hp to use this skill.,HP 不足，无法使用这个技能。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You do not have enough mp to use this skill.,You do not have enough mp to use this skill.,MP 不足，无法使用这个技能。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You do not have enough arrows to use this attack.,You do not have enough arrows to use this attack.,箭矢不足，无法攻击。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You do not have enough bullets to use this attack.,You do not have enough bullets to use this attack.,子弹不足，无法攻击。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You do not have enough throwing stars to use this attack.,You do not have enough throwing stars to use this attack.,飞镖不足，无法攻击。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You cannot use this skill as it is on cooldown.,You cannot use this skill as it is on cooldown.,技能冷却中，暂时无法使用。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:The scroll lights up and it's mysterious powers have been transferred to the item.,The scroll lights up and it's mysterious powers have been transferred to the item.,卷轴闪耀着光芒，神秘力量已注入装备。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:The scroll lights up but the item remains as if nothing happened.,The scroll lights up but the item remains as if nothing happened.,卷轴闪耀着光芒，但装备没有发生变化。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:The item has been destroyed due to the overwhelming power of the scroll.,The item has been destroyed due to the overwhelming power of the scroll.,装备承受不住卷轴的力量，已被摧毁。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:You cannot complete this action right now.\nEvade the attack and try again.,You cannot complete this action right now.\nEvade the attack and try again.,现在无法进行此操作。\n请脱离战斗后重试。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Your current job\ncannot equip the selected item.,Your current job\ncannot equip the selected item.,当前职业无法穿戴这件装备。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:Your stats are too low to equip this item\nor you do not meet the job requirement.,Your stats are too low to equip this item\nor you do not meet the job requirement.,未满足这件装备的等级或属性要求。,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:FAST (1),FAST (1),快（1）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:FAST (2),FAST (2),快（2）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:FAST (3),FAST (3),快（3）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:FAST (4),FAST (4),快（4）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:NORMAL (5),NORMAL (5),普通（5）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:NORMAL (6),NORMAL (6),普通（6）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:SLOW (7),SLOW (7),慢（7）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:SLOW (8),SLOW (8),慢（8）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Display:SLOW (9),SLOW (9),慢（9）,常用职业、装备说明与客户端提示,OpenStory,项目自有,src/Localization/Vocabulary.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Victoria Road,Victoria Road,维多利亚路,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Victoria Island,Victoria Island,金银岛,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Maple Road,Maple Road,彩虹岛路,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Maple Island,Maple Island,彩虹岛,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Dungeon,Dungeon,地下迷宫,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Sleepywood,Sleepywood,林中之城,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:SleepyWood,SleepyWood,林中之城,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Sleepy Dungeon,Sleepy Dungeon,沉睡的迷宫,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:On the Way to the Harbor,On the Way to the Harbor,通往港口的路,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Lith Harbor,Lith Harbor,明珠港,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Henesys,Henesys,射手村,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Henesys Market,Henesys Market,射手村市场,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Henesys Park,Henesys Park,射手村公园,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Henesys Hunting Ground,Henesys Hunting Ground,射手训练场,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Hunting Ground in the Middle of the Forest,Hunting Ground in the Middle of the Forest,森林中央的狩猎场,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Mushroom Garden,Mushroom Garden,蘑菇花园,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:An Empty House,An Empty House,空屋,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Pig Beach,Pig Beach,猪的海岸,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Ellinia,Ellinia,魔法密林,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Perion,Perion,勇士部落,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Kerning City,Kerning City,废弃都市,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Kerning City Subway,Kerning City Subway,废弃都市地铁,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Nautilus Harbor,Nautilus Harbor,诺特勒斯码头,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:The Nautilus,The Nautilus,诺特勒斯号,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Nautilus,Nautilus,诺特勒斯号,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Orbis,Orbis,天空之城,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Orbis Park,Orbis Park,天空之城公园,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Orbis Tower,Orbis Tower,通天塔,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:El Nath,El Nath,冰峰雪域,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:El Nath Market,El Nath Market,冰峰雪域市场,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Ludibrium,Ludibrium,玩具城,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Ludibrium Village,Ludibrium Village,玩具城村庄,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Eos Tower,Eos Tower,奥斯塔,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Helios Tower,Helios Tower,赫丽奥斯塔,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Omega Sector,Omega Sector,地球防御本部,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Korean Folk Town,Korean Folk Town,童话村,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Aquarium,Aquarium,水下世界,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Aqua Road,Aqua Road,水下世界路,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Leafre,Leafre,神木村,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Leafre Forest,Leafre Forest,神木村森林,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Mu Lung,Mu Lung,武陵,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Herb Town,Herb Town,百草堂,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Ariant,Ariant,阿里安特,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Magatia,Magatia,玛加提亚,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Nihal Desert,Nihal Desert,尼哈沙漠,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Ereve,Ereve,圣地,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Rien,Rien,里恩,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Rien Village,Rien Village,里恩村,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Florina Beach,Florina Beach,黄金海岸,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Amherst,Amherst,南港,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Southperry,Southperry,彩虹岛码头,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Amoria,Amoria,婚礼村,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:New Leaf City,New Leaf City,新叶城,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Singapore,Singapore,新加坡,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Boat Quay Town,Boat Quay Town,驳船码头,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:CBD,CBD,中央商务区,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Zipangu,Zipangu,日本,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Mushroom Shrine,Mushroom Shrine,蘑菇神社,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Showa Town,Showa Town,昭和村,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Showa Street Market,Showa Street Market,昭和市场,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Temple of Time,Temple of Time,时间神殿,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Time Lane,Time Lane,时间之路,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Deep Sleepywood,Deep Sleepywood,林中之城深处,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Ant Tunnel,Ant Tunnel,蚂蚁洞,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:The Cave of Evil Eye,The Cave of Evil Eye,邪恶之眼洞穴,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:The Forest of Golem,The Forest of Golem,石巨人森林,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Golem's Temple,Golem's Temple,石巨人寺院,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Dangerous Steam,Dangerous Steam,危险的蒸汽,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:The Swamp of Despair,The Swamp of Despair,绝望的沼泽,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Swamp,Swamp,沼泽,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:The Tree That Grew,The Tree That Grew,大木林,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Southern Forest,Southern Forest,南部森林,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Northern Forest,Northern Forest,北部森林,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:East Rocky Mountain,East Rocky Mountain,东部岩山,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:West Rocky Mountain,West Rocky Mountain,西部岩山,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Burnt Land,Burnt Land,火焰之地,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Sunset Sky,Sunset Sky,日落天空,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Hidden Street,Hidden Street,隐藏地图,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Hidden Map,Hidden Map,隐藏地图,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Free Market,Free Market,自由市场,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+Map:Cash Shop,Cash Shop,商城,地图文本显示；未知名称原样回退,OpenStory,项目自有,src/Localization/MapNames.h,项目自译,仅显示；未取得国服原包逐条核对证据
+CharacterNameFormat,"Use 3-12 English letters or digits. Chinese, spaces and symbols are not supported by this server.",角色名须为 3–12 位英文字母或数字。当前服务器不支持中文、空格或符号。,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+CharacterNameForbidden,This name contains a restricted word. Please choose another name.,角色名包含禁用词，请换一个名字。,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+EquipmentInventory,Equipment Inventory,角色装备,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+CommunityMenu,Community,社区,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+RankingsMenu,Rankings,排行榜,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+AdventureJournal,Adventure journal,冒险日志,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+MessengerMenu,Messenger,聊天工具,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+BattleAlbum,Battle album,战斗图鉴,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+MonsterFarm,Monster farm,怪物农场,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+EnableNavigation,Enable navigation,开启导航,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+AutoPilotReady,Auto-pilot ready,自动飞行,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+OpenMapSearch,Open search window,地图搜索,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SearchLabel,Search,搜索,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+MapSearchHint,Enter the name of the map or monster that you would like to find.,输入要查找的地图或怪物名称。,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotBook,Monster book,图鉴,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotHat,Hat,帽子,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotBadge,Badge,徽章,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotAndroid,Android,安卓,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotHeart,Heart,心脏,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotMedal,Medal,勋章,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotFace,Face,脸饰,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotRing,Ring,戒指,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotEye,Eye accessory,眼饰,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotEar,Earring,耳饰,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotShoulder,Shoulder,肩饰,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotCape,Cape,披风,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotTop,Top,上衣,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotPendant,Pendant,吊坠,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotWeapon,Weapon,武器,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotShield,Shield,盾牌,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotGloves,Gloves,手套,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotBottom,Bottom,裤裙,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotBelt,Belt,腰带,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotShoes,Shoes,鞋子,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotMount,Mount,骑宠,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotSaddle,Saddle,鞍具,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+SlotMountEquip,Mount equipment,骑装,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+WorldMapTitle,World Map,世界地图,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+DropMesoPrompt,How many mesos would you like to drop? (10 - {value}),要丢弃多少金币？（10～{value}）,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+DropMesoInsufficient,You need at least 10 mesos to drop coins.,至少持有 10 金币才能丢钱。,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写
+NumberMinimumValue,Please enter at least {value}.,请输入不小于 {value} 的数值。,常用界面补齐,OpenStory,项目自有,src/Localization/Messages.h,项目自译,仅显示；按实际功能译写

@@ -31,6 +31,20 @@ int main() {
     assert(state.active() && state.skill() == 0);
     state.accept("[TrainingAssist:auto:v1] 100 -1", 100);
     assert(!state.active());
+    ms::TrainingAutoAttack rotation;
+    assert(rotation.accept("[TrainingAssist:rotation:v1] 100 5001002:1000 5101006:60000",100));
+    assert(rotation.ready(now) && rotation.skill()==5001002);
+    assert(!rotation.ready(now));
+    assert(rotation.ready(now+std::chrono::milliseconds(200)) && rotation.skill()==5101006);
+    // Polling the same plan preserves timers, especially long buff intervals.
+    rotation.accept("[TrainingAssist:rotation:v1] 100 5001002:1000 5101006:60000",100);
+    assert(!rotation.ready(now+std::chrono::milliseconds(400)));
+    assert(rotation.ready(now+std::chrono::milliseconds(1000)) && rotation.skill()==5001002);
+    rotation.retry(now+std::chrono::milliseconds(1000));
+    assert(rotation.ready(now+std::chrono::milliseconds(1200)) && rotation.skill()==5001002);
+    rotation.accept("[TrainingAssist:rotation:v1] 100 5001002:1",100);
+    assert(rotation.active()); // malformed plan cannot replace existing settings
+    rotation.stop(); assert(!rotation.ready(now+std::chrono::seconds(600)));
     ms::TrainingAssistStatus status;
     assert(!status.fresh());
     assert(!status.accept("unrelated",100));

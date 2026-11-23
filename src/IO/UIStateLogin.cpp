@@ -88,6 +88,9 @@ namespace ms
 				return;
 			}
 		}
+		// Saved credentials can leave both text fields unfocused.
+		if (auto front = get_front(); front && front->get_type() == UIElement::Type::LOGIN)
+			front->send_key(action, pressed, escape);
 	}
 
 	Cursor::State UIStateLogin::send_cursor(Cursor::State cursorstate, Point<int16_t> cursorpos)

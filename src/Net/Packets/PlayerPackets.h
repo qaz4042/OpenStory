@@ -102,6 +102,17 @@ namespace ms
 		}
 	};
 
+	// Cosmic v83 CHANGE_KEYMAP modes 1/2 persist auto-potion item IDs.
+	class PetAutoPotionPacket : public OutPacket
+	{
+	public:
+		PetAutoPotionPacket(bool mp, int32_t itemid) : OutPacket(OutPacket::Opcode::CHANGE_KEYMAP)
+		{
+			write_int(mp ? 2 : 1);
+			write_int(itemid);
+		}
+	};
+
 	// Requests the server to change key mappings
 	// Opcode: CHANGE_KEYMAP(135)
 	class ChangeKeyMapPacket : public OutPacket

@@ -94,6 +94,11 @@ namespace ms
 		}
 	}
 
+	void UIStateCashShop::doubleclick(Point<int16_t> pos)
+	{
+		if (auto front = get_front()) front->doubleclick(pos);
+	}
+
 	void UIStateCashShop::send_scroll(double yoffset)
 	{
 		if (auto front = get_front())

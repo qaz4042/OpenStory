@@ -1023,6 +1023,30 @@ namespace ms
 			height = static_cast<GLshort>(srch * HD_SCALE);
 		}
 
+		// Linear filtering of stretched one-pixel UI slices samples beyond
+		// their atlas rect. Extrude their own edge pixels into a guard band so
+		// the neighbouring allocation can never leak into borders/backgrounds.
+		const GLshort image_width = width;
+		const GLshort image_height = height;
+		constexpr GLshort gutter = 1;
+		if (width + 2 * gutter > ATLASW || height + 2 * gutter > ATLASH - FONT_REGION_H)
+			return nulloffset;
+		width += 2 * gutter;
+		height += 2 * gutter;
+		std::vector<uint32_t> padded(static_cast<size_t>(width) * height);
+		const auto* source_pixels = static_cast<const uint32_t*>(pixels);
+		for (int row = 0; row < height; ++row)
+		{
+			const int sy = std::clamp(row - gutter, 0, int(image_height) - 1);
+			for (int col = 0; col < width; ++col)
+			{
+				const int sx = std::clamp(col - gutter, 0, int(image_width) - 1);
+				padded[static_cast<size_t>(row) * width + col] =
+					source_pixels[static_cast<size_t>(sy) * image_width + sx];
+			}
+		}
+		pixels = padded.data();
+
 		Leftover value = Leftover(x, y, width, height);
 
 		size_t lid = leftovers.findnode(
@@ -1091,10 +1115,16 @@ namespace ms
 			// and records an Offset that samples outside the texture.
 			if (border.y() + height > ATLASH)
 			{
-				// Mid-frame reset: every quad already queued this frame keeps
-				// an atlas rect that the rest of the frame is about to
-				// overwrite. If this line ever appears more than once per map
-				// load, that is the flicker.
+				// Consume queued UVs before their atlas storage is reused. Continue
+				// drawing into the same framebuffer without clearing earlier batches.
+				if (!quads.empty())
+				{
+					flush(1.0f);
+					frame_rendered = true;
+					quads.clear();
+					additive_ranges.clear();
+					additive_from = 0;
+				}
 				dbg_log_reset(ResetCause::OVERFLOW_FULL, width, height);
 
 				clearinternal();
@@ -1151,7 +1181,7 @@ namespace ms
 		return offsets.emplace(
 			std::piecewise_construct,
 			std::forward_as_tuple(id),
-			std::forward_as_tuple(x, y, width, height)
+			std::forward_as_tuple(x + gutter, y + gutter, image_width, image_height)
 		).first->second;
 	}
 
@@ -1743,7 +1773,9 @@ namespace ms
 		}
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		if (!frame_rendered)
+			glClear(GL_COLOR_BUFFER_BIT);
+		frame_rendered = true;
 
 		GLsizeiptr csize = quads.size() * sizeof(Quad);
 
@@ -1863,6 +1895,7 @@ namespace ms
 
 		if (coverscene)
 			quads.pop_back();
+		frame_rendered = false;
 	}
 
 	void GraphicsGL::clearscene()
@@ -1870,6 +1903,7 @@ namespace ms
 		if (!locked)
 		{
 			quads.clear();
+			frame_rendered = false;
 			additive_ranges.clear();
 			additive_active = false;
 			additive_from = 0;

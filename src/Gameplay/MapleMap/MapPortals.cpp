@@ -115,18 +115,21 @@ namespace ms
 			return {};
 	}
 
-	Portal::WarpInfo MapPortals::find_warp_at(Point<int16_t> playerpos)
+	Portal::WarpInfo MapPortals::find_warp_at(Point<int16_t> playerpos, bool up_only)
 	{
 		if (cooldown == 0)
 		{
-			cooldown = WARPCD;
-
 			for (auto& iter : portals_by_id)
 			{
 				const Portal& portal = iter.second;
 
-				if (portal.bounds().contains(playerpos))
-					return portal.getwarpinfo();
+				if (up_only && (portal.get_type() == Portal::SPAWN || portal.get_type() == Portal::TOUCH
+                    || portal.get_type() == Portal::SCRIPTED_TOUCH || portal.get_type() >= Portal::SPRING1)) continue;
+
+				if (portal.bounds().contains(playerpos)) {
+                    cooldown = WARPCD;
+                    return portal.getwarpinfo();
+                }
 			}
 		}
 

@@ -1,3 +1,4 @@
+#include "../Gameplay/PetSettings.h"
 //////////////////////////////////////////////////////////////////////////////////
 //	This file is part of the continued Journey MMORPG client					//
 //	Copyright (C) 2015-2019  Daniel Allendorf, Ryan Payton						//
@@ -213,7 +214,22 @@ namespace ms
 	{
 		const PlayerState* pst = get_state(state);
 
-		if (pst)
+        if (assist_flight && state != Char::State::DIED)
+        {
+            phobj.hforce = phobj.vforce = phobj.hspeed = phobj.vspeed = 0;
+            if (assist_flight_real)
+            {
+                phobj.x += assist_flight_step.x();
+                phobj.y += assist_flight_step.y();
+                phobj.fhid = 0;
+                phobj.onground = false;
+                if (assist_flight_step.x() != 0) set_direction(assist_flight_step.x() > 0);
+                set_state(Char::State::FALL);
+            }
+            else phobj.normalize(); // Freeze interpolation as well as the actual body.
+            Char::update(physics, get_stancespeed());
+        }
+        else if (pst)
 		{
 			pst->update(*this);
 			physics.move_object(phobj);
@@ -344,13 +360,13 @@ namespace ms
 				int32_t cur_mp = stats.get_stat(MapleStat::Id::MP);
 				int32_t max_mp = stats.get_stat(MapleStat::Id::MAXMP);
 
-				if (hp_pot != 0 && auto_hp_pot_ticks == 0 && cur_hp * 2 < max_hp && inventory.find_item(InventoryType::Id::USE, hp_pot))
+				if (hp_pot != 0 && auto_hp_pot_ticks == 0 && pet_needs_potion(cur_hp, max_hp, Setting<HPWarning>::get().load()) && inventory.find_item(InventoryType::Id::USE, hp_pot))
 				{
 					use_item(hp_pot);
 					auto_hp_pot_ticks = AUTO_POT_COOLDOWN_TICKS;
 				}
 
-				if (mp_pot != 0 && auto_mp_pot_ticks == 0 && cur_mp * 2 < max_mp && inventory.find_item(InventoryType::Id::USE, mp_pot))
+				if (mp_pot != 0 && auto_mp_pot_ticks == 0 && pet_needs_potion(cur_mp, max_mp, Setting<MPWarning>::get().load()) && inventory.find_item(InventoryType::Id::USE, mp_pot))
 				{
 					use_item(mp_pot);
 					auto_mp_pot_ticks = AUTO_POT_COOLDOWN_TICKS;

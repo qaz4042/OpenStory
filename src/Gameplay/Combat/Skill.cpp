@@ -297,6 +297,7 @@ namespace ms
 		if (weapon != reqweapon && reqweapon != Weapon::NONE)
 			return FBR_WEAPONTYPE;
 
+        if (!is_attack()) return FBR_NONE; // Buffs do not fire bullets/arrows/stars.
 		// Punches/kicks do not consume ammunition, including when holding a gun.
 		if (SkillData::get(skillid).is_melee())
 			return FBR_NONE;

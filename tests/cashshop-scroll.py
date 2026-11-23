@@ -9,6 +9,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import tempfile
+import sys
 
 root = Path(__file__).resolve().parents[1]
 build = root / 'build-macos'
@@ -23,6 +24,7 @@ source = r'''
 #include "src/Audio/Audio.h"
 #include "src/Util/NxFiles.h"
 #include "src/Net/Handlers/CashShopHandlers.h"
+#include "src/Gameplay/Stage.h"
 #include <cassert>
 #include <filesystem>
 #include <iostream>
@@ -51,6 +53,12 @@ int main(int argc,char** argv) {
  bytes={0x57};record(102,2000000,20);packet(); assert(get_cash_inventory().size()==2);
  bytes={int8_t(0x89)};number(2,1);record(103,5000000);record(104,1002001);number(0,2);packet();
  assert(get_cash_inventory().size()==4);
+ // Transfer success carries a destination slot and full item record.
+ bytes={0x68};number(9,2);number(2,1);number(2000000,4);number(1,1);number(102,8);
+ number(0,8);number(20,2);number(0,2);number(0,2);packet();
+ assert(Stage::get().get_player().get_inventory().get_item_id(InventoryType::USE,9)==2000000);
+ assert(get_cash_inventory().size()==3);
+ bytes={0x57};record(102,2000000,20);packet();
  bytes={0x4B};number(1,2);record(999,1002000); // missing trailing slot counts
  try {packet();assert(false);} catch(const PacketError&) {}
  assert(get_cash_inventory().size()==4);
@@ -80,7 +88,8 @@ int main(int argc,char** argv) {
  shop->search.change_text("");shop->filter_catalog();
  shop->send_cursor(true,Point<int16_t>(40,58+33+10));assert(shop->category==1 && !shop->items.empty());
  for(const auto& item:shop->items) assert(item.get_itemid()/10000==100);
- const auto title=shop->items.front().get_name();
+ auto title=shop->items.front().get_name();
+ title.erase(std::remove(title.begin(),title.end(),'\0'),title.end());
  shop->search.change_text("");shop->search.set_state(Textfield::State::FOCUSED);
  for(size_t i=0;i<title.size();) {
   size_t used=0;auto cp=Text::utf8_decode(title.data(),title.size(),i,used);assert(used>0);
@@ -128,5 +137,6 @@ with tempfile.TemporaryDirectory(prefix='openstory-cash-') as directory:
     subprocess.run(link, cwd=build, check=True)
     output = build / 'cashshop-scroll-check'
     output.mkdir(exist_ok=True)
-    subprocess.run([str(executable), str(root / 'wz'), str(work), str(output)],
-                   cwd=work, check=True)
+    if "--build-only" not in sys.argv:
+        subprocess.run([str(executable), str(root / 'wz'), str(work), str(output)],
+                       cwd=work, check=True)

@@ -552,8 +552,8 @@ namespace ms
 			auto character = Stage::get().get_character(cid);
 
 			if (recv.length() > 0)
-				recv.read_byte(); // pet
-			else if (character)
+				recv.read_byte(); // pet slot; use its owner as the stable animation target
+			if (character)
 				looter = character->get_phobj();
 
 			// Attenuate the pickup sound by the looting player's distance.

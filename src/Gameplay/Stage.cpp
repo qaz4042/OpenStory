@@ -25,6 +25,8 @@
 #include "../Configuration.h"
 
 #include "../IO/UI.h"
+#include "../IO/Window.h"
+#include "FlightMotion.h"
 #include "../IO/UITypes/UITrainingPanel.h"
 #include "../IO/UITypes/UIChatBar.h"
 #include "../Net/Packets/MessagingPackets.h"
@@ -37,6 +39,7 @@
 #include "../Net/Packets/GameplayPackets.h"
 #include "../Net/Packets/InventoryPackets.h"
 #include "../Graphics/GraphicsGL.h"
+#include "../Graphics/Geometry.h"
 #include "../Character/MapleStat.h"
 
 #ifdef USE_NX
@@ -69,10 +72,14 @@ namespace ms
 		}
 
 		state = State::ACTIVE;
+        const int resume_flight = transfer_flight_mode;
+        transfer_flight_mode = 0;
+        if (resume_flight) set_flight_mode(resume_flight);
 	}
 
 	void Stage::loadplayer(const CharEntry& entry)
 	{
+		flight_mode = transfer_flight_mode = 0;
 		player = entry;
 		playable = player;
 
@@ -83,8 +90,10 @@ namespace ms
 		expBefore = stats.get_exp();
 	}
 
-	void Stage::clear()
+	void Stage::clear(bool map_transfer)
 	{
+        transfer_flight_mode = map_transfer ? (flight_mode ? flight_mode : transfer_flight_mode) : 0;
+		set_flight_mode(0);
 		held_attack_skill = 0;
 		dash_tap_direction = -1;
 		stop_training_auto("Map changed / disconnected", false);
@@ -181,6 +190,11 @@ namespace ms
 		portals.draw(viewpos, alpha);
 
 		combat.draw(viewx, viewy, alpha);
+        if (flight_mode == 1) {
+            Point<int16_t> at = Point<int16_t>(flight_position.x(), flight_position.y()) + viewpos;
+            ColorBox(17, 3, Color::Name::YELLOW, 1).draw(at - Point<int16_t>(8,1));
+            ColorBox(3, 17, Color::Name::YELLOW, 1).draw(at - Point<int16_t>(1,8));
+        }
 
 		if (gfx_quality > 10)
 			backgrounds.drawforegrounds(viewx, viewy, alpha);
@@ -233,6 +247,7 @@ namespace ms
 
 	bool Stage::training_auto_notice(const std::string& notice)
 	{
+		if (training_status.accept_pet_vacuum(notice, get_mapid())) return true;
 		if (training_status.accept_vacuum_count(notice, get_mapid())) return true;
 		const std::string pin_prefix = "[TrainingAssist:pin:v1] ";
 		if (notice.compare(0, pin_prefix.size(), pin_prefix) == 0) {
@@ -255,12 +270,14 @@ namespace ms
 				stop_training_auto("Server stopped auto attack", false);
 			return true;
 		}
+        if (notice.rfind("[TrainingAssist:rotation:v1] ",0)==0)
+            return training_auto.accept(notice,get_mapid());
 		const bool handled = training_auto.accept(notice, get_mapid());
 		if (handled && training_auto.active()) training_status.stop_reason.clear();
 		if (handled)
 			if (auto chat = UI::get().get_element<UIChatBar>())
 				chat->send_chatline(training_auto.active()
-					? "Auto attack enabled (skill " + std::to_string(training_auto.skill()) + "). Manual input stops it."
+					? "Auto attack enabled (skill " + std::to_string(training_auto.skill()) + "). Use F8 to stop it."
 					: "Auto attack disabled.", UIChatBar::LineType::YELLOW);
 		return handled;
 	}
@@ -269,9 +286,11 @@ namespace ms
 	{
 		if (!training_auto.active()) return;
 		training_auto.stop();
-		training_status.stop_reason = reason == "Manual keyboard input" || reason == "Manual mouse input" || reason == "Manual game input"
-			? "手动操作，已停止挂机" : reason == "Disconnected / dead" ? "断线或死亡，已停止挂机"
+		training_status.stop_reason = reason == "Disconnected / dead" ? "断线或死亡，已停止挂机"
 			: reason == "No weapon equipped" ? "未装备武器，已停止挂机"
+            : reason == "No ammunition" ? "弹药不足，请补充子弹或箭矢"
+            : reason == "Not enough MP" ? "MP 不足，请补充蓝量"
+            : reason == "Wrong weapon type" ? "武器类型不符，请更换武器"
 			: reason == "Skill unavailable (MP, ammunition, weapon or skill requirements)" ? "技能条件不足，请检查蓝量、弹药和武器"
 			: reason == "Server stopped auto attack" ? "服务端已停止挂机" : "挂机已停止";
 		if (notify_server && Session::get().is_connected())
@@ -306,18 +325,20 @@ namespace ms
 		doors.update(physics);
 		mists.update(physics);
 		point_effects.update();
+		update_flight();
 		player.update(physics);
 
 		if (training_auto.active())
 		{
 			if (!Session::get().is_connected() || player.get_stats().get_stat(MapleStat::Id::HP) == 0)
 				stop_training_auto("Disconnected / dead");
-			else if (!(UI::get().get_element<UITrainingPanel>() && UI::get().get_element<UITrainingPanel>()->expanded())
-				&& !UI::get().blocks_training_attack() && !player.is_climbing() && !player.is_sitting()
+			else if (!flight_mode && !UI::get().blocks_training_attack() && !player.is_climbing() && !player.is_sitting()
 				&& training_auto.ready(TrainingAutoAttack::Clock::now()))
 			{
 				std::string reason;
-				if (!combat.auto_use_move(training_auto.skill(), reason)) stop_training_auto(reason);
+				if (!combat.auto_use_move(training_auto.skill(), reason))
+                    { training_auto.retry(TrainingAutoAttack::Clock::now()); training_status.stop_reason = "暂停：" + reason; }
+                else training_status.stop_reason.clear();
 			}
 		}
 
@@ -328,14 +349,14 @@ namespace ms
 			&& player.get_stats().get_stat(MapleStat::Id::HP) > 0)
 			combat.repeat_attack(held_attack_skill);
 
-		portals.update(player.get_position());
-		camera.update(player.get_position());
+		portals.update(flight_mode == 1 ? Point<int16_t>(flight_position.x(), flight_position.y()) : player.get_position());
+		camera.update(flight_mode == 1 ? Point<int16_t>(flight_position.x(), flight_position.y()) : player.get_position());
 
 		// The local player is the audio listener; world sounds attenuate by
 		// distance from here.
 		Sound::set_listener_position(player.get_position());
 
-		if (!player.is_climbing() && !player.is_sitting() && !player.is_attacking())
+		if (!flight_mode && !player.is_climbing() && !player.is_sitting() && !player.is_attacking())
 		{
 			if (player.is_key_down(KeyAction::Id::UP) && !player.is_key_down(KeyAction::Id::DOWN))
 				check_ladders(true);
@@ -370,6 +391,48 @@ namespace ms
 		}
 	}
 
+    void Stage::set_flight_mode(int mode)
+    {
+        if (mode < 0 || mode > 2 || (mode && (state != ACTIVE || !player.get_stats().get_stat(MapleStat::Id::HP)))) return;
+        if (mode == flight_mode) return;
+        held_attack_skill = 0;
+        dash_tap_direction = -1;
+        // Clear ladder/chair/input state without changing the actual position.
+        if (player.get_stats().get_stat(MapleStat::Id::HP) > 0)
+            player.respawn(player.get_position(), mapinfo.is_underwater());
+        player.set_assist_flight(false, false);
+        flight_position = {double(player.get_position().x()), double(player.get_position().y())};
+        flight_up = false;
+        flight_mode = mode;
+        camera.set_position(player.get_position());
+    }
+
+    void Stage::update_flight()
+    {
+        if (!flight_mode) return;
+        if (!Session::get().is_connected() || !player.get_stats().get_stat(MapleStat::Id::HP))
+        { set_flight_mode(0); return; }
+        auto panel = UI::get().get_element<UITrainingPanel>();
+        const bool paused = UI::get().blocks_training_attack() || (panel && panel->expanded());
+        const auto actual = player.get_position();
+        if (flight_mode == 2) flight_position = {player.get_phobj().crnt_x(), player.get_phobj().crnt_y()};
+        const auto origin = flight_mode == 1
+            ? Point<int16_t>(flight_position.x(), flight_position.y()) + camera.position()
+            : actual + camera.position();
+        auto next = flight_position;
+        if (!paused && Window::get().flight_pointer_active())
+        {
+            auto pointer = UI::get().get_cursor_position();
+            next = flight_next(flight_position, double(pointer.x())-origin.x(), double(pointer.y())-origin.y(),
+                               mapinfo.get_walls(), mapinfo.get_borders(),
+                               flight_speed(flight_mode, pointer, Constants::Constants::get().get_viewwidth(),
+                                            Constants::Constants::get().get_viewheight()));
+        }
+        player.set_assist_flight(true, flight_mode == 2,
+            {next.x()-flight_position.x(), next.y()-flight_position.y()});
+        flight_position = next;
+    }
+
 	void Stage::show_character_effect(int32_t cid, CharEffect::Id effect)
 	{
 		if (auto character = get_character(cid))
@@ -381,9 +444,15 @@ namespace ms
 		if (player.is_attacking())
 			return;
 
-		Point<int16_t> playerpos = player.get_position();
-		Portal::WarpInfo warpinfo = portals.find_warp_at(playerpos);
+		Point<int16_t> playerpos = flight_mode == 1 ? Point<int16_t>(flight_position.x(), flight_position.y()) : player.get_position();
+		Portal::WarpInfo warpinfo = portals.find_warp_at(playerpos, flight_mode != 0);
 
+        if (flight_mode == 1)
+        {
+            if (!warpinfo.name.empty())
+                GeneralChatPacket("@flyportal " + std::to_string(mapid) + " " + warpinfo.name, false).dispatch();
+            return;
+        }
 		if (warpinfo.intramap)
 		{
 			Point<int16_t> spawnpoint = portals.get_portal_by_name(warpinfo.toname);
@@ -432,10 +501,20 @@ namespace ms
 
 	void Stage::send_key(KeyType::Id type, int32_t action, bool down)
 	{
-		if (down) stop_training_auto("Manual game input");
 		if (state != State::ACTIVE || !playable)
 			return;
 
+        if (flight_mode) {
+            if (type == KeyType::Id::ACTION && down && KeyAction::actionbyid(action) == KeyAction::Id::INTERACT_HARVEST) {
+                npcs.talk_nearest(flight_mode == 1 ? Point<int16_t>(flight_position.x(), flight_position.y()) : player.get_position());
+                return;
+            }
+            if (type == KeyType::Id::ACTION && KeyAction::actionbyid(action) == KeyAction::Id::UP) {
+                if (down && !flight_up) check_portals();
+                flight_up = down;
+            }
+            return;
+        }
 		switch (type)
 		{
 			case KeyType::Id::ACTION:

@@ -28,6 +28,8 @@ namespace ms
 	public:
 		MesoDrop(int32_t oid, int32_t owner, Point<int16_t> start, Point<int16_t> dest, int8_t type, int8_t mode, bool playerdrop, const Animation& icon);
 
+		bool is_meso() const override { return true; }
+
 		void draw(double viewx, double viewy, float alpha) const override;
 		void draw_minimap(Point<int16_t> position, float scale, float alpha) const override;
 

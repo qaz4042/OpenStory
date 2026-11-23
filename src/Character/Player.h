@@ -87,7 +87,9 @@ namespace ms
 
 		// Check whether the player is invincible
 		bool is_invincible() const override;
-		void set_training_invulnerable(bool enabled) { training_invulnerable = enabled; }
+		void set_assist_flight(bool enabled, bool real, Point<double> step = {})
+        { assist_flight = enabled; assist_flight_real = real; assist_flight_step = step; }
+        void set_training_invulnerable(bool enabled) { training_invulnerable = enabled; }
 		bool is_training_invulnerable() const { return training_invulnerable; }
 		// Check whether the player is hidden (GM dark sight)
 		bool is_hidden() const override;
@@ -168,6 +170,8 @@ namespace ms
 
 	private:
 		bool training_invulnerable = false;
+        bool assist_flight = false, assist_flight_real = false;
+        Point<double> assist_flight_step;
 		CharStats stats;
 		Inventory inventory;
 		SkillBook skillbook;

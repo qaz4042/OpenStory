@@ -107,6 +107,8 @@ namespace ms
 		settings.emplace<FPSCap>();
 		settings.emplace<ShowFPS>();
 		settings.emplace<ScreenshotFolder>();
+		settings.emplace<PetLootMesos>();
+		settings.emplace<PetLootItems>();
 		settings.emplace<HPWarning>();
 		settings.emplace<MPWarning>();
 		settings.emplace<AllowWhisper>();
@@ -166,6 +168,12 @@ namespace ms
 			if (rsiter != rawsettings.end())
 				setting.second->value = rsiter->second;
 		}
+        // Normalize older 100% warning values to the supported pet threshold.
+        auto* hp = settings.get<HPWarning>();
+        auto* mp = settings.get<MPWarning>();
+        hp->save(std::min<uint8_t>(hp->load(), 95));
+        mp->save(std::min<uint8_t>(mp->load(), 95));
+
 	}
 
 	void Configuration::save() const
@@ -185,6 +193,7 @@ namespace ms
 			{ "Quality",     { "GraphicsQuality", "EffectsQuality", "ScreenShake" } },
 			{ "Input",       { "MouseSpeed", "Chatopen" } },
 			{ "Warnings",    { "HPWarning", "MPWarning" } },
+			{ "Pets",        { "PetLootMesos", "PetLootItems" } },
 			{ "Permissions", { "AllowWhisper", "AllowChatInvite", "AllowPartyInvite",
 			                   "AllowGuildChat", "AllowAllianceChat", "AllowFamilyInvite",
 			                   "AllowFriendChat", "AllowTradeRequest", "AllowExpeditionInvite",

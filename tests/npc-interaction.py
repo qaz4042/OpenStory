@@ -45,6 +45,11 @@ int main(int argc,char** argv) {
  map.remove(5); assert(map.find_talk_target(origin)==3);
  add(6,0,0); assert(map.find_talk_target(origin)==6);
  map.clear(); assert(map.find_talk_target(origin)==0);
+ // A virtual position chooses a remote NPC without moving the real actor.
+ add(7,1000,500);
+ assert(map.find_talk_target(origin)==0);
+ assert(map.find_talk_target({1000,500})==7);
+ map.clear();
  auto& tracker=NpcResponseTracker::get();
  assert(tracker.can_click_now()); tracker.mark_clicked_now(); assert(!tracker.can_click_now());
  std::cout<<"PASS: nearest NPC, map range, inactive NPCs, stable ties, clear and cooldown\n";

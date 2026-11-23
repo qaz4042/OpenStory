@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include "Helpers/CashShopParser.h"
+#include "Helpers/ItemParser.h"
 
 #include "../../Gameplay/Stage.h"
 #include "../../IO/UI.h"
@@ -122,6 +123,24 @@ namespace ms
 			for (const auto& item : purchased) add_cash_item(item);
 			break;
 		}
+		case 0x68: // Cosmic takeFromCashInventory: target slot + full item info
+		{
+			const int16_t slot = recv.read_short();
+			InPacket header = recv;
+			header.read_byte();
+			const int32_t item_id = header.read_int();
+			const bool cash = header.read_bool();
+			const int64_t cash_id = cash ? header.read_long() : 0;
+			// Validate the complete item before changing either inventory.
+			InPacket validate = recv;
+			ItemParser::skim_item(validate);
+			ItemParser::parse_item(recv, InventoryType::by_item_id(item_id), slot,
+				Stage::get().get_player().get_inventory());
+			cash_inventory.erase(std::remove_if(cash_inventory.begin(), cash_inventory.end(),
+				[cash_id](const auto& item) { return item.cash_id == cash_id; }), cash_inventory.end());
+			break;
+		}
+
 		case 0x6C: // deleted cash item
 		{
 			const auto id = recv.read_long();

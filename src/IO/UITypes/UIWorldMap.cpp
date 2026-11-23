@@ -159,6 +159,23 @@ namespace ms
 
 	void UIWorldMap::update()
 	{
+		// Defer replacement until the destination-number callback has returned.
+		if (pending_confirmation >= 0)
+		{
+			const auto id = pending_confirmation;
+			pending_confirmation = -1;
+			const auto source = Stage::get().get_mapid();
+			const auto name = NxHelper::Map::get_map_info_by_id(id).full_name;
+			const bool chinese = Setting<UILanguage>::get().load() == "zh-CN";
+			UI::get().emplace<UIYesNo>(chinese ? "确定免费传送至：\n" + name + "？"
+				: "Travel for free to:\n" + name + "?", [this, id, source](bool yes)
+			{
+				const auto now = std::chrono::steady_clock::now();
+				if (!yes || Stage::get().get_mapid() != source || id == source || now < next_travel) return;
+				next_travel = now + std::chrono::seconds(3);
+				GeneralChatPacket("@maptravel " + std::to_string(id), false).dispatch();
+			});
+		}
 		// Replace the number notice after its callback returns.
 		if (!pending_destinations.empty())
 		{
@@ -346,8 +363,7 @@ namespace ms
 	{
 		const auto now = std::chrono::steady_clock::now();
 		if (id == Stage::get().get_mapid() || now < next_travel) return;
-		next_travel = now + std::chrono::seconds(3);
-		GeneralChatPacket("@maptravel " + std::to_string(id), false).dispatch();
+		pending_confirmation = id;
 	}
 
 	void UIWorldMap::set_search(bool enable)

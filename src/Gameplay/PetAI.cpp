@@ -18,6 +18,8 @@
 #include "PetAI.h"
 
 #include "MapleMap/MapDrops.h"
+#include "MapleMap/Drop.h"
+#include "../Configuration.h"
 
 #include "../Character/Player.h"
 #include "../Net/Packets/InventoryPackets.h"
@@ -28,7 +30,14 @@ namespace ms
 {
 	void PetAI::update(Player& player, MapDrops& drops)
 	{
-		if (--loot_cd > 0)
+		const bool mesos = Setting<PetLootMesos>::get().load();
+        const bool items = Setting<PetLootItems>::get().load();
+        if (!mesos && !items) {
+            for (uint8_t i=0;i<3;++i) player.get_pet(i).clear_loot_target();
+            loot_cd = 0;
+            return;
+        }
+        if (--loot_cd > 0)
 			return;
 
 		loot_cd = 10;
@@ -49,9 +58,9 @@ namespace ms
 
 			for (auto it = dobjs->begin(); it != dobjs->end(); ++it)
 			{
-				MapObject* mo = it->second.get();
+				Drop* mo = dynamic_cast<Drop*>(it->second.get());
 
-				if (!mo || !mo->is_active())
+				if (!mo || !mo->can_pet_loot(mesos, items))
 					continue;
 
 				Point<int16_t> dpos = mo->get_position();
@@ -76,7 +85,7 @@ namespace ms
 
 			if (nearest)
 				pet.set_loot_target(nearest->get_position());
-			else if (loot_cd != 60)
+			else
 				pet.clear_loot_target();
 		}
 	}

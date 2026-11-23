@@ -17,8 +17,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 #include "Gauge.h"
 
-#include "../../Graphics/Geometry.h"
-
 #include <cmath>
 
 namespace ms
@@ -58,28 +56,6 @@ namespace ms
 				// (The original +8,+20 offset targeted post-Big-Bang gauges.)
 				barend.draw(args + Point<int16_t>(length, 0));
 
-				// Animated glint — a thin bright band sweeps left→right
-				// across the fill every ~2.3s, drawn on top of the
-				// gauge sprite so it reads as a glossy highlight.
-				constexpr int16_t SHINE_PERIOD = 140;
-				constexpr int16_t SHINE_WIDTH = 6;
-				constexpr int16_t SHINE_START_PAD = 20;
-				shine_tick = (shine_tick + 1) % SHINE_PERIOD;
-
-				int16_t sweep_range = length + SHINE_START_PAD * 2;
-				int16_t shine_x = static_cast<int16_t>(
-					static_cast<int32_t>(shine_tick) * sweep_range / SHINE_PERIOD
-				) - SHINE_START_PAD;
-
-				if (shine_x > -SHINE_WIDTH && shine_x < length)
-				{
-					int16_t draw_x = std::max<int16_t>(shine_x, 0);
-					int16_t draw_w = std::min<int16_t>(SHINE_WIDTH, length - draw_x);
-					int16_t gauge_h = barfront.height() > 0 ? barfront.height() : 6;
-
-					ColorBox glint(draw_w, gauge_h, Color::Name::WHITE, 0.40f);
-					glint.draw(DrawArgument(args.getpos() + Point<int16_t>(draw_x, 0)));
-				}
 			}
 			else if (type == Type::CASHSHOP)
 			{

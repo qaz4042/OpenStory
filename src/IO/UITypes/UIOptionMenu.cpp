@@ -30,6 +30,7 @@
 #include "../../Configuration.h"
 #include "../../Constants.h"
 #include "../../Gameplay/Stage.h"
+#include "../../Gameplay/PetSettings.h"
 
 #ifdef USE_NX
 #include <nlnx/nx.hpp>
@@ -236,7 +237,7 @@ namespace ms
 		// Draw all slider thumbs and percentage labels
 		for (int i = 0; i < NUM_SLIDERS; i++)
 		{
-			int16_t thumb_x = slider_x[i] + static_cast<int16_t>(slider_val[i] * slider_w[i] / 100);
+			int16_t thumb_x = slider_x[i] + static_cast<int16_t>(slider_val[i] * slider_w[i] / ((i == SL_HP_WARNING || i == SL_MP_WARNING) ? 95 : 100));
 			Point<int16_t> thumb_pos = position + Point<int16_t>(thumb_x, slider_y[i]);
 
 			if (fallback_layout)
@@ -334,7 +335,7 @@ namespace ms
 			if (relative_x < 0) relative_x = 0;
 			if (relative_x > tw) relative_x = tw;
 
-			slider_val[active_slider] = static_cast<uint8_t>(relative_x * 100 / tw);
+			slider_val[active_slider] = static_cast<uint8_t>(relative_x * ((active_slider == SL_HP_WARNING || active_slider == SL_MP_WARNING) ? 95 : 100) / tw);
 
 			// Apply live audio preview for BGM/SFX
 			if (active_slider == SL_BGM && !check_val[CHK_MUTE_BGM])
@@ -368,7 +369,7 @@ namespace ms
 					int16_t track_x = rel_x - tx;
 					if (track_x < 0) track_x = 0;
 					if (track_x > tw) track_x = tw;
-					slider_val[i] = static_cast<uint8_t>(track_x * 100 / tw);
+					slider_val[i] = static_cast<uint8_t>(track_x * ((i == SL_HP_WARNING || i == SL_MP_WARNING) ? 95 : 100) / tw);
 
 					if (i == SL_BGM && !check_val[CHK_MUTE_BGM])
 						Music::set_bgmvolume(slider_val[SL_BGM]);
@@ -443,8 +444,8 @@ namespace ms
 		slider_val[SL_GRAPHICS] = Setting<GraphicsQuality>::get().load();
 		slider_val[SL_EFFECTS] = Setting<EffectsQuality>::get().load();
 		slider_val[SL_MOUSE_SPEED] = Setting<MouseSpeed>::get().load();
-		slider_val[SL_HP_WARNING] = Setting<HPWarning>::get().load();
-		slider_val[SL_MP_WARNING] = Setting<MPWarning>::get().load();
+		slider_val[SL_HP_WARNING] = pet_potion_threshold(Setting<HPWarning>::get().load());
+		slider_val[SL_MP_WARNING] = pet_potion_threshold(Setting<MPWarning>::get().load());
 
 		// Resolution radio buttons (cosmetic only — does not change resolution)
 		check_val[CHK_RES_800] = false;

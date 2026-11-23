@@ -116,6 +116,7 @@ namespace ms
 			deactivate();
 			break;
 		case 2:
+        case 5: // Cosmic v83 pet pickup uses its own removal animation code.
 			angle.set(0.0f);
 			state = Drop::State::PICKEDUP;
 			looter = lt;

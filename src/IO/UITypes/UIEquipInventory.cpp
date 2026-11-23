@@ -26,13 +26,36 @@
 #include "../../Data/ItemData.h"
 
 #include "../../Net/Packets/InventoryPackets.h"
+#include "../../Net/Packets/PlayerPackets.h"
+#include "../../Net/Packets/GameplayPackets.h"
+#include "../../Graphics/Geometry.h"
+#include "../../Gameplay/PetSettings.h"
 
 #ifdef USE_NX
 #include <nlnx/nx.hpp>
+#include <nlnx/bitmap.hpp>
 #endif
 
 namespace ms
 {
+    namespace {
+        // Preserve the game's authored edges and gradient, extending only the fill.
+        Texture pet_skin(nl::node source, const std::string& key, int width, int height,
+                         int left, int right, int top, int bottom, int fill_x, int fill_y) {
+            nl::bitmap bitmap=source;
+            if (!bitmap || !bitmap.data()) return {};
+            const auto* pixels=static_cast<const uint8_t*>(bitmap.data());
+            std::vector<uint8_t> output(width*height*4);
+            for (int y=0;y<height;++y) for (int x=0;x<width;++x) {
+                int sx=x<left ? x : x>=width-right ? bitmap.width()-(width-x) : fill_x;
+                int sy=y<top ? y : y>=height-bottom ? bitmap.height()-(height-y)
+                    : fill_y+(y-top)*(bitmap.height()-bottom-fill_y)/(height-top-bottom);
+                for (int c=0;c<4;++c) output[(y*width+x)*4+c]=pixels[(sy*bitmap.width()+sx)*4+c];
+            }
+            return Texture::from_pixels("pet/skin/"+key,width,height,std::move(output),{});
+        }
+    }
+
 	UIEquipInventory::UIEquipInventory(const Inventory& invent) : UIDragElement<PosEQINV>(Point<int16_t>(184, 20)), inventory(invent), tab(Buttons::BT_TAB1), hasPendantSlot(false), hasPocketSlot(false)
 	{
 		// UIWindow2 doll cells: cols x=10,43,76,109,142; rows y=27..225 (step 33)
@@ -124,6 +147,18 @@ namespace ms
 		dimension = bg_dimensions;
 		dragarea = Point<int16_t>(bg_dimensions.x(), 20);
 
+        auto basic=nl::nx::ui["Basic.img"];
+        auto interior=nl::nx::ui["UIWindow2.img"]["UserList"]["Group"]["backgrnd2"];
+        pet_panel=pet_skin(interior,"panel",dimension.x()-16,dimension.y()-58,6,6,8,6,100,100);
+        pet_card=pet_skin(interior,"card",dimension.x()-28,72,6,6,8,6,100,100);
+        pet_slot=pet_skin(interior,"slot",36,36,6,6,8,6,100,100);
+        for (int i=0;i<2;++i) pet_checks[i]=Texture(basic["CheckBox3"][i]);
+        const char* states[]={"normal","mouseOver","disabled"};
+        for (int i=0;i<3;++i)
+            pet_adjust[i]=pet_skin(basic["BtOK"][states[i]]["0"],std::string("adjust/")+states[i],24,18,7,7,3,3,7,3);
+        for (int i=0;i<2;++i)
+            pet_tabs[i]=pet_skin(basic["BtOK"][i ? "normal" : "disabled"]["0"],std::string("tab/")+std::to_string(i),(dimension.x()-20)/2,20,7,7,3,3,7,3);
+
 		load_icons();
 	}
 
@@ -131,16 +166,18 @@ namespace ms
 	{
 		if (Setting<UILanguage>::get().load() == "zh-CN")
 		{
-			translated_frame.draw(position, false, alpha);
+			// LocalizedArt takes opacity; alpha here is frame interpolation.
+			translated_frame.draw(position);
 			// The frame must precede the paper-doll backing and captions.
 			sprites[1].draw(position, alpha);
-			translated_slots.draw(position, false, alpha);
+			translated_slots.draw(position);
 			draw_buttons(alpha);
 		}
 		else UIElement::draw(alpha);
 
 		for (auto iter : icons)
 		{
+			if (tab == Buttons::BT_TAB2) break;
 			// Unmapped slots (emblem/pocket/etc — not on this doll) default
 			// to (0,0); skip them so no icon stacks in the corner.
 			Point<int16_t> ipos = iconpositions[iter.first];
@@ -148,6 +185,67 @@ namespace ms
 			if (iter.second && (ipos.x() != 0 || ipos.y() != 0))
 				iter.second->draw(position + ipos + Point<int16_t>(1, 1));
 		}
+
+        const bool cn = Setting<UILanguage>::get().load() == "zh-CN";
+        auto label = [&](const std::string& text, int x, int y, Color::Name color=Color::Name::PRUSSIANBLUE, int width=0) {
+            Text(Text::A11M, Text::LEFT, color, text, width, false).draw(position+Point<int16_t>(x,y));
+        };
+        if (tab == Buttons::BT_TAB2) {
+            pet_panel.draw(position+Point<int16_t>(8,26));
+            label(cn ? "自动拾取" : "Auto pickup",16,31);
+            for (int i=0;i<2;++i) {
+                int x=i ? 96 : 16;
+                bool checked=i ? Setting<PetLootItems>::get().load() : Setting<PetLootMesos>::get().load();
+                const auto& check=pet_checks[checked ? 1 : 0];
+                check.draw(position+Point<int16_t>(x,52)+check.get_origin());
+                label(i ? (cn ? "物品" : "Items") : (cn ? "金币" : "Mesos"),x+19,51);
+            }
+            for (int slot=0;slot<2;++slot) {
+                int y=92+slot*72;
+                pet_card.draw(position+Point<int16_t>(14,y-18));
+                label(slot ? (cn ? "MP 自动恢复" : "MP recovery") : (cn ? "HP 自动恢复" : "HP recovery"),20,y-17,
+                    slot ? Color::Name::MEDIUMBLUE : Color::Name::DARKRED);
+                pet_slot.draw(position+Point<int16_t>(16,y-1));
+                int id=slot ? Configuration::get().get_auto_mp_pot() : Configuration::get().get_auto_hp_pot();
+                if (id) {
+                    const auto& icon=ItemData::get(id).get_icon(false);
+                    icon.draw(position+Point<int16_t>(18,y+1)+icon.get_origin());
+                }
+                label(id ? ItemData::get(id).get_name() : (cn ? "拖入药水" : "Drop potion"),57,y+4,Color::Name::PRUSSIANBLUE,104);
+                if (!id) label(cn ? "消耗背包 → 此处" : "From USE tab",57,y+18,Color::Name::DUSTYGRAY);
+                int threshold=pet_potion_threshold(slot ? Setting<MPWarning>::get().load() : Setting<HPWarning>::get().load());
+                label(threshold ? (cn ? "不高于 " : "At most ")+std::to_string(threshold)+"%" : (cn ? "已关闭" : "Off"),20,y+31);
+                for (int sign=0;sign<2;++sign) {
+                    int x=sign ? 142 : 110;
+                    bool disabled=sign ? threshold==95 : threshold==0;
+                    bool hover=Rectangle<int16_t>(x,x+24,y+36,y+54).contains(pet_hover);
+                    pet_adjust[disabled ? 2 : hover ? 1 : 0].draw(position+Point<int16_t>(x,y+36));
+                    Text(Text::A11M,Text::CENTER,Color::Name::WHITE,sign ? "+" : "−")
+                        .draw(position+Point<int16_t>(x+12,y+31));
+                }
+            }
+            for (int i=0;i<2;++i) {
+                int id=1812000+i;
+                int equipped=inventory.find_item(InventoryType::Id::EQUIPPED,id);
+                int owned=inventory.find_item(InventoryType::Id::EQUIP,id);
+                int x=i ? 96 : 16;
+                label(i ? (cn ? "道具袋" : "Pouch") : (cn ? "磁铁" : "Magnet"),x,214);
+                pet_tabs[equipped ? 0 : 1].draw(DrawArgument(position+Point<int16_t>(x,235),0.85f,0.85f));
+                Text(Text::A11M,Text::CENTER,equipped ? Color::Name::DARKGREY : Color::Name::WHITE,
+                    equipped ? (cn ? "卸下" : "Remove") : owned ? (cn ? "穿戴" : "Equip") : (cn ? "商城获取" : "Cash shop"))
+                    .draw(position+Point<int16_t>(x+34,230));
+            }
+
+        }
+        for (int t=0;t<2;++t) {
+            bool selected=(t==1)==(tab==Buttons::BT_TAB2);
+            int x=10+t*(dimension.x()-20)/2;
+            pet_tabs[selected ? 1 : 0].draw(position+Point<int16_t>(x,dimension.y()-26));
+            Text(Text::A11M,Text::CENTER,selected ? Color::Name::WHITE : Color::Name::DARKGREY,
+                t ? (cn ? "宠物" : "Pet") : (cn ? "装备" : "Equipment"))
+                .draw(position+Point<int16_t>(x+(dimension.x()-20)/4,dimension.y()-30));
+        }
+
 	}
 
 	Button::State UIEquipInventory::button_pressed(uint16_t id)
@@ -211,7 +309,41 @@ namespace ms
 
 	Cursor::State UIEquipInventory::send_cursor(bool pressed, Point<int16_t> cursorpos)
 	{
-		Cursor::State dstate = UIDragElement::send_cursor(pressed, cursorpos);
+		auto local = cursorpos - position;
+        pet_hover=local;
+        if (tab == Buttons::BT_TAB2) {
+            if (local.y()>=235 && local.y()<252 && local.x()>=16 && local.x()<166) {
+                if (pressed) use_pet_accessory(local.x()>=96 ? 1 : 0);
+                return Cursor::State::CANGRAB;
+            }
+            if (local.y() >= 49 && local.y() < 66 && local.x() >= 12 && local.x() < 174) {
+                if (pressed) {
+                    if (local.x() < 92) Setting<PetLootMesos>::get().save(!Setting<PetLootMesos>::get().load());
+                    else Setting<PetLootItems>::get().save(!Setting<PetLootItems>::get().load());
+                    Configuration::get().save();
+                }
+                return Cursor::State::CANGRAB;
+            }
+            for (int i=0;i<2;++i) {
+                int y=130+i*72;
+                if (local.y()>=y && local.y()<y+16 && local.x()>=108 && local.x()<170) {
+                    if (pressed) {
+                        int percentage=pet_potion_threshold(i ? Setting<MPWarning>::get().load() : Setting<HPWarning>::get().load());
+                        percentage=pet_potion_threshold(percentage+(local.x()<138 ? -5 : 5));
+                        if (i) Setting<MPWarning>::get().save(percentage);
+                        else Setting<HPWarning>::get().save(percentage);
+                        Configuration::get().save();
+                    }
+                    return Cursor::State::CANGRAB;
+                }
+            }
+        }
+        if (local.y() >= dimension.y()-26 && local.y() < dimension.y()-6 && local.x() >= 10 && local.x() < dimension.x()-10) {
+            if (pressed) { clear_tooltip(); change_tab(local.x() < dimension.x()/2 ? Buttons::BT_TAB0 : Buttons::BT_TAB2); }
+            return Cursor::State::CANGRAB;
+        }
+        Cursor::State dstate = UIDragElement::send_cursor(pressed, cursorpos);
+        if (tab == Buttons::BT_TAB2) { clear_tooltip(); return dstate; }
 
 		if (dragged)
 		{
@@ -267,6 +399,11 @@ namespace ms
 
 	void UIEquipInventory::doubleclick(Point<int16_t> cursorpos)
 	{
+        if (tab == Buttons::BT_TAB2) {
+            int slot = potion_slot(cursorpos);
+            if (slot >= 0) set_potion(slot == 1, 0);
+            return;
+        }
 		EquipSlot::Id slot = slot_by_position(cursorpos);
 
 		if (icons[slot])
@@ -286,11 +423,50 @@ namespace ms
 
 	bool UIEquipInventory::send_icon(const Icon& icon, Point<int16_t> cursorpos)
 	{
-		if (EquipSlot::Id slot = slot_by_position(cursorpos))
-			icon.drop_on_equips(slot);
+		if (tab == Buttons::BT_TAB2) {
+            int slot = potion_slot(cursorpos);
+            int id = icon.get_action_id();
+            if (slot < 0 || icon.get_source_tab() != InventoryType::Id::USE ||
+                !inventory.find_item(InventoryType::Id::USE, id)) return true;
+            std::string key = "0" + std::to_string(id);
+            auto spec = nl::nx::item["Consume"][key.substr(0,4)+".img"][key]["spec"];
+            const char* flat = slot ? "mp" : "hp";
+            const char* ratio = slot ? "mpR" : "hpR";
+            if (spec[flat].get_integer() > 0 || spec[ratio].get_integer() > 0)
+                set_potion(slot == 1, id);
+        } else if (EquipSlot::Id slot = slot_by_position(cursorpos))
+            icon.drop_on_equips(slot);
 
 		return true;
 	}
+
+    void UIEquipInventory::use_pet_accessory(int index) {
+        const int id=1812000+index;
+        if (int slot=inventory.find_item(InventoryType::Id::EQUIPPED,id)) {
+            if (int free=inventory.find_free_slot(InventoryType::Id::EQUIP))
+                UnequipItemPacket(slot,free).dispatch();
+        } else if (int slot=inventory.find_item(InventoryType::Id::EQUIP,id)) {
+            // Dedicated v83 pet accessory positions; never replace character cash gear.
+            const int destination=181+index;
+            if (!inventory.get_item_id(InventoryType::Id::EQUIPPED,destination))
+                MoveItemPacket(InventoryType::Id::EQUIP,slot,-destination,1).dispatch();
+        } else {
+            EnterCashShopPacket().dispatch();
+        }
+    }
+
+    int UIEquipInventory::potion_slot(Point<int16_t> cursorpos) const {
+        auto p = cursorpos-position;
+        for (int i=0;i<2;++i)
+            if (Rectangle<int16_t>(16,50,92+i*72,126+i*72).contains(p)) return i;
+        return -1;
+    }
+
+    void UIEquipInventory::set_potion(bool mp, int32_t itemid) {
+        PetAutoPotionPacket(mp,itemid).dispatch();
+        if (mp) Configuration::get().set_auto_mp_pot(itemid);
+        else Configuration::get().set_auto_hp_pot(itemid);
+    }
 
 	void UIEquipInventory::toggle_active()
 	{

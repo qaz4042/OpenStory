@@ -50,7 +50,7 @@ namespace ms
 		// Loads the map to display
 		void load(int32_t mapid, int8_t portalid);
 		// Remove all map objects and graphics
-		void clear();
+		void clear(bool map_transfer = false);
 
 		// Construct the player from a character entry
 		void loadplayer(const CharEntry& entry);
@@ -62,6 +62,9 @@ namespace ms
 		TrainingAssistStatus& get_training_status() { return training_status; }
 		bool training_auto_notice(const std::string& notice);
 		void stop_training_auto(const std::string& reason, bool notify_server = true);
+        // 0 off, 1 virtual camera, 2 real character flight. Never persisted.
+        void set_flight_mode(int mode);
+        int get_flight_mode() const { return flight_mode; }
 
 		// Show a character effect
 		void show_character_effect(int32_t cid, CharEffect::Id effect);
@@ -163,6 +166,11 @@ namespace ms
 
 		TrainingAssistStatus training_status;
 		TrainingAutoAttack training_auto;
+        int flight_mode = 0;
+        int transfer_flight_mode = 0;
+        bool flight_up = false;
+        Point<double> flight_position;
+        void update_flight();
 		int32_t held_attack_skill = 0;
 		int32_t dash_tap_direction = -1;
 		std::chrono::steady_clock::time_point dash_tap_time{};

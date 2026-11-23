@@ -37,6 +37,17 @@ namespace ms
 		}
 	};
 
+	// Cosmic CASHSHOP_OPERATION action 0x0D reads the locker cash ID as int.
+	class TakeCashItemPacket : public OutPacket
+	{
+	public:
+		explicit TakeCashItemPacket(int64_t cash_id) : OutPacket(OutPacket::Opcode::BUY_CS_ITEM)
+		{
+			write_byte(0x0D);
+			write_int(static_cast<int32_t>(cash_id));
+		}
+	};
+
 	// Opcode: COUPON_CODE(216)
 	class CouponCodePacket : public OutPacket
 	{

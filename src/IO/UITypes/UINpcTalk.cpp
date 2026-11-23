@@ -1153,6 +1153,11 @@ namespace ms
 			size_t text_end = tx.find("#l", text_start);
 			if (text_end == std::string::npos)
 				text_end = tx.size();
+			// Cosmic menus may omit #l between consecutive #L entries.
+			// The next entry still terminates the current option.
+			size_t next_link = tx.find("#L", text_start);
+			if (next_link != std::string::npos && next_link < text_end)
+				text_end = next_link;
 
 			std::string option_text = tx.substr(text_start, text_end - text_start);
 
@@ -1242,7 +1247,7 @@ namespace ms
 			result += "#k";
 			line++;
 
-			pos = text_end + 2; // skip past #l
+			pos = (text_end == next_link) ? text_end : text_end + 2;
 		}
 
 		return result;

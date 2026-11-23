@@ -90,6 +90,7 @@ namespace ms
 		};
 
 		std::vector<int32_t> pending_destinations;
+		int32_t pending_confirmation = -1;
 		size_t pending_page = 0;
 		bool search = false;
 		bool show_path_img = false;
