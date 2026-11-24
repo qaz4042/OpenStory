@@ -319,6 +319,16 @@ namespace ms
 
 	void UIChatBar::draw(float inter) const
 	{
+		// Give the translucent top edge an opaque backing so animated map
+		// pixels cannot shimmer through the seam above the chat strip.
+		const auto back_top_edge = [&](const Texture& texture)
+		{
+			if (texture.is_valid())
+				ColorBox(texture.width(), 2, Color::Name::BLACK, 1.0f).draw(
+					DrawArgument(position - texture.get_origin()));
+		};
+		back_top_edge(chatspace[chatopen ? 1 : 0]);
+		back_top_edge(chatenter);
 		chatspace[chatopen ? 1 : 0].draw(position);
 		chatenter.draw(position);
 
@@ -465,7 +475,11 @@ namespace ms
 		}
 		else if (rowtexts.count(rowmax))
 		{
-			rowtexts.at(rowmax).draw(position + Point<int16_t>(-500, -60));
+			// The collapsed bar only has room for one line. Keep wrapped
+			// continuation lines inside the expanded log, off the status bar.
+			const auto origin = position + Point<int16_t>(-500, -60);
+			const Range<int16_t> previewclip(origin.y(), origin.y() + 20);
+			rowtexts.at(rowmax).draw(origin, previewclip);
 		}
 	}
 

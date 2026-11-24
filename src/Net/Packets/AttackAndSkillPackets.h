@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../OutPacket.h"
+#include "../../Character/SkillId.h"
 
 namespace ms
 {
@@ -36,7 +37,8 @@ namespace ms
 			write_byte((attack.mobcount << 4) | attack.hitcount);
 			write_int(attack.skill);
 
-			if (attack.charge > 0)
+			// Cosmic reads this field for Corkscrew Blow even on an uncharged tap.
+			if (attack.charge > 0 || attack.skill == SkillId::CORKSCREW_BLOW)
 				write_int(attack.charge);
 
 			skip(8);

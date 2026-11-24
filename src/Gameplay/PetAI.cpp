@@ -30,61 +30,82 @@ namespace ms
 {
 	void PetAI::update(Player& player, MapDrops& drops)
 	{
-		const bool mesos = Setting<PetLootMesos>::get().load();
-        const bool items = Setting<PetLootItems>::get().load();
-        if (!mesos && !items) {
-            for (uint8_t i=0;i<3;++i) player.get_pet(i).clear_loot_target();
-            loot_cd = 0;
-            return;
-        }
-        if (--loot_cd > 0)
+		const auto& inventory = player.get_inventory();
+		const bool mesos = Setting<PetLootMesos>::get().load()
+			&& inventory.find_item(InventoryType::Id::EQUIPPED, 1812000);
+		const bool items = Setting<PetLootItems>::get().load()
+			&& inventory.find_item(InventoryType::Id::EQUIPPED, 1812001);
+		if (!mesos && !items)
+		{
+			for (uint8_t i = 0; i < 3; ++i)
+				player.get_pet(i).clear_loot_target();
+			reset();
 			return;
+		}
+		if (--loot_cd > 0)
+			return;
+		loot_cd = 10; // Scan every 80 ms, including while a request is pending.
 
-		loot_cd = 10;
+		MapObjects& objects = *drops.get_drops();
+		for (auto it = retries.begin(); it != retries.end();)
+		{
+			it->second -= 10;
+			if (it->second <= 0 || !objects.contains(it->first))
+				it = retries.erase(it);
+			else
+				++it;
+		}
 
-		Point<int16_t> cpos = player.get_position();
-		MapObjects* dobjs = drops.get_drops();
-
-		for (uint8_t pi = 0; pi < 3; pi++)
+		const auto cpos = player.get_position();
+		for (uint8_t pi = 0; pi < 3; ++pi)
 		{
 			PetLook& pet = player.get_pet(pi);
-
 			if (pet.get_itemid() == 0)
 				continue;
 
-			Point<int16_t> ppos = pet.get_position();
-			MapObject* nearest = nullptr;
-			int32_t bestdist = 200;
-
-			for (auto it = dobjs->begin(); it != dobjs->end(); ++it)
+			const auto ppos = pet.get_position();
+			Drop* pickup = nullptr;
+			Drop* target = nullptr;
+			int best_pickup = 10000;
+			int best_target = 10000;
+			for (auto& entry : objects)
 			{
-				Drop* mo = dynamic_cast<Drop*>(it->second.get());
-
-				if (!mo || !mo->can_pet_loot(mesos, items))
+				auto* drop = dynamic_cast<Drop*>(entry.second.get());
+				if (!drop || !drop->can_pet_loot(mesos, items)
+					|| retries.count(drop->get_oid()))
 					continue;
 
-				Point<int16_t> dpos = mo->get_position();
-
-				if (std::abs(dpos.x() - ppos.x()) <= 30 && std::abs(dpos.y() - ppos.y()) <= 25)
+				const auto dpos = drop->get_position();
+				const int cx = std::abs(int(dpos.x()) - cpos.x());
+				const int cy = std::abs(int(dpos.y()) - cpos.y());
+				// Stay inside PetLook's 150 px follow leash; avoid other floors.
+				if (cx * cx + cy * cy > 140 * 140 || cy > 60)
+					continue;
+				const int px = std::abs(int(dpos.x()) - ppos.x());
+				const int py = std::abs(int(dpos.y()) - ppos.y());
+				const int distance = px + py;
+				// A small magnet area works even when the character is standing.
+				if (px <= 100 && py <= 45 && distance < best_pickup)
 				{
-					PetLootPacket(pet.get_uniqueid(), mo->get_oid()).dispatch();
-					pet.clear_loot_target();
-					nearest = nullptr;
-					loot_cd = 60;
-					break;
+					pickup = drop;
+					best_pickup = distance;
 				}
-
-				int32_t dist = std::abs(dpos.x() - cpos.x()) + std::abs(dpos.y() - cpos.y());
-
-				if (dist < bestdist)
+				if (distance < best_target)
 				{
-					bestdist = dist;
-					nearest = mo;
+					target = drop;
+					best_target = distance;
 				}
 			}
 
-			if (nearest)
-				pet.set_loot_target(nearest->get_position());
+			if (pickup)
+			{
+				PetLootPacket(pet.get_uniqueid(), pickup->get_oid()).dispatch();
+				// Retry rejected/late requests without blocking other drops or pets.
+				retries[pickup->get_oid()] = 60;
+				pet.clear_loot_target();
+			}
+			else if (target)
+				pet.set_loot_target(target->get_position());
 			else
 				pet.clear_loot_target();
 		}

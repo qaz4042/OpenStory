@@ -245,6 +245,19 @@ int main(int argc,char**argv) {
     ack("1 1 1 1 5001001 800 20"); render();
     panel.click(4); assert(commands.back()=="@assist auto off");
     ack("1 1 1 1 -1 800 20");
+    auto rapid_before=commands.size(); panel.click(15); assert(commands.size()==rapid_before);
+    status.accept_rapid("[TrainingAssist:rapid:v1] 100 -1 0 0 0 0 0 0",100); panel.update();
+    panel.click(15); assert(commands.back()=="@assist rapid on 10 5001001");
+    for (int rate : {10,20,40}) {
+        ack("1 1 1 1 5001001 0 0");
+        status.accept_rapid("[TrainingAssist:rapid:v1] 100 5001001 "+std::to_string(rate)+" 200 0 200 123456 10000",100);
+        panel.update(); render();
+        panel.click(15);
+        assert(commands.back()==(rate==40 ? "@assist rapid off"
+            : "@assist rapid on "+std::to_string(rate*2)+" 5001001"));
+    }
+    status.accept_rapid("[TrainingAssist:rapid:v1] 100 -1 0 0 0 0 0 0",100);
+    ack("1 1 1 1 -1 0 0");
     stage.get_player().get_skills().set_skill(5001001,1,20,0);
     panel.click(13); panel.verify_bounds(); render();
     panel.click(30); panel.click(21); // enable slot two: normal attack duplicates slot one

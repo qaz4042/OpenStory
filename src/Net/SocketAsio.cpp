@@ -33,17 +33,27 @@ namespace ms
 
 	bool SocketAsio::open(const char* address, const char* port)
 	{
-		auto endpoints = resolver.resolve(address, port);
-		error_code error;
-		asio::connect(socket, endpoints, error);
-
-		if (!error)
-		{
-			size_t result = socket.read_some(asio::buffer(buffer), error);
-			return !error && (result == HANDSHAKE_LEN);
-		}
-
-		return !error;
+		close();
+		iocontext.restart();
+		bool success = false;
+		asio::steady_timer deadline(iocontext, std::chrono::milliseconds(1500));
+		deadline.async_wait([&](const error_code& ec) {
+			if (!ec) { resolver.cancel(); error_code ignored; socket.close(ignored); }
+		});
+		resolver.async_resolve(address, port, [&](const error_code& ec, tcp::resolver::results_type endpoints) {
+			if (ec) { deadline.cancel(); return; }
+			asio::async_connect(socket, endpoints, [&](const error_code& ec, const tcp::endpoint&) {
+				if (ec) { deadline.cancel(); return; }
+				asio::async_read(socket, asio::buffer(buffer, HANDSHAKE_LEN),
+					[&](const error_code& ec, size_t count) {
+						success = !ec && count == HANDSHAKE_LEN;
+						deadline.cancel();
+					});
+			});
+		});
+		iocontext.run();
+		if (!success) close();
+		return success;
 	}
 
 	bool SocketAsio::close()
@@ -57,16 +67,17 @@ namespace ms
 
 	size_t SocketAsio::receive(bool* recvok)
 	{
-		if (socket.available() > 0)
-		{
-			error_code error;
-			size_t result = socket.read_some(asio::buffer(buffer), error);
-			*recvok = !error;
-
-			return result;
-		}
-
-		return 0;
+		if (!socket.is_open()) { *recvok = false; return 0; }
+		error_code error;
+		socket.non_blocking(true, error);
+		if (error) { *recvok = false; return 0; }
+		size_t result = socket.read_some(asio::buffer(buffer), error);
+		error_code ignored;
+		socket.non_blocking(false, ignored);
+		if (error == asio::error::would_block || error == asio::error::try_again)
+			return 0;
+		*recvok = !error && !ignored;
+		return error ? 0 : result;
 	}
 
 	const int8_t* SocketAsio::get_buffer() const

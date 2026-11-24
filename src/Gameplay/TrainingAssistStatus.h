@@ -8,6 +8,23 @@ namespace ms
 {
     struct TrainingAssistStatus
     {
+        bool rapid_known = false;
+        int rapid_rate = 0, rapid_skill = -1;
+        unsigned long long rapid_accepted=0, rapid_rejected=0, rapid_lines=0, rapid_damage=0, rapid_elapsed=0;
+        bool accept_rapid(const std::string& message, int current_map) {
+            const std::string prefix="[TrainingAssist:rapid:v1] ";
+            if (message.compare(0,prefix.size(),prefix)!=0) return false;
+            int map,id,rate; long long accepted,rejected,lines,damage,elapsed;
+            std::string extra; std::istringstream input(message.substr(prefix.size()));
+            if ((input>>map>>id>>rate>>accepted>>rejected>>lines>>damage>>elapsed) && !(input>>extra)
+                && accepted>=0 && rejected>=0 && lines>=0 && damage>=0 && elapsed>=0
+                && map==current_map && (rate==0 || rate==10 || rate==20 || rate==40)
+                && (rate==0 ? id==-1 : TrainingAutoAttack::rapid_supported(id))) {
+                rapid_known=true; rapid_rate=rate; rapid_skill=id; rapid_accepted=accepted;
+                rapid_rejected=rejected; rapid_lines=lines; rapid_damage=damage; rapid_elapsed=elapsed; ++revision;
+            }
+            return true;
+        }
         bool pet_vacuum = false, pet_vacuum_known = false;
         bool pet_vacuum_mesos = false, pet_vacuum_items = false, pet_vacuum_split_known = false;
         bool known = false, allowed = false, invincible = false, silence = false, vacuum = false;
@@ -70,6 +87,6 @@ namespace ms
         {
             return known && std::chrono::steady_clock::now() - received < std::chrono::seconds(6);
         }
-        void clear() { pet_vacuum_mesos = pet_vacuum_items = pet_vacuum_split_known = false; pet_vacuum = pet_vacuum_known = false; known = false; vacuum_pinned = vacuum_eligible = -1; stop_reason.clear(); ++revision; }
+        void clear() { rapid_known=false; rapid_rate=0; rapid_skill=-1; pet_vacuum_mesos = pet_vacuum_items = pet_vacuum_split_known = false; pet_vacuum = pet_vacuum_known = false; known = false; vacuum_pinned = vacuum_eligible = -1; stop_reason.clear(); ++revision; }
     };
 }

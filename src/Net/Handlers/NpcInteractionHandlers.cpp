@@ -43,9 +43,15 @@ namespace ms
 
 		std::string text = recv.read_string();
 
-		// `style` is unused by the new layout but kept on the
-		// change_text signature for interface stability.
+		// Cosmic uses msgtype 0 plus previous/next flags for all text pages.
+		// Keep those display flags separate from the wire response type.
 		int16_t style = 0;
+		if (msgtype == 0 && recv.length() >= 2)
+		{
+			const bool previous = recv.read_bool();
+			const bool next = recv.read_bool();
+			style = (previous ? 1 : 0) | (next ? 2 : 0);
+		}
 
 		// Trailing payload: msgtype 3 (sendGetNumber) carries default,
 		// min, max as three ints (12 bytes total).

@@ -43,7 +43,7 @@ namespace ms
 		void use_move(int32_t move_id);
 		void repeat_attack(int32_t move_id);
 		// Returns false only for a terminal skill/resource failure; no target means wait.
-		bool auto_use_move(int32_t move_id, std::string& stop_reason);
+		bool auto_use_move(int32_t move_id, std::string& stop_reason, bool rapid = false);
 
 		// Add an attack to the attack queue
 		void push_attack(const AttackResult& attack);
@@ -82,7 +82,7 @@ namespace ms
 		};
 
 		void apply_attack(const AttackResult& attack);
-		void apply_move(const SpecialMove& move);
+		void apply_move(const SpecialMove& move, bool rapid = false);
 		std::vector<int32_t> find_closest(MapObjects* objs, Rectangle<int16_t> range, Point<int16_t> origin, uint8_t objcount, bool use_mobs) const;
 		void apply_use_movement(const SpecialMove& move);
 		void apply_result_movement(const SpecialMove& move, const AttackResult& result);
@@ -95,7 +95,7 @@ namespace ms
 		void apply_flash_jump();
 		void apply_bullet_effect(const BulletEffect& effect);
 		void apply_damage_effect(const DamageEffect& effect);
-		void extract_effects(const Char& user, const SpecialMove& move, const AttackResult& result);
+		void extract_effects(const Char& user, const SpecialMove& move, const AttackResult& result, bool rapid = false);
 		std::vector<DamageNumber> place_numbers(int32_t oid, const std::vector<std::pair<int32_t, bool>>& damagelines);
 		const SpecialMove& get_move(int32_t move_id);
 

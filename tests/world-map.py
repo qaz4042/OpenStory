@@ -40,7 +40,26 @@ public:
  void click_link(int index) {
   auto& button=buttons.at(6+index); assert(button->is_active());
   auto b=button->bounds(position); auto p=b.get_left_top()+Point<int16_t>(b.width()/2,b.height()/2);
-  send_cursor(false,p); send_cursor(true,p); send_cursor(false,p);
+  send_cursor(false,p); send_cursor(true,p);
+  const auto entered_parent = parent_map;
+  assert(region_click_consumed);
+  // UIStateGame routes cursor moves during a held press as clicked=true.
+  // Put the cursor on a child link to prove it cannot drill down again.
+  Point<int16_t> child_point = p;
+  for (const auto& link : link_maps) {
+   if (link.second == "WorldMap") continue;
+   auto child=buttons.at(link.first)->bounds(position);
+   child_point=child.get_left_top()+Point<int16_t>(child.width()/2,child.height()/2);
+   break;
+  }
+  for(int move=0;move<5;++move) send_cursor(true,child_point);
+  doubleclick(child_point); // GLFW can dispatch this before the release.
+  assert(parent_map==entered_parent && region_click_consumed);
+  assert(pending_confirmation==-1 && pending_destinations.empty());
+  send_cursor(false,child_point);
+  assert(!region_click_consumed && parent_map==entered_parent);
+  // Releasing outside the window clears the latch via remove_cursor too.
+  region_click_consumed=true; remove_cursor(); assert(!region_click_consumed);
  }
 };
 int main(int argc,char** argv) {
@@ -100,7 +119,7 @@ int main(int argc,char** argv) {
   }
   assert(tested);
  }
- std::cout<<"PASS: repeated overview -> Victoria -> overview using real mouse callbacks, both languages\n";
+ std::cout<<"PASS: held region clicks consume repeats and double-clicks until release; repeated overview -> Victoria -> overview, both languages\n";
 }
 '''
 

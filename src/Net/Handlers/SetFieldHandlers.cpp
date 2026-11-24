@@ -15,6 +15,7 @@
 //	You should have received a copy of the GNU Affero General Public License	//
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
+#include "../Session.h"
 #include "SetFieldHandlers.h"
 
 #include "Helpers/CharacterParser.h"
@@ -159,5 +160,6 @@ namespace ms
 		Sound(Sound::Name::GAMESTART).play();
 
 		UI::get().change_state(UI::State::GAME);
+		Session::get().entered_game();
 	}
 }

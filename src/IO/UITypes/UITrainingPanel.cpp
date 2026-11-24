@@ -101,8 +101,8 @@ namespace ms
         : status(status), sender(std::move(sender))
     {
         auto native=nl::nx::ui["UIWindow2.img"]["UserList"]["Group"];
-        frame_=native_slice(native["backgrnd"],"frame",300,314,12,12,24,12);
-        interior_=native_slice(native["backgrnd2"],"interior",288,286,6,6,8,6,100,100);
+        frame_=native_slice(native["backgrnd"],"frame",300,390,12,12,24,12);
+        interior_=native_slice(native["backgrnd2"],"interior",288,362,6,6,8,6,100,100);
         for (int i=0;i<4;++i) checks_[i]=Texture(nl::nx::ui["Basic.img"]["CheckBox3"][i]);
         screen_width = Constants::Constants::get().get_viewwidth();
         screen_height = Constants::Constants::get().get_viewheight();
@@ -145,7 +145,7 @@ namespace ms
     void UITrainingPanel::layout()
     {
         const Point<int16_t> collapsed_size(104, 24);
-        dimension = expanded_ ? Point<int16_t>(300, 314) : collapsed_size;
+        dimension = expanded_ ? Point<int16_t>(300, 390) : collapsed_size;
         position = Point<int16_t>(std::max<int>(0, screen_width - dimension.x() - 16),
             std::max<int>(0, std::min<int>(56, screen_height - dimension.y() - 44)));
         buttons.clear();
@@ -164,7 +164,8 @@ namespace ms
         add(5,88,158,152,24); add(13,244,158,40,24);
         add(6,16,186,128,24); add(7,156,186,128,24);
         add(12,16,234,128,24); add(14,156,234,128,24);
-        add(8,16,278,68,24); add(9,94,278,112,24); add(10,216,278,68,24);
+        add(15,16,260,268,24);
+        add(8,16,354,68,24); add(9,94,354,112,24); add(10,216,354,68,24);
     }
 
     void UITrainingPanel::toggle()
@@ -225,6 +226,10 @@ namespace ms
         set(14,"宠吸·物品", enabled && status.pet_vacuum_split_known);
         static_cast<PanelButton*>(buttons.at(12).get())->checked(status.fresh() && status.pet_vacuum_mesos);
         static_cast<PanelButton*>(buttons.at(14).get())->checked(status.fresh() && status.pet_vacuum_items);
+        int rapid_skill = status.rapid_rate ? status.rapid_skill : available_skills[selected_skill];
+        set(15,!status.rapid_known ? "高频连发 · 需配套服务端" : status.rapid_rate
+            ? "高频连发 · "+std::to_string(status.rapid_rate)+"次/秒 ›" : "高频连发 · 关闭 ›",
+            enabled && status.rapid_known && TrainingAutoAttack::rapid_supported(rapid_skill));
         set(8,"刷新"); set(9,"全部停止"); set(10,"收起");
     }
     void UITrainingPanel::draw(float alpha) const
@@ -232,7 +237,7 @@ namespace ms
         if (!expanded_) { UIElement::draw(alpha); return; }
         if (frame_.is_valid()) frame_.draw(position);
         if (interior_.is_valid()) interior_.draw(position+Point<int16_t>(6,22));
-        else ColorBox(288,286,Color::Name::PORCELAIN,1).draw(position+Point<int16_t>(6,22));
+        else ColorBox(288,362,Color::Name::PORCELAIN,1).draw(position+Point<int16_t>(6,22));
         Text(Text::A12B,Text::CENTER,Color::Name::YELLOW,"辅助 · F8").draw(position+Point<int16_t>(150,6));
         label(position+Point<int16_t>(16,32), !feedback.empty() ? feedback : !status.fresh() ? "未同步 · 请刷新" : status.allowed ? "已同步" : "当前地图未开放");
         if (rotation_view) {
@@ -250,7 +255,20 @@ namespace ms
         label(position+Point<int16_t>(16,214),status.vacuum_pinned < 0 ? "吸怪数量待同步"
             : "吸怪 " + std::to_string(status.vacuum_pinned) + " / " + std::to_string(status.vacuum_eligible) + "（不含 Boss）");
 
-        label(position+Point<int16_t>(16,260),status.stop_reason.empty() ? "挂机按正常攻速 · 展开暂停飞行" : status.stop_reason,Color::Name::DUSTYGRAY);
+        auto rate_text = [&](unsigned long long count) {
+            auto tenths = status.rapid_elapsed ? count*10000/status.rapid_elapsed : 0;
+            return std::to_string(tenths/10)+"."+std::to_string(tenths%10);
+        };
+        label(position+Point<int16_t>(16,286),status.rapid_rate
+            ? "服务端 "+rate_text(status.rapid_accepted)+"次/秒 · 有效 "+rate_text(status.rapid_lines)+"段/秒"
+            : "实验档 10 / 20 / 40次/秒 · 海盗一转");
+        label(position+Point<int16_t>(16,302),status.rapid_rate
+            ? "接收 "+std::to_string(status.rapid_accepted)+" · 限流 "+std::to_string(status.rapid_rejected)
+            : "双弹每次2段；逐次消耗MP和弹药",Color::Name::DUSTYGRAY);
+        label(position+Point<int16_t>(16,318),status.rapid_rate
+            ? "累计扣血 "+std::to_string(status.rapid_damage)+" · 多目标合计"
+            : "技能轮换独立使用；切图停止高频",Color::Name::DUSTYGRAY);
+        label(position+Point<int16_t>(16,334),status.stop_reason.empty() ? "展开暂停飞行 · 全部停止可关闭连发" : status.stop_reason,Color::Name::DUSTYGRAY);
         UIElement::draw(alpha);
     }
     Button::State UITrainingPanel::button_pressed(uint16_t id)
@@ -279,6 +297,15 @@ namespace ms
         else if (id==6 || id==7 || id==11) Stage::get().set_flight_mode(Stage::get().get_flight_mode()==(id==6 ? 1 : 2) ? 0 : id==6 ? 1 : 2);
         else if (!pending_ && status.fresh() && status.allowed)
         {
+            if (id==15 && status.rapid_known) {
+                int rate=status.rapid_rate==0 ? 10 : status.rapid_rate==10 ? 20 : status.rapid_rate==20 ? 40 : 0;
+                int skill=status.rapid_rate ? status.rapid_skill : available_skills[selected_skill];
+                if (!rate) request("rapid off");
+                else if (TrainingAutoAttack::rapid_supported(skill)) {
+                    use_rotation=false;
+                    request("rapid on "+std::to_string(rate)+" "+std::to_string(skill));
+                }
+            }
             if (id==12 && status.pet_vacuum_split_known) request(std::string("petvac mesos ")+(status.pet_vacuum_mesos ? "off":"on"));
             if (id==14 && status.pet_vacuum_split_known) request(std::string("petvac items ")+(status.pet_vacuum_items ? "off":"on"));
             if (id==1) request(std::string("invincible ")+(status.invincible ? "off":"on"));

@@ -109,6 +109,9 @@ namespace ms
 		summons.clear();
 		dragons.clear();
 		drops.clear();
+		petai.reset();
+		for (uint8_t i = 0; i < 3; ++i)
+			player.get_pet(i).clear_loot_target();
 		doors.clear();
 		mists.clear();
 		point_effects.clear();
@@ -247,6 +250,9 @@ namespace ms
 
 	bool Stage::training_auto_notice(const std::string& notice)
 	{
+        if (training_status.accept_rapid(notice, get_mapid())) {
+            training_auto.accept(notice, get_mapid()); return true;
+        }
 		if (training_status.accept_pet_vacuum(notice, get_mapid())) return true;
 		if (training_status.accept_vacuum_count(notice, get_mapid())) return true;
 		const std::string pin_prefix = "[TrainingAssist:pin:v1] ";
@@ -336,8 +342,12 @@ namespace ms
 				&& training_auto.ready(TrainingAutoAttack::Clock::now()))
 			{
 				std::string reason;
-				if (!combat.auto_use_move(training_auto.skill(), reason))
-                    { training_auto.retry(TrainingAutoAttack::Clock::now()); training_status.stop_reason = "暂停：" + reason; }
+				if (!combat.auto_use_move(training_auto.skill(), reason, training_auto.rapid_rate()>0))
+                    {
+                        if (training_auto.rapid_rate()>0 && reason.rfind("等待",0)!=0) {
+                            stop_training_auto(reason); training_status.stop_reason="高频已停止："+reason;
+                        } else { training_auto.retry(TrainingAutoAttack::Clock::now()); training_status.stop_reason="暂停："+reason; }
+                    }
                 else training_status.stop_reason.clear();
 			}
 		}

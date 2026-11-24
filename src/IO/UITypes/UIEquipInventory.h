@@ -102,7 +102,7 @@ namespace ms
 		LocalizedArt translated_frame, translated_slots;
 		Texture tabbar;
         Texture pet_panel, pet_card, pet_slot;
-        Texture pet_checks[2], pet_adjust[3], pet_tabs[2];
+        Texture pet_checks[2], pet_adjust[3], pet_tabs[2], pet_nav_tabs[3];
         Point<int16_t> pet_hover = Point<int16_t>(-1,-1);
 		Texture background[Buttons::BT_TABE];
 		Texture disabled;

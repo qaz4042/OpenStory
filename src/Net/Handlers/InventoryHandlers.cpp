@@ -30,6 +30,7 @@
 #include "../../IO/UITypes/UIStorage.h"
 #include "../../IO/UITypes/UIChatBar.h"
 #include "../../IO/UITypes/UIQuestHelper.h"
+#include "../../IO/UITypes/UIQuestLog.h"
 
 namespace ms
 {
@@ -199,6 +200,9 @@ namespace ms
 		}
 
 		Stage::get().get_player().recalc_stats(true);
+		Stage::get().get_npcs().refresh_quest_marks();
+		if (auto log = UI::get().get_element<UIQuestLog>())
+			if (log->is_active()) log->load_quests();
 
 		// Item requirements are counted from the local inventory, so they go
 		// stale unless a bag change refreshes them

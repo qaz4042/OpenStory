@@ -26,11 +26,8 @@
 
 namespace ms
 {
-	// Tracks TalkToNPC requests and detects when the server fails to respond
-	// (common on private servers that are missing NX quest data). Any NPC
-	// whose talk request times out is flagged "unavailable" so UI code can
-	// hide its quest indicator and move related quests to the
-	// "Not Available" tab of the quest log.
+	// Tracks pending TalkToNPC requests and mirrors the server click cooldown.
+	// A timeout only expires a request; it must not change quest availability.
 	class NpcResponseTracker : public Singleton<NpcResponseTracker>
 	{
 	public:
@@ -40,8 +37,8 @@ namespace ms
 		// Clear a pending entry because the server responded (dialog/shop).
 		void clear_pending(int32_t npcid);
 
-		// Expire stale pending entries. Returns true if anything was newly
-		// flagged as unavailable during this call.
+		// Expire stale pending entries without declaring an NPC unavailable.
+		// Return value retained for existing callers; timeout alone returns false.
 		bool tick();
 
 		bool is_unavailable(int32_t npcid) const;

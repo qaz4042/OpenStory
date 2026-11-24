@@ -22,6 +22,8 @@
 #include "../UI.h"
 
 #include "../Components/MapleButton.h"
+#include "../Components/LabeledButton.h"
+#include <sstream>
 
 #include "../../Character/SkillId.h"
 #include "../../Data/JobData.h"
@@ -149,6 +151,14 @@ namespace ms
 		buttons[Buttons::BT_HYPER]->set_state(Button::State::DISABLED);
 		buttons[Buttons::BT_GUILDSKILL]->set_state(Button::State::DISABLED);
 		buttons[Buttons::BT_RIDE]->set_state(Button::State::DISABLED);
+        // Reuse the footer space occupied by three unsupported feature buttons.
+        buttons[Buttons::BT_HYPER]->set_active(false);
+        buttons[Buttons::BT_GUILDSKILL]->set_active(false);
+        buttons[Buttons::BT_RIDE]->set_active(false);
+        buttons[Buttons::BT_JOB_SWITCH] = std::make_unique<LabeledButton>("切换职业", "Switch Job", 82);
+        buttons[Buttons::BT_JOB_SWITCH]->set_position(Point<int16_t>(10, bg_dimensions.y() - 24));
+        buttons[Buttons::BT_JOB_SWITCH]->set_state(Button::DISABLED);
+
 
 
 		translated_frame = LocalizedArt(ui_backgrnd, {{30, 3, 114, 12, localization::Key::SkillInventory, Color::Name::YELLOW}});
@@ -239,6 +249,9 @@ namespace ms
 			uint16_t row = i - Buttons::BT_SPUP0;
 			Point<int16_t> spup_position = SKILL_OFFSET + Point<int16_t>(124, 20 + row * ROW_HEIGHT);
 			buttons[i] = std::make_unique<MapleButton>(main["BtSpUp"], spup_position);
+            auto maxid = Buttons::BT_SPMAX0 + row;
+            buttons[maxid] = std::make_unique<LabeledButton>("满", "Max", 28);
+            buttons[maxid]->set_position(SKILL_OFFSET + Point<int16_t>(93, 19 + row * ROW_HEIGHT));
 		}
 
 		booktext = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE, "", 150);
@@ -397,9 +410,60 @@ namespace ms
 		UIElement::draw_buttons(alpha);
 	}
 
+    bool UISkillBook::job_switch_supported() const {
+        if (stats.get_stat(MapleStat::Id::LEVEL) < 30 || stats.get_stat(MapleStat::Id::JOB) % 10 > 2) return false;
+        switch (stats.get_stat(MapleStat::Id::JOB) / 10 * 10) {
+            case 110: case 120: case 130: case 210: case 220: case 230:
+            case 310: case 320: case 410: case 420: case 510: case 520: return true;
+            default: return false;
+        }
+    }
+
+    bool UISkillBook::job_switch_ready() const {
+        return job_switch_supported() && job_switch_code == 0
+            && job_switch_map == Stage::get().get_mapid() && job_switch_job == stats.get_stat(MapleStat::Id::JOB)
+            && std::chrono::steady_clock::now() - job_switch_received < std::chrono::seconds(3);
+    }
+
+    std::string UISkillBook::job_switch_hint() const {
+        if (job_switch_server_missing) return "当前服务端未开放职业切换，请先更新服务端";
+        if (!job_switch_supported()) return "仅开放 30 级以上冒险家同系分支互换，保持当前转数";
+        if (job_switch_map != Stage::get().get_mapid() || job_switch_job != stats.get_stat(MapleStat::Id::JOB)
+                || std::chrono::steady_clock::now() - job_switch_received >= std::chrono::seconds(3)
+                || job_switch_code < 0) return "正在查询切换条件；若持续无响应，请检查服务端是否已更新";
+        if (job_switch_code == 1) return "脱战后可切换 · 还需 " + std::to_string(job_switch_seconds) + " 秒（允许走路）";
+        if (job_switch_code == 2) return "仅开放 30 级以上冒险家同系分支互换，保持当前转数";
+        if (job_switch_code == 3) return "当前状态或活动／副本地图不能切换职业";
+        if (job_switch_code == 4) return "装备栏空位不足，无法自动卸下全部装备";
+        return "切换同系职业分支：保持转数，保留一转，退还分支 SP；自动卸下全部装备，需脱战 30 秒";
+    }
+
+    void UISkillBook::accept_job_switch_status(const std::string& message) {
+        const std::string prefix = "[JobSwitch:state:v1] ";
+        if (message.rfind(prefix, 0) != 0) return;
+        int map, job, code, seconds; std::string extra;
+        std::istringstream input(message.substr(prefix.size()));
+        if (!(input >> map >> job >> code >> seconds) || (input >> extra) || code < 0 || code > 5
+                || seconds < 0 || seconds > 30 || map != Stage::get().get_mapid()
+                || job != stats.get_stat(MapleStat::Id::JOB)) return;
+        job_switch_map = map; job_switch_job = job; job_switch_code = code; job_switch_seconds = seconds;
+        job_switch_received = std::chrono::steady_clock::now();
+    }
+
 	void UISkillBook::update()
 	{
 		UIElement::update();
+        if (!UI::get().is_mouse_held()) sp_click_consumed = false;
+        advance_spup();
+        const auto now = std::chrono::steady_clock::now();
+        if (active && !job_switch_server_missing && job_switch_supported() && now >= job_switch_poll) {
+            GeneralChatPacket("@jobswitch status", false).dispatch();
+            job_switch_poll = now + std::chrono::seconds(1);
+        }
+        buttons[BT_JOB_SWITCH]->set_state(job_switch_ready() ? Button::NORMAL : Button::DISABLED);
+        if (job_switch_hover && active)
+            UI::get().show_text(Tooltip::Parent::SKILLBOOK, job_switch_hint());
+
 
 		if (macro_enabled)
 			macro_name_field.update(position);
@@ -422,14 +486,29 @@ namespace ms
 
 	Button::State UISkillBook::button_pressed(uint16_t id)
 	{
-		std::string sp_text = splabel.get_text();
-		int16_t cur_sp = sp_text.empty() ? 0 : std::stoi(sp_text);
+        const bool sp_button = (id >= BT_SPUP0 && id <= BT_SPUP3)
+            || (id >= BT_SPMAX0 && id <= BT_SPMAX3);
+        if (sp_button) {
+            if (sp_click_consumed) return Button::IDENTITY;
+            sp_click_consumed = true;
+        }
 
 		switch (id)
 		{
 		case Buttons::BT_CLOSE:
 			close();
 			break;
+        case Buttons::BT_JOB_SWITCH:
+            if (!job_switch_ready()) {
+                UI::get().show_text(Tooltip::Parent::SKILLBOOK, job_switch_hint());
+                return Button::DISABLED;
+            }
+            Stage::get().stop_training_auto("Job switch requested");
+            pending_macro_skills.clear();
+            GeneralChatPacket("@jobswitch", false).dispatch();
+            job_switch_code = -1;
+            job_switch_poll = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+            return Button::DISABLED;
 		case Buttons::BT_MACRO:
 			set_macro(!macro_enabled);
 			break;
@@ -447,6 +526,12 @@ namespace ms
 		case Buttons::BT_SPUP3:
 			send_spup(id - Buttons::BT_SPUP0 + offset);
 			break;
+        case Buttons::BT_SPMAX0:
+        case Buttons::BT_SPMAX1:
+        case Buttons::BT_SPMAX2:
+        case Buttons::BT_SPMAX3:
+            send_spup(id - Buttons::BT_SPMAX0 + offset, true);
+            break;
 		case Buttons::BT_MACRO_OK:
 			save_macros();
 			set_macro(false);
@@ -458,17 +543,26 @@ namespace ms
 			break;
 		}
 
-		return Button::State::NORMAL;
+		return sp_button ? Button::IDENTITY : Button::NORMAL;
 	}
 
 	void UISkillBook::toggle_active()
 	{
+        cancel_spup();
+        change_offset(offset);
 		UIElement::toggle_active();
+        job_switch_code = -1;
+        job_switch_poll = {};
+        job_switch_hover = false;
 		clear_tooltip();
 	}
 
 	void UISkillBook::doubleclick(Point<int16_t> cursorpos)
 	{
+        // The level controls share a skill row, but are not skill-use targets.
+        for (uint16_t i = 0; i < ROWS; ++i)
+            if (buttons[BT_SPUP0 + i]->bounds(position).contains(cursorpos)
+                    || buttons[BT_SPMAX0 + i]->bounds(position).contains(cursorpos)) return;
 		const SkillDisplayMeta* skill = skill_by_position(cursorpos - position);
 
 		if (skill)
@@ -484,13 +578,23 @@ namespace ms
 	void UISkillBook::remove_cursor()
 	{
 		UIDragElement::remove_cursor();
+        job_switch_hover = false;
+        clear_tooltip();
 
 		slider.remove_cursor();
 	}
 
 	Cursor::State UISkillBook::send_cursor(bool clicked, Point<int16_t> cursorpos)
 	{
+        if (!clicked) sp_click_consumed = false;
 		Cursor::State dstate = UIDragElement::send_cursor(clicked, cursorpos);
+        job_switch_hover = buttons[BT_JOB_SWITCH]->bounds(position).contains(cursorpos);
+        if (job_switch_hover) {
+            UI::get().show_text(Tooltip::Parent::SKILLBOOK, job_switch_hint());
+            buttons[BT_JOB_SWITCH]->set_state(job_switch_ready() ? Button::MOUSEOVER : Button::DISABLED);
+            return dstate;
+        }
+
 
 		// The base hover loop resets un-hovered buttons to NORMAL; keep the
 		// currently-selected tab visually pressed regardless of the cursor.
@@ -587,6 +691,12 @@ namespace ms
 				return dstate;
 		}
 
+        for (uint16_t i = BT_SPMAX0; i <= BT_SPMAX3; ++i) {
+            if (buttons[i]->is_active() && buttons[i]->bounds(position).contains(cursorpos)) {
+                UI::get().show_text(Tooltip::Parent::SKILLBOOK, "加至当前上限；SP 不足时用完可用点数。关闭窗口可停止。");
+                return dstate;
+            }
+        }
 		Point<int16_t> skill_position = position + SKILL_OFFSET;
 
 		if (!grabbing)
@@ -717,6 +827,14 @@ namespace ms
 
 	void UISkillBook::update_skills(int32_t skill_id)
 	{
+        if (skill_id == pending_sp_skill && pending_sp_waiting) {
+            if (skillbook.get_level(skill_id) == pending_sp_level + 1) {
+                pending_sp_waiting = false;
+                if (pending_sp_left == 0) cancel_spup();
+            } else {
+                cancel_spup();
+            }
+        }
 		// change_tab() rebuilds the list and deliberately scrolls back to the
 		// top, which is right when the player actually switches tab. Spending a
 		// skill point is not a tab change -- it comes through here with the tab
@@ -740,6 +858,7 @@ namespace ms
 
 	void UISkillBook::change_job(uint16_t id)
 	{
+        cancel_spup();
 		job.change_job(id);
 
 		Job::Level level = job.get_level();
@@ -787,6 +906,7 @@ namespace ms
 
 	void UISkillBook::change_tab(uint16_t new_tab)
 	{
+        if (new_tab != tab) cancel_spup();
 		buttons[Buttons::BT_TAB0 + tab]->set_state(Button::NORMAL);
 		buttons[Buttons::BT_TAB0 + new_tab]->set_state(Button::PRESSED);
 		tab = new_tab;
@@ -849,13 +969,17 @@ namespace ms
 		{
 			uint16_t index = Buttons::BT_SPUP0 + i;
 			uint16_t row = offset + i;
+            auto& maxbutton = buttons[BT_SPMAX0 + i];
+            maxbutton->set_active(false);
 			buttons[index]->set_active(row < skillcount);
 
 			if (row < skills.size())
 			{
 				int32_t skill_id = skills[row].get_id();
 				bool canraise = can_raise(skill_id);
-				buttons[index]->set_state(canraise ? Button::State::NORMAL : Button::State::DISABLED);
+				buttons[index]->set_state(canraise && !pending_sp_skill ? Button::State::NORMAL : Button::State::DISABLED);
+                maxbutton->set_active(skillbook.get_level(skill_id) < skill_cap(skill_id));
+                maxbutton->set_state(canraise && !pending_sp_skill ? Button::NORMAL : Button::DISABLED);
 			}
 		}
 	}
@@ -905,22 +1029,65 @@ namespace ms
 		}
 	}
 
-	void UISkillBook::send_spup(uint16_t row)
-	{
-		if (row >= skills.size())
-			return;
+	int32_t UISkillBook::skill_cap(int32_t id) const
+    {
+        int32_t cap = skillbook.get_masterlevel(id);
+        int32_t resource_cap = SkillData::get(id).get_masterlevel();
+        return cap > 0 ? std::min(cap, resource_cap) : resource_cap;
+    }
 
-		int32_t id = skills[row].get_id();
+    void UISkillBook::cancel_spup()
+    {
+        pending_sp_skill = 0;
+        pending_sp_left = 0;
+        pending_sp_waiting = false;
+    }
 
-		std::string sp_txt = splabel.get_text();
-		int16_t cur_sp = sp_txt.empty() ? 0 : std::stoi(sp_txt);
+    void UISkillBook::send_spup(uint16_t row, bool fill)
+    {
+        if (pending_sp_skill || row >= skills.size()) return;
+        int32_t id = skills[row].get_id();
+        if (!can_raise(id)) return;
+        int32_t available = joblevel_by_tab(tab) == Job::BEGINNER ? beginner_sp : sp;
+        int32_t count = std::min(available, skill_cap(id) - skillbook.get_level(id));
+        if (count <= 0) return;
+        pending_sp_skill = id;
+        pending_sp_left = fill ? count : 1;
+        pending_sp_job = stats.get_stat(MapleStat::JOB);
+        pending_sp_map = Stage::get().get_mapid();
+        advance_spup();
+        change_offset(offset);
+    }
 
-		if (cur_sp <= 0)
-			return;
-
-		spend_sp(id);
-		change_sp();
-	}
+    void UISkillBook::advance_spup()
+    {
+        if (!pending_sp_skill) return;
+        if (!active || pending_sp_job != stats.get_stat(MapleStat::JOB)
+                || pending_sp_map != Stage::get().get_mapid()) {
+            cancel_spup();
+            change_offset(offset);
+            return;
+        }
+        if (pending_sp_waiting) {
+            // Never retry an unacknowledged point: its result may arrive late.
+            if (std::chrono::steady_clock::now() - pending_sp_sent > std::chrono::seconds(3)) {
+                cancel_spup();
+                change_offset(offset);
+            }
+            return;
+        }
+        if (pending_sp_left <= 0 || !can_raise(pending_sp_skill)
+                || skillbook.get_level(pending_sp_skill) >= skill_cap(pending_sp_skill)) {
+            cancel_spup();
+            change_offset(offset);
+            return;
+        }
+        pending_sp_level = skillbook.get_level(pending_sp_skill);
+        --pending_sp_left;
+        pending_sp_waiting = true;
+        pending_sp_sent = std::chrono::steady_clock::now();
+        spend_sp(pending_sp_skill);
+    }
 
 	void UISkillBook::spend_sp(int32_t skill_id)
 	{
@@ -971,6 +1138,7 @@ namespace ms
 
 	void UISkillBook::close()
 	{
+        cancel_spup();
 		clear_tooltip();
 		deactivate();
 	}

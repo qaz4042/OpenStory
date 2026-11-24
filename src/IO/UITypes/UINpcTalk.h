@@ -35,13 +35,13 @@ namespace ms
 	public:
 		// msgType layout per the actual server (Cosmic / HeavenMS,
 		// confirmed by reading the wire bytes the server emits):
-		//  0  sendOk(text)              — text + [OK]
+		//  0  text: trailing [previous][next] flags select OK/Next/Back
 		//  1  sendYesNo(text)           — text + [Yes] [No]
 		//  2  sendGetText(...)          — text input field
 		//  3  sendGetNumber(...)        — number input slider
 		//  4  sendSimple(text)          — text with #L0#..#l selection links
-		//  5  sendNext(text)            — text + [Next]
-		//  6  sendNextPrev(text)        — text + [Back] [Next]
+		//  5  internal sendNext display — wire msgtype 0
+		//  6  internal sendNextPrev     — wire msgtype 0
 		// 12  sendAcceptDecline(text)   — text + [Accept] [Decline]
 		enum TalkType : int8_t
 		{
@@ -53,6 +53,7 @@ namespace ms
 			SENDSIMPLE = 4,
 			SENDNEXT = 5,
 			SENDNEXTPREV = 6,
+			SENDPREV = 7, // Internal display variant; wire msgtype remains 0.
 			SENDACCEPTDECLINE = 12,
 			LENGTH = 13
 		};

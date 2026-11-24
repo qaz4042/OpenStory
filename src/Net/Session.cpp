@@ -21,6 +21,11 @@
 #include <cstring>
 
 #include "../Configuration.h"
+#include "../Gameplay/Stage.h"
+#include "../IO/UI.h"
+#include "../IO/UITypes/UILoginWait.h"
+#include "Packets/LoginPackets.h"
+#include "Packets/SelectCharPackets.h"
 
 namespace ms
 {
@@ -67,12 +72,8 @@ namespace ms
 	void Session::reconnect(const char* address, const char* port)
 	{
 		// Close the current connection and open a new one
-		bool success = socket.close();
-
-		if (success)
-			init(address, port);
-		else
-			connected = false;
+		socket.close();
+		init(address, port);
 	}
 
 	void Session::process(const int8_t* bytes, size_t available)
@@ -138,12 +139,41 @@ namespace ms
 		cryptography.create_header(header, packet_length);
 		cryptography.encrypt(packet_bytes, packet_length);
 
-		socket.dispatch(header, HEADER_LENGTH);
-		socket.dispatch(packet_bytes, packet_length);
+		connected = socket.dispatch(header, HEADER_LENGTH)
+			&& socket.dispatch(packet_bytes, packet_length);
 	}
 
 	void Session::read()
 	{
+		const auto now = std::chrono::steady_clock::now();
+		if (!connected && in_game && !restore_password.empty())
+		{
+			in_game = false;
+			restoring = true;
+			restore_world = Configuration::get().get_worldid();
+			restore_channel = Configuration::get().get_channelid();
+			Stage::get().clear();
+			UI::get().change_state(UI::State::LOGIN);
+			UI::get().enable();
+			UI::get().emplace<UILoginWait>([] { Session::get().cancel_restore(); });
+			retry_at = now;
+		}
+		if (restoring && now >= retry_at)
+		{
+			socket.close();
+			connected = false;
+			if (!init())
+			{
+				UI::get().emplace<UILoginWait>([] { Session::get().cancel_restore(); });
+				LoginPacket(restore_account, restore_password).dispatch();
+				// A connected server can still be starting its channels.
+				retry_at = now + std::chrono::seconds(20);
+			}
+			else
+				retry_at = now + std::chrono::seconds(5);
+		}
+		if (!connected)
+			return;
 		// TCP reads may split either the header or the body at any byte.
 		size_t result = socket.receive(&connected);
 
@@ -157,10 +187,60 @@ namespace ms
 
 	void Session::reconnect()
 	{
+		if (!restoring) in_game = false;
 		std::string HOST = Setting<ServerIP>::get().load();
 		std::string PORT = Setting<ServerPort>::get().load();
 
 		reconnect(HOST.c_str(), PORT.c_str());
+	}
+
+	void Session::remember_login(const std::string& account, const std::string& password)
+	{
+		cancel_restore();
+		restore_account = account;
+		restore_password = password;
+	}
+
+	void Session::remember_character(int32_t id, const std::string& pic)
+	{
+		restore_cid = id;
+		restore_pic = pic;
+	}
+
+	void Session::restore_world_selection()
+	{
+		Configuration::get().set_worldid(restore_world);
+		Configuration::get().set_channelid(restore_channel);
+		CharlistRequestPacket(restore_world, restore_channel).dispatch();
+	}
+
+	void Session::entered_game()
+	{
+		in_game = true;
+		restoring = false;
+	}
+
+	void Session::cancel_restore()
+	{
+		restoring = in_game = false;
+	}
+
+	bool Session::restore_character(const std::vector<CharEntry>& characters, int8_t pic_mode)
+	{
+		if (!restoring)
+			return false;
+		const auto found = std::find_if(characters.begin(), characters.end(),
+			[this](const CharEntry& c) { return c.id == restore_cid; });
+		if (found == characters.end() || pic_mode == 0 || (pic_mode != 2 && restore_pic.empty()))
+		{
+			cancel_restore();
+			return false;
+		}
+		if (pic_mode == 2)
+			SelectCharPacket(restore_cid).dispatch();
+		else
+			SelectCharPicPacket(restore_pic, restore_cid).dispatch();
+		return true;
 	}
 
 	bool Session::is_connected() const

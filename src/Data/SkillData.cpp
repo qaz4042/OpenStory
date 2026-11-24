@@ -161,11 +161,15 @@ namespace ms
 			{ SkillId::METEOR_SHOWER, ATTACK },
             { 3001004, ATTACK | RANGED }, { 3001005, ATTACK | RANGED },
             { 4001334, ATTACK | MELEE }, { 4001344, ATTACK | RANGED },
-            { 5101002, ATTACK | MELEE }, { 5201001, ATTACK | RANGED },
+            { 5201001, ATTACK | RANGED },
 			// Pirate
 			{ SkillId::FLASH_FIST, ATTACK | MELEE },
 			{ SkillId::SOMERSAULT_KICK, ATTACK | MELEE },
-			{ SkillId::DOUBLE_SHOT, ATTACK | RANGED }
+			{ SkillId::DOUBLE_SHOT, ATTACK | RANGED },
+			// Brawler
+			{ SkillId::BACK_SPIN_BLOW, ATTACK | MELEE },
+			{ SkillId::DOUBLE_UPPERCUT, ATTACK | MELEE },
+			{ SkillId::CORKSCREW_BLOW, ATTACK | MELEE }
 		};
 
 		auto iter = skill_flags.find(id);

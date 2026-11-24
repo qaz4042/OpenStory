@@ -507,8 +507,18 @@ namespace ms
 				{
 					case InventoryType::Id::EQUIP:
 					{
-						if (can_wear_equip(slot))
-							EquipItemPacket(slot, inventory.find_equipslot(item_id)).dispatch();
+						if (item_id == 1812000 || item_id == 1812001)
+						{
+							const int16_t destination = 181 + (item_id - 1812000);
+							if (!inventory.get_item_id(InventoryType::Id::EQUIPPED, destination))
+								MoveItemPacket(InventoryType::Id::EQUIP, slot, -destination, 1).dispatch();
+						}
+						else if (can_wear_equip(slot))
+						{
+							const auto destination = inventory.find_equipslot(item_id);
+							if (destination != EquipSlot::Id::NONE)
+								EquipItemPacket(slot, destination).dispatch();
+						}
 
 						break;
 					}

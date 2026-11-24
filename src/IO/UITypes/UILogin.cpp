@@ -15,6 +15,7 @@
 //	You should have received a copy of the GNU Affero General Public License	//
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.		//
 //////////////////////////////////////////////////////////////////////////////////
+#include "../../Net/Session.h"
 #include "UILogin.h"
 #include "../Components/LoginResources.h"
 
@@ -260,12 +261,24 @@ namespace ms
 			Configuration::get().save();
 		}
 
+		Session::get().cancel_restore();
+		if (!Session::get().is_connected())
+			Session::get().reconnect();
+		if (!Session::get().is_connected())
+		{
+			UI::get().emplace<UILoginNotice>(UILoginNotice::Message::UNKNOWN_ERROR, okhandler);
+			return;
+		}
+
 		UI::get().emplace<UILoginWait>(okhandler);
 
 		auto loginwait = UI::get().get_element<UILoginWait>();
 
 		if (loginwait && loginwait->is_active())
+		{
+			Session::get().remember_login(account_text, password_text);
 			LoginPacket(account_text, password_text).dispatch();
+		}
 	}
 
 	void UILogin::open_url(uint16_t id)

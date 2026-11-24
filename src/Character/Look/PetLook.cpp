@@ -197,12 +197,12 @@ namespace ms
 			{
 				set_position(charpos.x(), charpos.y());
 			}
-			else if (charpos.x() - curpos.x() > 50)
+			else if ((has_loot_target ? loot_target.x() : charpos.x()) - curpos.x() > (has_loot_target ? 8 : 50))
 			{
 				phobj.hforce = PETWALKFORCE;
 				flip = true;
 			}
-			else if (charpos.x() - curpos.x() < -50)
+			else if ((has_loot_target ? loot_target.x() : charpos.x()) - curpos.x() < -(has_loot_target ? 8 : 50))
 			{
 				phobj.hforce = -PETWALKFORCE;
 				flip = false;

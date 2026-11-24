@@ -1076,22 +1076,25 @@ namespace ms
 	void UIShop::sell_all()
 	{
 		std::vector<ShopSale> sales;
-		for (int8_t type = InventoryType::EQUIP; type <= InventoryType::ETC; ++type) {
-			auto tab = static_cast<InventoryType::Id>(type);
-			for (int16_t slot = 1; slot <= inventory.get_slotmax(tab); ++slot) {
-				int32_t id = inventory.get_item_id(tab, slot);
-				if (!id || inventory.is_sell_locked(tab, slot)) continue;
-				const auto& data = ItemData::get(id);
-				if (data.is_cashitem() || data.is_unsellable() || data.get_price() <= 0) continue;
-				int16_t count = inventory.get_item_count(tab, slot);
-				if (count > 0) sales.push_back({type, slot, id, count});
-			}
-		}
+        const auto tab = sellstate.tab;
+        if (tab >= InventoryType::EQUIP && tab <= InventoryType::ETC) {
+            for (int16_t slot = 1; slot <= inventory.get_slotmax(tab); ++slot) {
+                int32_t id = inventory.get_item_id(tab, slot);
+                if (!id || inventory.is_sell_locked(tab, slot)) continue;
+                const auto& data = ItemData::get(id);
+                if (data.is_cashitem() || data.is_unsellable() || data.get_price() < 0) continue;
+                int16_t count = inventory.get_item_count(tab, slot);
+                if (count > 0) sales.push_back({static_cast<int8_t>(tab), slot, id, count});
+            }
+        }
 		bool zh = Setting<UILanguage>::get().load() == "zh-CN";
-		std::string question = zh
-			? "出售所有背包分类中未加锁的可售物品（含药水、卷轴、弹药）？共 "
-			: "Sell unlocked items in ALL inventory tabs (including potions, scrolls, ammo)? Up to ";
-		question += std::to_string(sales.size()) + (zh ? " 格。售出无法撤销。" : " slots. This cannot be undone.");
+        const char* zh_tabs[] = {"", "装备", "消耗", "设置", "其他", "特殊"};
+        const char* en_tabs[] = {"", "Equip", "Use", "Set-up", "Etc", "Cash"};
+        const int tab_index = tab >= InventoryType::EQUIP && tab <= InventoryType::CASH ? tab : 0;
+        std::string question = zh
+            ? std::string("仅出售【") + zh_tabs[tab_index] + "】栏未加锁的可售物品？共 "
+            : std::string("Sell unlocked items in the ") + en_tabs[tab_index] + " tab only? Up to ";
+		question += std::to_string(sales.size()) + (zh ? " 格（含0金币物品）。售出无法撤销。" : " slots (including 0-meso items). Cannot undo.");
 		int32_t npc = shop_npc;
 		UI::get().emplace<UIYesNo>(question, [npc, sales](bool yes) {
 			if (yes && !sales.empty()) ShopSellAllPacket(npc, sales).dispatch();

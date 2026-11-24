@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../UIDragElement.h"
+#include <chrono>
 #include "../Components/LocalizedArt.h"
 
 #include "../Components/Charset.h"
@@ -56,6 +57,8 @@ namespace ms
 
 		void update_stat(MapleStat::Id stat, int16_t value);
 		void update_skills(int32_t skill_id);
+		void accept_job_switch_status(const std::string& message);
+        void job_switch_unavailable() { job_switch_server_missing = true; }
 
 		// Called by SkillMacrosHandler at login
 		void load_macro(uint8_t index, const std::string& name, bool shout, int32_t s1, int32_t s2, int32_t s3);
@@ -133,7 +136,15 @@ namespace ms
 		void clear_tooltip();
 
 		bool can_raise(int32_t skill_id) const;
-		void send_spup(uint16_t row);
+		void send_spup(uint16_t row, bool fill = false);
+		void advance_spup();
+		void cancel_spup();
+		int32_t skill_cap(int32_t id) const;
+		bool sp_click_consumed = false;
+		int32_t pending_sp_skill = 0, pending_sp_level = 0, pending_sp_left = 0;
+		int32_t pending_sp_job = 0, pending_sp_map = 0;
+		bool pending_sp_waiting = false;
+		std::chrono::steady_clock::time_point pending_sp_sent{};
 		void spend_sp(int32_t skill_id);
 
 		Job::Level joblevel_by_tab(uint16_t tab) const;
@@ -143,6 +154,14 @@ namespace ms
 		bool check_required(int32_t id) const;
 
 		void set_macro(bool enabled);
+
+        bool job_switch_supported() const;
+        bool job_switch_ready() const;
+        std::string job_switch_hint() const;
+        int job_switch_code = -1, job_switch_seconds = 30, job_switch_map = -1, job_switch_job = -1;
+        bool job_switch_hover = false;
+        bool job_switch_server_missing = false;
+        std::chrono::steady_clock::time_point job_switch_received{}, job_switch_poll{};
 
 		enum Buttons : uint16_t
 		{
@@ -160,7 +179,9 @@ namespace ms
 			BT_SPUP0,
 			BT_SPUP1,
 			BT_SPUP2,
-			BT_SPUP3
+			BT_SPUP3,
+			BT_JOB_SWITCH,
+			BT_SPMAX0, BT_SPMAX1, BT_SPMAX2, BT_SPMAX3
 		};
 
 		static constexpr int16_t ROWS = 4;

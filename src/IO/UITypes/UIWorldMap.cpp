@@ -274,7 +274,11 @@ namespace ms
 		if (buttonid >= Buttons::BT_LINK0)
 		{
 			auto link = link_maps.find(buttonid);
-			if (link != link_maps.end()) update_world(link->second);
+			if (link != link_maps.end())
+			{
+				region_click_consumed = true;
+				update_world(link->second);
+			}
 
 			return Button::State::IDENTITY;
 		}
@@ -284,6 +288,8 @@ namespace ms
 
 	void UIWorldMap::remove_cursor()
 	{
+		if (!UI::get().is_mouse_held())
+			region_click_consumed = false;
 		UIDragElement::remove_cursor();
 
 		UI::get().clear_tooltip(Tooltip::Parent::WORLDMAP);
@@ -293,6 +299,15 @@ namespace ms
 
 	Cursor::State UIWorldMap::send_cursor(bool clicked, Point<int16_t> cursorpos)
 	{
+		// Region links rebuild the controls on mouse-down. Held cursor moves
+		// must not activate a link in the newly displayed map.
+		if (region_click_consumed)
+		{
+			if (!clicked && !UI::get().is_mouse_held())
+				region_click_consumed = false;
+			return clicked ? Cursor::State::CLICKING : Cursor::State::IDLE;
+		}
+
 		if (Cursor::State new_state = search_text.send_cursor(cursorpos, clicked))
 			return new_state;
 
@@ -319,6 +334,7 @@ namespace ms
 
 	void UIWorldMap::doubleclick(Point<int16_t> cursorpos)
 	{
+		if (region_click_consumed) return;
 		for (const auto& spot : map_spots)
 		{
 			auto top = spot.first + position + base_position - 10;

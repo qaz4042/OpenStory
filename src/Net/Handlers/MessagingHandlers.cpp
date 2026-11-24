@@ -1,3 +1,4 @@
+#include "../../IO/UITypes/UISkillBook.h"
 //////////////////////////////////////////////////////////////////////////////////
 //	This file is part of the continued Journey MMORPG client					//
 //	Copyright (C) 2015-2019  Daniel Allendorf, Ryan Payton						//
@@ -337,6 +338,13 @@ namespace ms
 			recv.skip(1);
 
 		std::string message = recv.read_string();
+        if (message.find("Command 'jobswitch' is not available") != std::string::npos) {
+            if (auto book = UI::get().get_element<UISkillBook>()) book->job_switch_unavailable();
+        }
+        if (type == 5 && message.rfind("[JobSwitch:state:v1] ", 0) == 0) {
+            if (auto book = UI::get().get_element<UISkillBook>()) book->accept_job_switch_status(message);
+            return;
+        }
 		if (type == 5 && Stage::get().training_auto_notice(message)) return;
 
 		auto chatbar = UI::get().get_element<UIChatBar>();

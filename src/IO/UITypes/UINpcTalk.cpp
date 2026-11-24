@@ -520,7 +520,9 @@ namespace ms
 
 	Button::State UINpcTalk::button_pressed(uint16_t buttonid)
 	{
+		if (!is_active()) return Button::State::NORMAL;
 		deactivate();
+		const int8_t response_type = (type == SENDNEXT || type == SENDNEXTPREV || type == SENDPREV) ? 0 : type;
 
 		switch (type)
 		{
@@ -530,41 +532,42 @@ namespace ms
 				switch (buttonid)
 				{
 					case Buttons::CLOSE:
-						NpcTalkMorePacket(type, -1).dispatch();
+						NpcTalkMorePacket(response_type, -1).dispatch();
 						break;
 					case Buttons::OK:
-						NpcTalkMorePacket(type, 1).dispatch();
+						NpcTalkMorePacket(response_type, 1).dispatch();
 						break;
 				}
 				break;
 			}
 			case TalkType::SENDNEXT:
 			{
-				// msgtype 5 — text + [Next].
+				// Internal text + [Next] variant; reply with wire msgtype 0.
 				switch (buttonid)
 				{
 					case Buttons::CLOSE:
-						NpcTalkMorePacket(type, -1).dispatch();
+						NpcTalkMorePacket(response_type, -1).dispatch();
 						break;
 					case Buttons::NEXT:
-						NpcTalkMorePacket(type, 1).dispatch();
+						NpcTalkMorePacket(response_type, 1).dispatch();
 						break;
 				}
 				break;
 			}
+			case TalkType::SENDPREV:
 			case TalkType::SENDNEXTPREV:
 			{
-				// msgtype 6 — text + [Back] [Next].
+				// Internal text + [Back] or [Back] [Next] variant.
 				switch (buttonid)
 				{
 					case Buttons::CLOSE:
-						NpcTalkMorePacket(type, -1).dispatch();
+						NpcTalkMorePacket(response_type, -1).dispatch();
 						break;
 					case Buttons::NEXT:
-						NpcTalkMorePacket(type, 1).dispatch();
+						NpcTalkMorePacket(response_type, 1).dispatch();
 						break;
 					case Buttons::PREV:
-						NpcTalkMorePacket(type, 0).dispatch();
+						NpcTalkMorePacket(response_type, 0).dispatch();
 						break;
 				}
 				break;
@@ -575,13 +578,13 @@ namespace ms
 				switch (buttonid)
 				{
 					case Buttons::CLOSE:
-						NpcTalkMorePacket(type, -1).dispatch();
+						NpcTalkMorePacket(response_type, -1).dispatch();
 						break;
 					case Buttons::NO:
-						NpcTalkMorePacket(type, 0).dispatch();
+						NpcTalkMorePacket(response_type, 0).dispatch();
 						break;
 					case Buttons::YES:
-						NpcTalkMorePacket(type, 1).dispatch();
+						NpcTalkMorePacket(response_type, 1).dispatch();
 						break;
 				}
 				break;
@@ -600,13 +603,13 @@ namespace ms
 					case Buttons::QAFTER:
 					case Buttons::QCNO:
 					case Buttons::QGIVEUP:
-						NpcTalkMorePacket(type, 0).dispatch();
+						NpcTalkMorePacket(response_type, 0).dispatch();
 						break;
 					case Buttons::YES:
 					case Buttons::QYES:
 					case Buttons::QSTART:
 					case Buttons::QCYES:
-						NpcTalkMorePacket(type, 1).dispatch();
+						NpcTalkMorePacket(response_type, 1).dispatch();
 						break;
 				}
 				break;
@@ -617,7 +620,7 @@ namespace ms
 				switch (buttonid)
 				{
 					case Buttons::CLOSE:
-						NpcTalkMorePacket(type, 0).dispatch();
+						NpcTalkMorePacket(response_type, 0).dispatch();
 						break;
 					case Buttons::OK:
 						NpcTalkMorePacket(input_field.get_text()).dispatch();
@@ -631,7 +634,7 @@ namespace ms
 				switch (buttonid)
 				{
 					case Buttons::CLOSE:
-						NpcTalkMorePacket(type, 0).dispatch();
+						NpcTalkMorePacket(response_type, 0).dispatch();
 						break;
 					case Buttons::OK:
 					{
@@ -658,7 +661,7 @@ namespace ms
 			{
 				// msgtype 4 — close only; selections handled in send_cursor.
 				if (buttonid == Buttons::CLOSE)
-					NpcTalkMorePacket(type, 0).dispatch();
+					NpcTalkMorePacket(response_type, 0).dispatch();
 				break;
 			}
 			default:
@@ -800,12 +803,21 @@ namespace ms
 
 	void UINpcTalk::send_key(int32_t keycode, bool pressed, bool escape)
 	{
-		if (pressed && escape)
+		if (!pressed || !is_active()) return;
+		if (escape)
 		{
-			deactivate();
-
-			NpcTalkMorePacket(type, 0).dispatch();
+			button_pressed(Buttons::CLOSE);
+			return;
 		}
+		if (keycode != KeyAction::Id::RETURN) return;
+		for (auto id : {Buttons::OK, Buttons::NEXT, Buttons::YES})
+			if (buttons[id]->is_active())
+			{
+				button_pressed(id);
+				return;
+			}
+		if (type == TalkType::SENDPREV)
+			button_pressed(Buttons::CLOSE);
 	}
 
 	void UINpcTalk::send_scroll(double yoffset)
@@ -1256,6 +1268,8 @@ namespace ms
 	void UINpcTalk::change_text(int32_t npcid, int8_t msgtype, int16_t style, int8_t speakerbyte, const std::string& tx)
 	{
 		type = is_valid_type(msgtype) ? static_cast<TalkType>(msgtype) : TalkType::NONE;
+		if (msgtype == 0 && style != 0)
+			type = (style == 3) ? SENDNEXTPREV : (style == 2) ? SENDNEXT : SENDPREV;
 
 		current_npcid = npcid;
 		expanded_quest_ids.clear();
@@ -1390,6 +1404,12 @@ namespace ms
 			{
 				buttons[Buttons::NEXT]->set_position(Point<int16_t>(471, y_cord));
 				buttons[Buttons::NEXT]->set_active(true);
+				break;
+			}
+			case TalkType::SENDPREV:
+			{
+				buttons[Buttons::PREV]->set_position(Point<int16_t>(389, y_cord));
+				buttons[Buttons::PREV]->set_active(true);
 				break;
 			}
 			case TalkType::SENDNEXTPREV:

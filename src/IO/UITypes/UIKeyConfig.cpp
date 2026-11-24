@@ -426,6 +426,8 @@ namespace ms
 			if (mapping.type == KeyType::Id::MACRO)
 			{
 				int32_t idx = mapping.action;
+				// Keep existing icons alive when a dragged binding is moved.
+				if (macro_icons.count(idx)) continue;
 				Texture tx = src[std::to_string(idx)]["icon"];
 				macro_icons[idx] = std::make_unique<Icon>(std::make_unique<MappingIcon>(mapping), tx, -1);
 			}
@@ -823,6 +825,11 @@ namespace ms
 				Texture tx = get_skill_texture(skill_id);
 				skill_icons[skill_id] = std::make_unique<Icon>(std::make_unique<MappingIcon>(mapping), tx, -1);
 			}
+		}
+
+		else if (mapping.type == KeyType::Id::MACRO)
+		{
+			load_macro_icons();
 		}
 
 		dirty = true;

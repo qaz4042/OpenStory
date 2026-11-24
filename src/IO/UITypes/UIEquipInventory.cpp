@@ -159,6 +159,12 @@ namespace ms
         for (int i=0;i<2;++i)
             pet_tabs[i]=pet_skin(basic["BtOK"][i ? "normal" : "disabled"]["0"],std::string("tab/")+std::to_string(i),(dimension.x()-20)/2,20,7,7,3,3,7,3);
 
+        // Enabled navigation must not use the disabled grey button artwork.
+        const char* nav_states[]={"normal","mouseOver","pressed"};
+        for (int i=0;i<3;++i)
+            pet_nav_tabs[i]=pet_skin(basic["BtOK"][nav_states[i]]["0"],
+                std::string("nav-tab/")+nav_states[i],(dimension.x()-20)/2,20,7,7,3,3,7,3);
+
 		load_icons();
 	}
 
@@ -229,7 +235,8 @@ namespace ms
                 int equipped=inventory.find_item(InventoryType::Id::EQUIPPED,id);
                 int owned=inventory.find_item(InventoryType::Id::EQUIP,id);
                 int x=i ? 96 : 16;
-                label(i ? (cn ? "道具袋" : "Pouch") : (cn ? "磁铁" : "Magnet"),x,214);
+                label((i ? (cn ? std::string("道具袋") : std::string("Pouch")) : (cn ? std::string("磁铁") : std::string("Magnet")))
+                    + (equipped ? (cn ? "·已穿" : ": On") : (cn ? "·未穿" : ": Off")),x,214);
                 pet_tabs[equipped ? 0 : 1].draw(DrawArgument(position+Point<int16_t>(x,235),0.85f,0.85f));
                 Text(Text::A11M,Text::CENTER,equipped ? Color::Name::DARKGREY : Color::Name::WHITE,
                     equipped ? (cn ? "卸下" : "Remove") : owned ? (cn ? "穿戴" : "Equip") : (cn ? "商城获取" : "Cash shop"))
@@ -240,8 +247,9 @@ namespace ms
         for (int t=0;t<2;++t) {
             bool selected=(t==1)==(tab==Buttons::BT_TAB2);
             int x=10+t*(dimension.x()-20)/2;
-            pet_tabs[selected ? 1 : 0].draw(position+Point<int16_t>(x,dimension.y()-26));
-            Text(Text::A11M,Text::CENTER,selected ? Color::Name::WHITE : Color::Name::DARKGREY,
+            bool hover=Rectangle<int16_t>(x,x+(dimension.x()-20)/2,dimension.y()-26,dimension.y()-6).contains(pet_hover);
+            pet_nav_tabs[selected ? 1 : hover ? 2 : 0].draw(position+Point<int16_t>(x,dimension.y()-26));
+            Text(Text::A11M,Text::CENTER,Color::Name::WHITE,
                 t ? (cn ? "宠物" : "Pet") : (cn ? "装备" : "Equipment"))
                 .draw(position+Point<int16_t>(x+(dimension.x()-20)/4,dimension.y()-30));
         }

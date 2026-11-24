@@ -56,6 +56,8 @@ namespace ms
 			// The packet should contain a 'reason' integer which can signify various things
 			if (int32_t reason = recv.read_int())
 			{
+				if (reason != 7)
+					Session::get().cancel_restore();
 				// Login unsuccessful
 				// The LoginNotice displayed will contain the specific information
 				switch (reason)
@@ -162,6 +164,8 @@ namespace ms
 
 				// Add the world selection screen to the UI
 				worldselect->draw_world();
+				if (Session::get().is_restoring())
+					Session::get().restore_world_selection();
 
 				// End of packet
 				return;
@@ -207,7 +211,8 @@ namespace ms
 				worldselect->remove_selected();
 
 			// Add the character selection screen
-			UI::get().emplace<UICharSelect>(characters, charcount, slots, pic);
+			if (!Session::get().restore_character(characters, pic))
+				UI::get().emplace<UICharSelect>(characters, charcount, slots, pic);
 		}
 	}
 

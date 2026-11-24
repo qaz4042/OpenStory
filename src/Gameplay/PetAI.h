@@ -18,6 +18,7 @@
 #pragma once
 
 #include <cstdint>
+#include <unordered_map>
 
 namespace ms
 {
@@ -28,8 +29,10 @@ namespace ms
 	{
 	public:
 		void update(Player& player, MapDrops& drops);
+		void reset() { loot_cd = 0; retries.clear(); }
 
 	private:
 		int16_t loot_cd = 0;
+		std::unordered_map<int32_t, int16_t> retries;
 	};
 }

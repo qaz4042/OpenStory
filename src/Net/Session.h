@@ -17,8 +17,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <chrono>
 #include "Cryptography.h"
 #include "PacketSwitch.h"
+#include "Login.h"
 
 #include "../Error.h"
 #include "../MapleStory.h"
@@ -52,7 +54,19 @@ namespace ms
 		// Check if the connection is alive
 		bool is_connected() const;
 
+		void remember_login(const std::string& account, const std::string& password);
+		void remember_character(int32_t id, const std::string& pic);
+		void entered_game();
+		void restore_world_selection();
+		void cancel_restore();
+		bool is_restoring() const { return restoring; }
+		bool restore_character(const std::vector<CharEntry>& characters, int8_t pic_mode);
 	private:
+		std::string restore_account, restore_password, restore_pic;
+		int32_t restore_cid = 0;
+		uint8_t restore_world = 0, restore_channel = 0;
+		bool restoring = false, in_game = false;
+		std::chrono::steady_clock::time_point retry_at{};
 		bool init(const char* host, const char* port);
 		void process(const int8_t* bytes, size_t available);
 

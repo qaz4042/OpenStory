@@ -293,6 +293,13 @@ namespace ms
 		Stage::get().draw(alpha);
 		UI::get().draw(alpha);
 
+		if (Session::get().is_restoring())
+		{
+			static Text reconnectlabel(Text::Font::A11M, Text::Alignment::LEFT, Color::Name::YELLOW);
+			reconnectlabel.change_text("连接中断，正在自动重连… / Reconnecting...");
+			reconnectlabel.draw(DrawArgument(Point<int16_t>(20, 20)));
+		}
+
 		// On-screen FPS counter (top-right, yellow).
 		if (Configuration::get().get_show_fps())
 		{
@@ -308,8 +315,7 @@ namespace ms
 
 	bool running()
 	{
-		return Session::get().is_connected()
-			&& UI::get().not_quitted()
+		return UI::get().not_quitted()
 			&& Window::get().not_closed();
 	}
 

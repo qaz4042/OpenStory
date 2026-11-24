@@ -17,8 +17,8 @@ root = Path(__file__).resolve().parents[1]
 build = (root / args.build_dir).resolve()
 data = (root / args.data_dir).resolve()
 
-def run(command):
-    result = subprocess.run(command, cwd=root, text=True, stdout=subprocess.PIPE,
+def run(command, cwd=root):
+    result = subprocess.run(command, cwd=cwd, text=True, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     if result.returncode:
         raise SystemExit(result.stdout)
@@ -47,6 +47,15 @@ int main(int argc, char** argv) {
         assert(s.get_masterlevel() == 20);
         assert(s.get_stats(1).damage > 0);
     }
+    for (int id : {SkillId::BACK_SPIN_BLOW, SkillId::DOUBLE_UPPERCUT, SkillId::CORKSCREW_BLOW}) {
+        const auto& s = SkillData::get(id);
+        assert(s.is_attack() && s.is_melee() && !s.is_passive());
+        assert(s.get_masterlevel() == 20);
+        assert(s.get_stats(1).damage > 0 && s.get_stats(20).damage > 0);
+        std::cout << id << " " << s.get_name() << " MP=" << s.get_stats(1).mpcost << " hits=" << int(s.get_stats(1).attackcount) << "\n";
+    }
+    assert(SkillData::get(SkillId::DOUBLE_UPPERCUT).get_stats(1).attackcount == 2);
+    assert(SkillData::get(SkillId::CORKSCREW_BLOW).get_stats(1).mobcount == 3);
     const auto& fist = SkillData::get(SkillId::FLASH_FIST);
     const auto& kick = SkillData::get(SkillId::SOMERSAULT_KICK);
     const auto& shot = SkillData::get(SkillId::DOUBLE_SHOT);
@@ -71,7 +80,7 @@ with tempfile.TemporaryDirectory(prefix='openstory-pirate-') as directory:
     source = work / 'check.cpp'
     source.write_text(CHECK)
     objects = build / 'CMakeFiles/OpenStory.dir'
-    names = ['src/Data/SkillData', 'src/Character/Inventory/Weapon', 'src/Util/Misc']
+    names = ['src/Data/SkillData', 'src/Character/Inventory/Weapon', 'src/Util/Misc', 'src/Configuration']
     names += ['vendor/NoLifeNx/nlnx/' + name
               for name in ('node', 'file', 'bitmap', 'audio', 'nx')]
     brew = Path('/opt/homebrew') if Path('/opt/homebrew').exists() else Path('/usr/local')
@@ -82,4 +91,4 @@ with tempfile.TemporaryDirectory(prefix='openstory-pirate-') as directory:
          '-I' + str(brew / 'opt/glew/include/GL'), str(source),
          *[str(objects / (name + '.cpp.o')) for name in names],
          '-L' + str(brew / 'lib'), '-llz4', '-Wl,-dead_strip', '-o', str(executable)])
-    print(run([str(executable), str(data)]), end='')
+    print(run([str(executable), str(data)], cwd=work), end='')

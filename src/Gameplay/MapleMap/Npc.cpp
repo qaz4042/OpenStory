@@ -20,6 +20,7 @@
 #include "../Stage.h"
 #include "../MapleTVBroadcast.h"
 #include "../../Character/QuestLog.h"
+#include "../../Character/QuestAvailability.h"
 #include "../../Graphics/Text.h"
 #include "../../Net/NpcResponseTracker.h"
 #include "../../Constants.h"
@@ -460,12 +461,6 @@ namespace ms
 	{
 		quest_mark_type = QuestMarkType::NONE;
 
-		// If a previous TalkToNPC attempt timed out (server had no handler /
-		// the quest data is missing from this server), never show an
-		// indicator bulb above this NPC.
-		if (NpcResponseTracker::get().is_unavailable(npcid))
-			return;
-
 		const Player& player = Stage::get().get_player();
 		const QuestLog& quests = const_cast<Player&>(player).get_quests();
 		int16_t player_level = static_cast<int16_t>(player.get_stats().get_stat(MapleStat::Id::LEVEL));
@@ -634,56 +629,8 @@ namespace ms
 			if (!end_date.empty())
 				continue;
 
-			// Job check
-			nl::node job_node = start_check["job"];
-			if (job_node && job_node.size() > 0)
-			{
-				bool job_ok = false;
-				for (auto j : job_node)
-				{
-					int32_t required_job = static_cast<int32_t>(safe_int(j));
-					if (required_job == 0 || required_job == player_job)
-					{
-						job_ok = true;
-						break;
-					}
-					if (required_job > 0 && (player_job / 100) == (required_job / 100) && player_job >= required_job)
-					{
-						job_ok = true;
-						break;
-					}
-				}
-				if (!job_ok)
-					continue;
-			}
-
-			// Prerequisite quest check
-			nl::node quest_prereq = start_check["quest"];
-			if (quest_prereq)
-			{
-				bool prereqs_met = true;
-				for (auto qp : quest_prereq)
-				{
-					int32_t prereq_id = static_cast<int32_t>(safe_int(qp["id"]));
-					int32_t prereq_state = static_cast<int32_t>(safe_int(qp["state"]));
-
-					if (prereq_id > 0)
-					{
-						if (prereq_state == 2 && !completed_map.count(static_cast<int16_t>(prereq_id)))
-						{
-							prereqs_met = false;
-							break;
-						}
-						if (prereq_state == 1 && !started.count(static_cast<int16_t>(prereq_id)))
-						{
-							prereqs_met = false;
-							break;
-						}
-					}
-				}
-				if (!prereqs_met)
-					continue;
-			}
+			if (!quest_start_requirements_met(start_check, player_job, quests, player.get_inventory()))
+				continue;
 
 			// Player qualifies — show available mark
 			quest_mark_type = QuestMarkType::AVAILABLE;

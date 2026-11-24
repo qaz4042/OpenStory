@@ -30,6 +30,7 @@
 #include "../../Gameplay/Stage.h"
 #include "../../Gameplay/MapleMap/Npc.h"
 #include "../../Net/NpcResponseTracker.h"
+#include "../../Character/QuestAvailability.h"
 #include "../../Net/Packets/QuestPackets.h"
 
 #include <algorithm>
@@ -601,66 +602,10 @@ namespace ms
 					continue;
 			}
 
-			// Job check
 			nl::node job_node = start_check["job"];
-			if (job_node && job_node.size() > 0)
-			{
-				bool job_ok = false;
-				for (auto j : job_node)
-				{
-					int32_t required_job = j.get_integer();
-
-					if (required_job == 0 || required_job == player_job)
-					{
-						job_ok = true;
-						break;
-					}
-
-					// Job group check (e.g., 100 matches 110, 111, 112)
-					if (required_job > 0 && (player_job / 100) == (required_job / 100))
-					{
-						if (player_job >= required_job)
-						{
-							job_ok = true;
-							break;
-						}
-					}
-				}
-
-				if (!job_ok)
-					continue;
-			}
-
-			// Prerequisite quest check
-			nl::node quest_prereq = start_check["quest"];
-			if (quest_prereq)
-			{
-				bool prereqs_met = true;
-				for (auto qp : quest_prereq)
-				{
-					int32_t prereq_id = qp["id"].get_integer();
-					int32_t prereq_state = qp["state"].get_integer();
-
-					if (prereq_id > 0)
-					{
-						// state 2 = must be completed
-						if (prereq_state == 2 && !completed_map.count(static_cast<int16_t>(prereq_id)))
-						{
-							prereqs_met = false;
-							break;
-						}
-						// state 1 = must be started
-						if (prereq_state == 1 && !started.count(static_cast<int16_t>(prereq_id)))
-						{
-							prereqs_met = false;
-							break;
-						}
-					}
-				}
-
-				if (!prereqs_met)
-					continue;
-			}
+			if (!quest_start_requirements_met(start_check, player_job, questlog,
+				Stage::get().get_player().get_inventory()))
+				continue;
 
 			// Quest is available — get name
 			std::string name = strip_quest_codes(qnode["name"].get_string());

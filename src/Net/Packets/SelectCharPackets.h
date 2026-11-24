@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../OutPacket.h"
+#include "../Session.h"
 
 namespace ms
 {
@@ -28,6 +29,7 @@ namespace ms
 	public:
 		SelectCharPacket(int32_t cid) : OutPacket(OutPacket::Opcode::SELECT_CHAR)
 		{
+			Session::get().remember_character(cid, "");
 			write_int(cid);
 			write_hardware_info();
 		}
@@ -40,6 +42,7 @@ namespace ms
 	public:
 		RegisterPicPacket(int32_t cid, const std::string& pic) : OutPacket(OutPacket::Opcode::REGISTER_PIC)
 		{
+			Session::get().remember_character(cid, pic);
 			skip(1);
 
 			write_int(cid);
@@ -55,6 +58,7 @@ namespace ms
 	public:
 		SelectCharPicPacket(const std::string& pic, int32_t cid) : OutPacket(OutPacket::Opcode::SELECT_CHAR_PIC)
 		{
+			Session::get().remember_character(cid, pic);
 			write_string(pic);
 			write_int(cid);
 			write_hardware_info();

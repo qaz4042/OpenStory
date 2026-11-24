@@ -440,7 +440,10 @@ namespace ms
 			}
 			else if (npctalk && npctalk->is_active())
 			{
-				npctalk->send_key(mapping.action, pressed, escape);
+				const bool confirm = enter || keycode == GLFW_KEY_Y;
+				// Use the physical confirmation key regardless of gameplay bindings.
+				if (!confirm || !pressed || !is_key_down[keycode])
+					npctalk->send_key(confirm ? KeyAction::Id::RETURN : mapping.action, pressed, escape);
 				sent = true;
 			}
 			else if (statusbar && statusbar->is_menu_active())

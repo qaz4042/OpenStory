@@ -43,31 +43,15 @@ namespace ms
 
 	bool NpcResponseTracker::tick()
 	{
-		if (pending_.empty())
-			return false;
-
-		auto now = Clock::now();
-		bool changed = false;
-
+		// A timeout can mean distance, cooldown, a busy conversation or a late
+		// packet. It is not evidence that the NPC's quests are unavailable.
+		const auto now = Clock::now();
 		for (auto it = pending_.begin(); it != pending_.end();)
-		{
 			if (now - it->second >= TIMEOUT)
-			{
-				if (unavailable_.insert(it->first).second)
-					changed = true;
-
 				it = pending_.erase(it);
-			}
 			else
-			{
 				++it;
-			}
-		}
-
-		if (changed)
-			++revision_;
-
-		return changed;
+		return false;
 	}
 
 	bool NpcResponseTracker::is_unavailable(int32_t npcid) const

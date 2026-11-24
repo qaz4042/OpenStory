@@ -67,9 +67,13 @@ int main(int argc,char**argv) {
  Inventory inv; inv.set_slotmax(InventoryType::EQUIP,96);inv.set_slotmax(InventoryType::USE,96);inv.set_slotmax(InventoryType::ETC,96);inv.set_slotmax(InventoryType::CASH,96);
  inv.add_item(InventoryType::USE,1,2000000,false,-1,10,"",0x400);
  inv.add_item(InventoryType::USE,2,2000001,false,-1,20,"",0);
+ inv.add_item(InventoryType::USE,4,2061000,false,-1,2000,"",0);
+ inv.add_item(InventoryType::USE,5,2061000,false,-1,2000,"",0x400);
  inv.add_item(InventoryType::CASH,1,5450000,true,-1,1,"",0);
  EnumMap<EquipStat::Id,uint16_t> stats;
  inv.add_equip(InventoryType::EQUIP,1,1002008,false,-1,7,0,stats,"",0x400,0,0,0);
+ inv.add_equip(InventoryType::EQUIP,2,1002008,false,-1,7,0,stats,"",0,0,0,0);
+ inv.add_item(InventoryType::ETC,1,4000000,false,-1,10,"",0);
  assert(inv.is_sell_locked(InventoryType::EQUIP,1));assert(inv.is_sell_locked(InventoryType::USE,1));assert(!inv.is_sell_locked(InventoryType::USE,2));
  inv.modify(InventoryType::USE,1,Inventory::SWAP,3,Inventory::MOVE_INTERNAL);
  assert(!inv.is_sell_locked(InventoryType::USE,1));assert(inv.is_sell_locked(InventoryType::USE,3));
@@ -92,8 +96,15 @@ int main(int argc,char**argv) {
   std::cerr<<"render bag "<<lang<<"\n";bag.set_full(false);bag.assert_lock_inside();render(bag,std::string(argv[3])+"/bag-"+lang+".ppm");
   bag.set_full(true);bag.assert_lock_inside();render(bag,std::string(argv[3])+"/bag-full-"+lang+".ppm");
   std::cerr<<"render shop\n";render(shop,std::string(argv[3])+"/shop-"+lang+".ppm");
-  std::cerr<<"open modal\n";shop.button_pressed(Shop::SELL_ALL);auto modal=UI::get().get_element<UIYesNo>();assert(modal);
+  std::cerr<<"open modal\n";shop.button_pressed(Shop::SELL_ALL);auto modal=UI::get().get_element<UIYesNo>();assert(modal);assert(modal->question.get_text().find("2")!=std::string::npos);
+  assert(modal->question.get_text().find(std::string(lang)=="zh-CN" ? "消耗" : "Use")!=std::string::npos);
   render(*modal,std::string(argv[3])+"/confirm-"+lang+".ppm");
+  modal->yesnohandler(false);UI::get().remove(UIElement::Type::NOTICE);
+ }
+ for(auto tab:{InventoryType::EQUIP,InventoryType::ETC,InventoryType::CASH}) {
+  shop.changeselltab(tab);shop.button_pressed(Shop::SELL_ALL);
+  auto modal=UI::get().get_element<UIYesNo>();assert(modal);
+  assert(modal->question.get_text().find(tab==InventoryType::CASH ? "0 slots" : "1 slots")!=std::string::npos);
   modal->yesnohandler(false);UI::get().remove(UIElement::Type::NOTICE);
  }
  ShopSellAllPacket bulk(9090000,{{2,2,2000001,20}});assert(bulk.bytes.size()==18);assert(bulk.bytes[2]==4);

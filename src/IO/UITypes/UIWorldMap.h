@@ -94,6 +94,7 @@ namespace ms
 		size_t pending_page = 0;
 		bool search = false;
 		bool show_path_img = false;
+		bool region_click_consumed = false;
 		std::chrono::steady_clock::time_point next_travel{};
 
 		int32_t mapid = -1;

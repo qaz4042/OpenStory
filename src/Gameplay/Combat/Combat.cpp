@@ -1,3 +1,4 @@
+#include "../TrainingAutoAttack.h"
 //////////////////////////////////////////////////////////////////////////////////
 //	This file is part of the continued Journey MMORPG client					//
 //	Copyright (C) 2015-2019  Daniel Allendorf, Ryan Payton						//
@@ -148,14 +149,16 @@ namespace ms
 			apply_move(move);
 	}
 
-	bool Combat::auto_use_move(int32_t move_id, std::string& stop_reason)
+	bool Combat::auto_use_move(int32_t move_id, std::string& stop_reason, bool rapid)
 	{
 		if (!training_buff(move_id) && !player.get_look().get_equips().has_weapon())
 		{
 			stop_reason = "未装备武器";
 			return false;
 		}
-		if (!player.can_attack()) { stop_reason="等待动作结束"; return false; }
+		rapid = rapid && TrainingAutoAttack::rapid_supported(move_id);
+        if ((!rapid && !player.can_attack()) || player.is_climbing() || player.is_sitting())
+            { stop_reason="等待动作结束"; return false; }
 		const auto& move = get_move(move_id);
 		if (!move.is_attack() && !training_buff(move_id)) { stop_reason="技能不支持自动施放"; return false; }
 		const auto reason = player.can_use(move);
@@ -182,19 +185,21 @@ namespace ms
 		{
 			if (!find_closest(mobs.get_mobs(), attack_bounds(preview), preview.origin, 1, true).empty())
 			{
-				player.set_direction(!preview.toleft);
-				use_move(move_id);
+				if (rapid) player.Char::set_direction(!preview.toleft);
+                else player.set_direction(!preview.toleft);
+				if (rapid) apply_move(move, true); else use_move(move_id);
 				return true;
 			}
 			preview.toleft = !preview.toleft;
 		}
+        if (rapid) { stop_reason="等待范围内目标"; return false; }
         // Behave like holding the attack key even when acquisition finds no target.
         // The actual cast still owns hit detection, action delay and server validation.
         use_move(move_id);
 		return true;
 	}
 
-	void Combat::apply_move(const SpecialMove& move)
+	void Combat::apply_move(const SpecialMove& move, bool rapid)
 	{
 		local_cast_id = move.get_id();
 		local_cast_timeout = 90; // ~720ms echo window
@@ -204,10 +209,13 @@ namespace ms
 			bool melee_skill = move.is_skill() && SkillData::get(move.get_id()).is_melee();
 			Attack attack = player.prepare_attack(move.is_skill(), melee_skill);
 
-			move.apply_useeffects(player);
-			move.apply_actions(player, attack.type);
-
-			player.set_afterimage(move.get_id());
+            // Casting cadence is independent from visual animation in fast mode.
+            // Let each sampled action finish, bounding sounds/effects at normal cadence.
+            if (!rapid || !player.is_attacking()) {
+                move.apply_useeffects(player);
+                move.apply_actions(player, attack.type);
+                player.set_afterimage(move.get_id());
+            }
 
 			move.apply_stats(player, attack);
 
@@ -226,7 +234,7 @@ namespace ms
 
 			mobs.send_attack(result, attack, mob_targets, mobcount);
 			result.attacker = player.get_oid();
-			extract_effects(player, move, result);
+			extract_effects(player, move, result, rapid);
 
 			apply_use_movement(move);
 			apply_result_movement(move, result);
@@ -536,7 +544,7 @@ namespace ms
 		}
 	}
 
-	void Combat::extract_effects(const Char& user, const SpecialMove& move, const AttackResult& result)
+	void Combat::extract_effects(const Char& user, const SpecialMove& move, const AttackResult& result, bool rapid)
 	{
 		AttackUser attackuser = {
 			user.get_skilllevel(move.get_id()),
@@ -575,7 +583,7 @@ namespace ms
 							move.get_id()
 						};
 
-						bulleteffects.emplace(user.get_attackdelay(i), std::move(effect), bullet, head);
+						bulleteffects.emplace((rapid ? 0 : user.get_attackdelay(i)), std::move(effect), bullet, head);
 						i++;
 					}
 				}
@@ -589,7 +597,7 @@ namespace ms
 				for (uint8_t i = 0; i < result.hitcount; i++)
 				{
 					DamageEffect effect{ attackuser, {}, 0, false, 0, 0 };
-					bulleteffects.emplace(user.get_attackdelay(i), std::move(effect), bullet, target);
+					bulleteffects.emplace((rapid ? 0 : user.get_attackdelay(i)), std::move(effect), bullet, target);
 				}
 			}
 		}
@@ -608,7 +616,7 @@ namespace ms
 					for (auto& number : numbers)
 					{
 						damageeffects.emplace(
-							user.get_attackdelay(i),
+							(rapid ? 0 : user.get_attackdelay(i)),
 							attackuser,
 							number,
 							line.second[i].first,
