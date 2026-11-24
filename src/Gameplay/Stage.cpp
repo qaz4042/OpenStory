@@ -38,7 +38,6 @@
 #include "../Net/Packets/TradePackets.h"
 #include "../Net/Packets/GameplayPackets.h"
 #include "../Net/Packets/InventoryPackets.h"
-#include "../Graphics/GraphicsGL.h"
 #include "../Graphics/Geometry.h"
 #include "../Character/MapleStat.h"
 
@@ -210,42 +209,8 @@ namespace ms
 		if (gfx_quality > 50)
 			weather.draw(alpha);
 
-		// HP/MP warning screen overlay
-		uint8_t hp_threshold = Setting<HPWarning>::get().load();
-		uint8_t mp_threshold = Setting<MPWarning>::get().load();
+		// Low HP/MP warnings are drawn on their status-bar gauges by UIStatusBar.
 
-		if (hp_threshold > 0 || mp_threshold > 0)
-		{
-			const CharStats& stats = player.get_stats();
-			int32_t cur_hp = stats.get_stat(MapleStat::Id::HP);
-			int32_t max_hp = stats.get_total(EquipStat::Id::HP);
-			int32_t cur_mp = stats.get_stat(MapleStat::Id::MP);
-			int32_t max_mp = stats.get_total(EquipStat::Id::MP);
-
-			if (max_hp > 0 && hp_threshold > 0)
-			{
-				int32_t hp_pct = cur_hp * 100 / max_hp;
-
-				if (hp_pct <= hp_threshold)
-				{
-					float intensity = 1.0f - static_cast<float>(hp_pct) / hp_threshold;
-					float pulse_alpha = 0.15f + 0.10f * intensity;
-					GraphicsGL::get().drawscreenfill(1.0f, 0.0f, 0.0f, pulse_alpha);
-				}
-			}
-
-			if (max_mp > 0 && mp_threshold > 0)
-			{
-				int32_t mp_pct = cur_mp * 100 / max_mp;
-
-				if (mp_pct <= mp_threshold)
-				{
-					float intensity = 1.0f - static_cast<float>(mp_pct) / mp_threshold;
-					float pulse_alpha = 0.12f + 0.08f * intensity;
-					GraphicsGL::get().drawscreenfill(0.0f, 0.0f, 1.0f, pulse_alpha);
-				}
-			}
-		}
 	}
 
 	bool Stage::training_auto_notice(const std::string& notice)

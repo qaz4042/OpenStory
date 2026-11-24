@@ -22,6 +22,7 @@
 #include "../UI.h"
 
 #include "../Components/MapleButton.h"
+#include "../Components/LabeledButton.h"
 
 #include "../../Gameplay/Stage.h"
 
@@ -41,6 +42,30 @@
 
 namespace ms
 {
+    namespace {
+        class JobChoiceButton : public Button {
+        public:
+            JobChoiceButton(std::string label, int16_t width) : label(std::move(label)), w(width) {
+                active = true; pressed = false; state = NORMAL;
+            }
+            void draw(Point<int16_t> parent) const override {
+                if (!active) return;
+                ColorBox(w,24,Color::Name::PRUSSIANBLUE,1).draw(parent+position);
+                ColorBox(w-2,22,state==MOUSEOVER ? Color::Name::LIGHTBLUE : Color::Name::WHITE,1)
+                    .draw(parent+position+Point<int16_t>(1,1));
+                Text(Text::A12M, Text::CENTER, Color::Name::DARKGREY, label)
+                    .draw(parent + position + Point<int16_t>(w/2,-1));
+            }
+            void update() override {}
+            Rectangle<int16_t> bounds(Point<int16_t> parent) const override { return {parent+position,parent+position+Point<int16_t>(w,24)}; }
+            int16_t width() const override { return w; }
+            Point<int16_t> origin() const override { return {}; }
+            Cursor::State send_cursor(bool,Point<int16_t>) override { return Cursor::IDLE; }
+        private:
+            std::string label; int16_t w;
+        };
+    }
+
 	UINpcTalk::UINpcTalk() : offset(0), unitrows(0), rowmax(0), show_slider(false), draw_text(false), formatted_text(""), formatted_text_pos(0), timestep(0), selection_top(0), hovered_selection(-1)
 	{
 		nl::node UtilDlgEx_v83 = nl::nx::ui["UIWindow.img"]["UtilDlgEx"];
@@ -117,6 +142,17 @@ namespace ms
 
 	void UINpcTalk::draw(float inter) const
 	{
+        if (compact_job_switch) {
+            ColorBox(dimension.x(), dimension.y(), Color::Name::DARKGREY, 1).draw(position);
+            ColorBox(dimension.x()-2, dimension.y()-2, Color::Name::WHITE, 1).draw(position+Point<int16_t>(1,1));
+            ColorBox(dimension.x()-2, 26, Color::Name::PRUSSIANBLUE, 1.0f).draw(position+Point<int16_t>(1,1));
+            Text(Text::A12M,Text::LEFT,Color::Name::WHITE,"切换职业").draw(position+Point<int16_t>(12,3));
+            Text(Text::A11M,Text::LEFT,Color::Name::DARKGREY,Text::Background::NONE,
+                 compact_job_text,272,true).draw(position+Point<int16_t>(14,34));
+            UIElement::draw_buttons(inter);
+            return;
+        }
+
 		Point<int16_t> drawpos = position;
 		top.draw(drawpos);
 		drawpos.shift_y(top.height());
@@ -266,10 +302,10 @@ namespace ms
 					else pref_escaped += c;
 				}
 				Text prefix_text(Text::Font::A12M, Text::Alignment::LEFT,
-					Color::Name::DARKGREY, Text::Background::NONE, pref_escaped, 320, true);
+					Color::Name::DARKGREY, Text::Background::NONE, pref_escaped + "X", 320, true);
 
 				int16_t base_y = position.y() + 19 - offset * SCROLL_STEP;
-				int16_t row_y = base_y + prefix_text.height() - 16;
+				int16_t row_y = base_y + prefix_text.height() - 12;
 
 				if (row_y + 16 > text_min_height && row_y < clip_bot)
 				{
@@ -312,12 +348,10 @@ namespace ms
 					}
 					Text prefix_text(Text::Font::A12M, Text::Alignment::LEFT,
 						Color::Name::DARKGREY, Text::Background::NONE,
-						pref_escaped, 320, true);
-					// height() returns the baseline y of the next row after
-					// the prefix; subtract linespace so row_y points at the
-					// TOP of the option's row (where list_bg/dot sprites
-					// would normally anchor).
-					int16_t row_y = text_y + prefix_text.height() - line_h;
+						pref_escaped + "X", 320, true);
+					// Include a glyph on the option line: an empty Text has height 0.
+					// Place the band around the 12px glyph ascent, not the line gap.
+					int16_t row_y = text_y + prefix_text.height() - 12;
 					Point<int16_t> row_pos(text_x - 36, row_y);
 					Point<int16_t> dot_pos(text_x - 14, row_y + 3);
 
@@ -518,11 +552,27 @@ namespace ms
 		}
 	}
 
+	void UINpcTalk::show_local_menu(int32_t npcid, const std::string& text, std::function<void(int32_t)> selected)
+	{
+		change_text(npcid, SENDSIMPLE, 0, 0, text);
+		local_selection = std::move(selected);
+		makeactive();
+	}
+
 	Button::State UINpcTalk::button_pressed(uint16_t buttonid)
 	{
 		if (!is_active()) return Button::State::NORMAL;
+        if (compact_job_switch && buttonid >= 100) {
+            const size_t option = buttonid - 100;
+            if (option >= selections.size()) return Button::NORMAL;
+            deactivate();
+            NpcTalkMorePacket(selections[option].index).dispatch();
+            return Button::NORMAL;
+        }
+
 		deactivate();
-		const int8_t response_type = (type == SENDNEXT || type == SENDNEXTPREV || type == SENDPREV) ? 0 : type;
+		if (local_selection) return Button::State::NORMAL; // Local close never creates a server conversation.
+		const int8_t response_type = wire_type;
 
 		switch (type)
 		{
@@ -675,6 +725,7 @@ namespace ms
 
 	Cursor::State UINpcTalk::send_cursor(bool clicked, Point<int16_t> cursorpos)
 	{
+        if (compact_job_switch) return UIElement::send_cursor(clicked,cursorpos);
 		Point<int16_t> cursor_relative = cursorpos - position;
 
 		// Handle text input field cursor for SENDGETTEXT / SENDGETNUMBER
@@ -756,7 +807,7 @@ namespace ms
 				}
 				Text prefix_text(Text::Font::A12M, Text::Alignment::LEFT,
 					Color::Name::DARKGREY, Text::Background::NONE,
-					pref_escaped, 320, true);
+					pref_escaped + "X", 320, true);
 
 				// prefix_text.height() is the baseline-y of where THIS
 				// option's glyphs render. Glyphs extend roughly from
@@ -779,7 +830,12 @@ namespace ms
 					{
 						hovered_selection = -1;
 						deactivate();
-						NpcTalkMorePacket(sel.index).dispatch();
+						if (local_selection)
+						{
+							auto selected = local_selection;
+							selected(sel.index);
+						}
+						else NpcTalkMorePacket(wire_type, 1, sel.index).dispatch();
 						return Cursor::State::IDLE;
 					}
 					else
@@ -1265,9 +1321,57 @@ namespace ms
 		return result;
 	}
 
+    void UINpcTalk::setup_compact_job_switch(const std::string& tx) {
+        draw_text = false;
+        show_slider = false;
+        selections.clear();
+        for (auto& button : buttons) button.second->set_active(false);
+        auto add = [&](uint16_t id, const std::string& label, int x, int y, int w) {
+            buttons[id] = std::make_unique<JobChoiceButton>(label,w);
+            buttons[id]->set_position(Point<int16_t>(x,y));
+        };
+        dimension = Point<int16_t>(300,140);
+        if (type == SENDSIMPLE) {
+            parse_simple_selections(format_text(tx,1022000));
+            compact_job_text = tx.substr(0,tx.find("\r\n"));
+            for (size_t i=0;i<selections.size();++i)
+                add(100+i,selections[i].text,14+(i%2)*138,62+(i/2)*30,134);
+            add(CLOSE,"取消",222,108,64);
+        } else {
+            compact_job_text.clear();
+            for (char c : tx) {
+                if (c == '\n') compact_job_text += "\\n";
+                else if (c != '\r') compact_job_text += c;
+            }
+            Text body(Text::A11M,Text::LEFT,Color::Name::DARKGREY,Text::Background::NONE,compact_job_text,272,true);
+            dimension.set_y(std::max<int16_t>(140,body.height()+82));
+            int y = dimension.y()-32;
+            if (type == SENDYESNO) {
+                add(YES,"切换",146,y,64);
+                add(NO,"取消",222,y,64);
+            } else add(OK,"确定",222,y,64);
+        }
+        auto& constants = Constants::Constants::get();
+        position = Point<int16_t>((constants.get_viewwidth()-dimension.x())/2,
+                                  (constants.get_viewheight()-dimension.y())/2);
+    }
+
 	void UINpcTalk::change_text(int32_t npcid, int8_t msgtype, int16_t style, int8_t speakerbyte, const std::string& tx)
 	{
+        compact_job_switch = npcid == 1022000 && tx.rfind("[JobSwitch]",0) == 0
+            && (msgtype == 0 || msgtype == 1 || msgtype == 4);
+        if (compact_job_switch) {
+            local_selection = {};
+            wire_type = msgtype;
+            type = static_cast<TalkType>(msgtype);
+            setup_compact_job_switch(tx.substr(11));
+            return;
+        }
+
+		local_selection = {};
+		wire_type = msgtype;
 		type = is_valid_type(msgtype) ? static_cast<TalkType>(msgtype) : TalkType::NONE;
+		if (msgtype == 14) type = SENDSIMPLE;
 		if (msgtype == 0 && style != 0)
 			type = (style == 3) ? SENDNEXTPREV : (style == 2) ? SENDNEXT : SENDPREV;
 
@@ -1497,6 +1601,11 @@ namespace ms
 	// is (top.width(), height + 120), which is how change_text sized it.
 	void UINpcTalk::update_screen(int16_t new_width, int16_t new_height)
 	{
+        if (compact_job_switch) {
+            position = Point<int16_t>((new_width-dimension.x())/2,(new_height-dimension.y())/2);
+            return;
+        }
+
 		int16_t height = dimension.y() - 120;
 
 		position = Point<int16_t>(

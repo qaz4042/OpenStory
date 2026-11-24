@@ -41,7 +41,28 @@ namespace ms
 		int8_t msgtype = recv.read_byte();
 		int8_t speaker = recv.read_byte();
 
+		// Dimensional Mirror (v83 type14) carries a reserved int before its text.
+		if (msgtype == 14) recv.skip(4);
 		std::string text = recv.read_string();
+		if (msgtype == 14)
+		{
+			// Mirror destinations use #<id># rather than ordinary #L<id># links.
+			std::string menu;
+			size_t pos = 0;
+			while ((pos = text.find('#', pos)) != std::string::npos)
+			{
+				const auto end = text.find('#', pos + 1);
+				if (end == std::string::npos) break;
+				const auto next = text.find('#', end + 1);
+				const auto id = text.substr(pos + 1, end - pos - 1);
+				const auto label = text.substr(end + 1, next == std::string::npos ? next : next - end - 1);
+				if (!id.empty() && id[0] != '-') menu += "#L" + id + "#" + label + "#l\r\n";
+				else menu += label;
+				if (next == std::string::npos) break;
+				pos = next;
+			}
+			text = menu;
+		}
 
 		// Cosmic uses msgtype 0 plus previous/next flags for all text pages.
 		// Keep those display flags separate from the wire response type.

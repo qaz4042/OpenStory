@@ -23,6 +23,7 @@
 
 #include "../Components/MapleButton.h"
 #include "../Components/LabeledButton.h"
+#include "../Components/SkillPointMaxButton.h"
 #include <sstream>
 
 #include "../../Character/SkillId.h"
@@ -155,7 +156,7 @@ namespace ms
         buttons[Buttons::BT_HYPER]->set_active(false);
         buttons[Buttons::BT_GUILDSKILL]->set_active(false);
         buttons[Buttons::BT_RIDE]->set_active(false);
-        buttons[Buttons::BT_JOB_SWITCH] = std::make_unique<LabeledButton>("切换职业", "Switch Job", 82);
+        buttons[Buttons::BT_JOB_SWITCH] = std::make_unique<LabeledButton>("转职", "Job", 52);
         buttons[Buttons::BT_JOB_SWITCH]->set_position(Point<int16_t>(10, bg_dimensions.y() - 24));
         buttons[Buttons::BT_JOB_SWITCH]->set_state(Button::DISABLED);
 
@@ -250,8 +251,8 @@ namespace ms
 			Point<int16_t> spup_position = SKILL_OFFSET + Point<int16_t>(124, 20 + row * ROW_HEIGHT);
 			buttons[i] = std::make_unique<MapleButton>(main["BtSpUp"], spup_position);
             auto maxid = Buttons::BT_SPMAX0 + row;
-            buttons[maxid] = std::make_unique<LabeledButton>("满", "Max", 28);
-            buttons[maxid]->set_position(SKILL_OFFSET + Point<int16_t>(93, 19 + row * ROW_HEIGHT));
+            buttons[maxid] = std::make_unique<SkillPointMaxButton>(main["BtSpUp"]);
+            buttons[maxid]->set_position(SKILL_OFFSET + Point<int16_t>(105, 20 + row * ROW_HEIGHT));
 		}
 
 		booktext = Text(Text::Font::A11M, Text::Alignment::CENTER, Color::Name::WHITE, "", 150);
@@ -427,14 +428,14 @@ namespace ms
 
     std::string UISkillBook::job_switch_hint() const {
         if (job_switch_server_missing) return "当前服务端未开放职业切换，请先更新服务端";
-        if (!job_switch_supported()) return "仅开放 30 级以上冒险家同系分支互换，保持当前转数";
+        if (!job_switch_supported()) return "当前职业不可切换";
         if (job_switch_map != Stage::get().get_mapid() || job_switch_job != stats.get_stat(MapleStat::Id::JOB)
                 || std::chrono::steady_clock::now() - job_switch_received >= std::chrono::seconds(3)
-                || job_switch_code < 0) return "正在查询切换条件；若持续无响应，请检查服务端是否已更新";
+                || job_switch_code < 0) return "正在查询…";
         if (job_switch_code == 1) return "脱战后可切换 · 还需 " + std::to_string(job_switch_seconds) + " 秒（允许走路）";
-        if (job_switch_code == 2) return "仅开放 30 级以上冒险家同系分支互换，保持当前转数";
-        if (job_switch_code == 3) return "当前状态或活动／副本地图不能切换职业";
-        if (job_switch_code == 4) return "装备栏空位不足，无法自动卸下全部装备";
+        if (job_switch_code == 2) return "当前职业不可切换";
+        if (job_switch_code == 3) return "请先结束交易或活动";
+        if (job_switch_code == 4) return "装备栏空位不足";
         return "切换同系职业分支：保持转数，保留一转，退还分支 SP；自动卸下全部装备，需脱战 30 秒";
     }
 

@@ -16,6 +16,10 @@ source = r'''
 #include "src/IO/UITypes/UINpcTalk.h"
 #include "src/Net/Handlers/NpcInteractionHandlers.h"
 #include "src/Net/NpcResponseTracker.h"
+#include "src/Gameplay/Stage.h"
+#include "src/Gameplay/MapleMap/MapNpcs.h"
+#include "src/Gameplay/MapleMap/Npc.h"
+#include "src/IO/UITypes/UIQuestLog.h"
 #include "src/Util/NxFiles.h"
 #include <cassert>
 #include <filesystem>
@@ -24,13 +28,14 @@ using namespace ms;
 namespace ms { extern std::vector<std::vector<int8_t>> captured; }
 class Talk : public UINpcTalk {
 public: using UINpcTalk::button_pressed;
+ Point<int16_t> origin() { return position; }
  bool active_button(int id) { return buttons.at(id)->is_active(); }
 };
 std::vector<int8_t> wire;
 void put(uint64_t n,int bytes) { for(int i=0;i<bytes;++i)wire.push_back((n>>(i*8))&255); }
 void receive(int type,int prev=0,int next=0) {
  wire.clear();put(4,1);put(12101,4);put(type,1);put(0,1);
- std::string text="Amherst dialogue";put(text.size(),2);for(char c:text)put(c,1);
+ std::string text=type==14 ? "#1# Mu Lung Dojo#2# Monster Carnival 1" : "Amherst dialogue";if(type==14)put(0,4);put(text.size(),2);for(char c:text)put(c,1);
  if(type==0) {put(prev,1);put(next,1);}
  InPacket packet(wire.data(),wire.size());NpcDialogueHandler handler;
  static_cast<const PacketHandler&>(handler).handle(packet);assert(packet.length()==0);
@@ -43,6 +48,46 @@ void reply(int type,int action) {
 int main(int argc,char**argv) {
  std::filesystem::current_path(argv[1]);assert(!NxFiles::init());std::filesystem::current_path(argv[2]);
  Setting<Fullscreen>::get().save(false);assert(!Window::get().init());UI::get().change_state(UI::State::GAME);
+ // El Nath Fox: a real level-40 quest NPC without a plain NPC script.
+ auto& player=Stage::get().get_player();
+ player.get_stats().set_stat(MapleStat::LEVEL,46);player.get_stats().set_stat(MapleStat::JOB,510);
+ MapNpcs map;auto npc=std::make_unique<Npc>(2020003,99,false,0,false,Point<int16_t>{});
+ auto available=npc->available_quests();assert(std::find(available.begin(),available.end(),3000)!=available.end());
+ npc->makeactive();map.get_npcs()->add(std::move(npc));
+ map.talk_nearest({});assert(captured.empty());
+ assert(UI::get().get_element<UINpcTalk>()->is_active());
+ // Cancel must remain local, with no NPC_TALK_MORE or stuck server CM.
+ UI::get().send_key(GLFW_KEY_ESCAPE,true);UI::get().send_key(GLFW_KEY_ESCAPE,false);assert(captured.empty());
+ map.talk_nearest({});assert(UI::get().get_element<UINpcTalk>()->is_active());
+ // Use real menu hit testing to select the first quest and open its details.
+ auto menu=UI::get().get_element<UINpcTalk>();
+ Talk geometry;geometry.change_text(2020003,4,0,0,"#L0#Quest#l\r\n#L1#Talk#l");auto pos=geometry.origin();
+ bool selected=false;
+ for(int y=pos.y()+30;y<pos.y()+100 && !selected;++y)for(int x=pos.x()+170;x<pos.x()+400 && !selected;x+=10) {
+  menu->send_cursor(true,{static_cast<int16_t>(x),static_cast<int16_t>(y)});
+  if(auto log=UI::get().get_element<UIQuestLog>())selected=log->is_active();
+  if(!menu->is_active()&&!selected)break;
+ }
+ assert(selected && captured.empty());
+ UI::get().get_element<UIQuestLog>()->deactivate();
+ // Type14 mirror has a reserved int and destination IDs distinct from row numbers.
+ for(int round=0;round<5;++round) {
+  receive(14);UI::get().send_key(GLFW_KEY_ESCAPE,true);reply(14,0);UI::get().send_key(GLFW_KEY_ESCAPE,false);
+  receive(14);
+  Talk geometry;geometry.change_text(12101,14,0,0,"#L1#Mu Lung Dojo#l\r\n#L2#Monster Carnival 1#l");
+  auto origin=geometry.origin();Text metric(Text::Font::A12M,Text::Alignment::LEFT,Color::Name::DARKGREY,"X",320,true);
+  auto talk=UI::get().get_element<UINpcTalk>();
+  // Click where the first row's glyphs actually render, not the blank line above.
+  talk->send_cursor(true,{static_cast<int16_t>(origin.x()+180),static_cast<int16_t>(origin.y()+48+metric.height()-8)});
+  assert(captured.size()==1 && captured[0].size()==8 && captured[0][4]==1);
+  reply(14,1);
+ }
+ // Render Latin/CJK menu rows with first-row hover for visual verification.
+ Talk aligned;aligned.change_text(2020003,4,0,0,"#L0#Missing Staff Sergeant Charlie#l\r\n#L1#普通对话#l");
+ auto origin=aligned.origin();Text metric(Text::Font::A12M,Text::Alignment::LEFT,Color::Name::DARKGREY,"X",320,true);
+ aligned.send_cursor(false,{static_cast<int16_t>(origin.x()+180),static_cast<int16_t>(origin.y()+48+metric.height()-8)});
+ Setting<ScreenshotFolder>::get().save(std::string(argv[3])+"/npc-aligned");
+ Window::get().begin();aligned.draw(1.0f);Window::get().end();Window::get().take_screenshot();
  // All four Cosmic text variants retain msgtype 0 in the reply.
  for(int style=0;style<4;++style) {
   Talk talk;talk.change_text(12101,0,style,0,"Text");
@@ -69,7 +114,7 @@ int main(int argc,char**argv) {
  // Y in a text field remains printable instead of submitting the dialog.
  receive(2);UI::get().send_key(GLFW_KEY_Y,true);UI::get().send_char('y');UI::get().send_key(GLFW_KEY_Y,false);
  assert(captured.empty() && UI::get().get_element<UINpcTalk>()->is_active());
- std::cout<<"PASS: text button flags/wire replies, five reopen cycles, Y yes/next/OK, repeat suppression, Escape cancel and text input\n";
+ std::cout<<"PASS: type14 mirror five cancel/reopen/select cycles with visible-row hit testing and wire IDs; aligned menu render; real Fox level46 quest3000, local NPC menu cancel/reopen/selection without server packets; text button flags/wire replies, five reopen cycles, Y yes/next/OK, repeat suppression, Escape cancel and text input\n";
 }
 '''
 with tempfile.TemporaryDirectory(prefix='openstory-item-drag-') as directory:
@@ -98,7 +143,7 @@ with tempfile.TemporaryDirectory(prefix='openstory-item-drag-') as directory:
     link += ['-std=c++17', '-UNDEBUG', '-I' + str(root), *shlex.split(includes),
              str(cpp), '-Wl,-rpath,' + str(root / 'vendor/bass24/macos')]
     subprocess.run(link, cwd=build, check=True)
-    output = build / 'inventory-large-update-check'
+    output = build / 'npc-dialogue-check'
     output.mkdir(exist_ok=True)
     subprocess.run([str(executable), str(root / 'wz'), str(work), str(output)],
                    cwd=work, check=True)

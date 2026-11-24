@@ -194,8 +194,7 @@ namespace ms
 		if (mid != mapid)
 		{
 			mapid = mid;
-			auto prefix = mapid / 10000000;
-			auto parent_map = "WorldMap0" + std::to_string(prefix);
+			auto parent_map = world_for_map(mapid);
 			user_map = parent_map;
 
 			update_world(parent_map);
@@ -212,12 +211,36 @@ namespace ms
 		UIElement::update();
 	}
 
+	std::string UIWorldMap::world_for_map(int32_t id)
+	{
+		// World-map page suffixes are resource identifiers, not map-ID prefixes.
+		// Interior maps may only be represented by their surrounding town.
+		std::string town_world;
+		for (nl::node world : nl::nx::map["WorldMap"])
+		{
+			std::string name = world.name();
+			if (name.size() < 4 || name.substr(name.size() - 4) != ".img") continue;
+			name.resize(name.size() - 4);
+			if (name == "WorldMap") continue; // Overview also duplicates regional map IDs.
+			for (nl::node spot : world["MapList"])
+				for (nl::node number : spot["mapNo"])
+				{
+					int32_t candidate = number;
+					if (candidate == id) return name;
+					if (candidate == id / 1000000 * 1000000) town_world = name;
+				}
+		}
+		return town_world.empty() ? "WorldMap" : town_world;
+	}
+
 	void UIWorldMap::toggle_active()
 	{
 		UIElement::toggle_active();
 
-		if (!active)
+		if (active)
 		{
+			mapid = Stage::get().get_mapid();
+			user_map = world_for_map(mapid);
 			set_search(true);
 			update_world(user_map);
 		}

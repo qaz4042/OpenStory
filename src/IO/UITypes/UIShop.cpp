@@ -836,7 +836,8 @@ namespace ms
 			namelabel.change_text(item.get_name());
 		}
 
-		int32_t display_price = (chargeprice > 0 && price == 0) ? chargeprice : price;
+		// chargeprice contains only the high 16 bits of a double, not a meso price.
+		int32_t display_price = price;
 		std::string mesostr = std::to_string(display_price);
 		string_format::split_number(mesostr);
 		pricelabel.change_text(mesostr + suffix);
@@ -1013,7 +1014,9 @@ namespace ms
 			return;
 
 		const BuyItem& item = items[selection];
-		int16_t buyable = item.get_buyable();
+		// Rechargeable stock is sold as one full stack, not slotMax individual purchases.
+		const bool rechargeable = item.get_id() / 10000 == 207 || item.get_id() / 10000 == 233;
+		int16_t buyable = rechargeable ? 1 : item.get_buyable();
 		int16_t slot = item_slots[selection];
 		int32_t itemid = item.get_id();
 

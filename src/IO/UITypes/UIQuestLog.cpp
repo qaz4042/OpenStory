@@ -837,6 +837,35 @@ namespace ms
 		show_detail = false;
 	}
 
+	void UIQuestLog::focus_npc_quest(int16_t qid)
+	{
+		search_text.clear();
+		search.change_text("");
+		filter_my_level = true;
+		filter_my_location = false;
+		show_recommended = true;
+		load_quests();
+		const bool started = questlog.get_started().count(qid) != 0;
+		change_tab(started ? Buttons::TAB1 : Buttons::TAB0);
+		makeactive();
+		const auto& entries = started ? active_entries : recommended_entries;
+		for (size_t i = 0; i < entries.size(); ++i)
+			if (entries[i].id == qid)
+			{
+				selected_entry = i;
+				select_quest(i, !started);
+				return;
+			}
+		if (!started)
+			for (size_t i = 0; i < available_entries.size(); ++i)
+				if (available_entries[i].id == qid)
+				{
+					selected_entry = recommended_entries.size() + i;
+					select_quest(i);
+					return;
+				}
+	}
+
 	void UIQuestLog::focus_completed_quest(int16_t qid)
 	{
 		load_quests();

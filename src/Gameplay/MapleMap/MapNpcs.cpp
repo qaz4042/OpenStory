@@ -23,6 +23,11 @@
 #include "../../Net/NpcResponseTracker.h"
 #include "../../Net/Packets/NpcInteractionPackets.h"
 #include "../../IO/UI.h"
+#include "../../IO/UITypes/UINpcTalk.h"
+#include "../../IO/UITypes/UIQuestLog.h"
+#include "../Stage.h"
+#include <nlnx/nx.hpp>
+#include "../../Configuration.h"
 
 namespace ms
 {
@@ -140,6 +145,45 @@ namespace ms
 	{
 		auto npc = npcs.get(oid);
 		if (!npc || !npc->is_active() || !NpcResponseTracker::get().can_click_now()) return;
+		const auto* target = static_cast<Npc*>(npc.get());
+		auto quests = target->available_quests();
+		const int32_t npcid = target->get_npcid();
+		const auto& player = Stage::get().get_player();
+		for (const auto& entry : const_cast<Player&>(player).get_quests().get_started())
+		{
+			auto check = nl::nx::quest["Check.img"][std::to_string(entry.first)];
+			if (check["0"]["npc"].get_integer() == npcid || check["1"]["npc"].get_integer() == npcid)
+				quests.push_back(entry.first);
+		}
+		if (!quests.empty())
+		{
+			std::string text;
+			for (size_t i = 0; i < quests.size(); ++i)
+				text += "#L" + std::to_string(i) + "#"
+					+ nl::nx::quest["QuestInfo.img"][std::to_string(quests[i])]["name"].get_string() + "#l\r\n";
+			text += "#L" + std::to_string(quests.size())
+				+ (Setting<UILanguage>::get().load() == "zh-CN" ? "#普通对话#l" : "#Talk#l");
+			// Like the reference QuestDelivery flow, offer quests before ordinary NPC services.
+			UI::get().remove(UIElement::Type::NPCTALK);
+			UI::get().emplace<UINpcTalk>();
+			const auto mapid = Stage::get().get_mapid();
+			UI::get().get_element<UINpcTalk>()->show_local_menu(npcid, text, [quests, oid, mapid, npcid](int32_t choice) {
+				if (Stage::get().get_mapid() != mapid || choice < 0) return;
+				if (static_cast<size_t>(choice) < quests.size())
+				{
+					if (!UI::get().get_element<UIQuestLog>())
+						UI::get().emplace<UIQuestLog>(const_cast<Player&>(Stage::get().get_player()).get_quests());
+					if (auto log = UI::get().get_element<UIQuestLog>()) log->focus_npc_quest(quests[choice]);
+				}
+				else if (static_cast<size_t>(choice) == quests.size() && NpcResponseTracker::get().can_click_now())
+				{
+					NpcResponseTracker::get().mark_clicked_now();
+					NpcResponseTracker::get().mark_pending(npcid);
+					TalkToNPCPacket(oid).dispatch();
+				}
+			});
+			return;
+		}
 		// Share the Cosmic cooldown and response tracking with mouse clicks.
 		NpcResponseTracker::get().mark_clicked_now();
 		NpcResponseTracker::get().mark_pending(static_cast<Npc*>(npc.get())->get_npcid());

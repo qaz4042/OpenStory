@@ -24,9 +24,9 @@ class Book : public UISkillBook {
 public:
  using UISkillBook::UISkillBook;
  void verify_layout() const {
-   // BT_JOB_SWITCH is the final button; locate it by its 82px width.
+   // BT_JOB_SWITCH is the final button; locate it by its 52px width.
    const Button* entry=nullptr;
-   for(const auto& item:buttons) if(item.second->width()==82) entry=item.second.get();
+   for(const auto& item:buttons) if(item.second->width()==52) entry=item.second.get();
    assert(entry);
    auto b=entry->bounds({});
    std::cout<<"Switch button bounds "<<b.left()<<","<<b.top()<<","<<b.right()<<","<<b.bottom()<<" window "<<dimension.x()<<","<<dimension.y()<<"\n";
@@ -37,17 +37,17 @@ public:
    }
  }
  bool disabled() const {
-   for(const auto& item:buttons) if(item.second->width()==82) return item.second->get_state()==Button::DISABLED;
+   for(const auto& item:buttons) if(item.second->width()==52) return item.second->get_state()==Button::DISABLED;
    assert(false); return true;
  }
  void click_entry() {
-   for(const auto& item:buttons) if(item.second->width()==82) {
+   for(const auto& item:buttons) if(item.second->width()==52) {
      auto at=item.second->bounds(get_draw_position()).get_left_top()+Point<int16_t>(20,8);
      send_cursor(false,at); send_cursor(true,at); send_cursor(false,at); return;
    }
  }
  void hover() {
-   for(const auto& item:buttons) if(item.second->width()==82) {
+   for(const auto& item:buttons) if(item.second->width()==52) {
      auto b=item.second->bounds(get_draw_position());
      send_cursor(false,b.get_left_top()+Point<int16_t>(20,8)); return;
    }

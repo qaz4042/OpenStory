@@ -83,6 +83,7 @@ namespace ms
 
 		// Recalculate quest mark for this NPC based on current quest state
 		void update_quest_mark();
+		std::vector<int16_t> available_quests() const;
 
 		// Initialize shared quest mark animations (call once at startup)
 		static void init_quest_marks();

@@ -550,6 +550,24 @@ namespace ms
 			return;
 		}
 
+		if (!available_quests().empty())
+		{
+			quest_mark_type = QuestMarkType::AVAILABLE;
+			quest_mark_anim = mark_available;
+		}
+	}
+
+	std::vector<int16_t> Npc::available_quests() const
+	{
+		std::vector<int16_t> result;
+		const auto& player = Stage::get().get_player();
+		const auto& quests = const_cast<Player&>(player).get_quests();
+		const auto& started = quests.get_started();
+		const auto& completed_map = quests.get_completed();
+		const auto player_level = player.get_stats().get_stat(MapleStat::Id::LEVEL);
+		const auto player_job = player.get_stats().get_stat(MapleStat::Id::JOB);
+		auto quest_info = nl::nx::quest["QuestInfo.img"];
+		auto quest_check = nl::nx::quest["Check.img"];
 		// Third check: does this NPC have an available quest the player qualifies for?
 		for (auto qnode : quest_info)
 		{
@@ -633,9 +651,8 @@ namespace ms
 				continue;
 
 			// Player qualifies — show available mark
-			quest_mark_type = QuestMarkType::AVAILABLE;
-			quest_mark_anim = mark_available;
-			return;
+			result.push_back(qid);
 		}
+		return result;
 	}
 }

@@ -74,7 +74,9 @@ namespace ms
 		}
 
 		// Response for msgType 4 (sendSimple): [msgtype=4][response=1][index:int]
-		NpcTalkMorePacket(int32_t selection) : NpcTalkMorePacket(4, 1)
+		NpcTalkMorePacket(int32_t selection) : NpcTalkMorePacket(4, 1, selection) {}
+
+		NpcTalkMorePacket(int8_t msgtype, int8_t response, int32_t selection) : NpcTalkMorePacket(msgtype, response)
 		{
 			write_int(selection);
 		}

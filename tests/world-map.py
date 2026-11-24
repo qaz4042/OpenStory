@@ -71,6 +71,20 @@ int main(int argc,char** argv) {
  for (const char* lang : {"en","zh-CN"}) {
   Setting<UILanguage>::get().save(lang);
   TestWorld world; world.update(); world.place();
+  for (int32_t id : {120000000,120000100,120000101}) {
+   auto region=world.world_for_map(id);
+   std::cout << "Nautilus " << id << " -> " << region << "\n";
+   assert(region=="WorldMap010");
+   world.update_world(region);
+   bool town=false;
+   for(const auto& spot:world.map_spots)
+    for(auto map:spot.second.map_ids) if(map==120000000 || map==id) town=true;
+   assert(town);
+  }
+  assert(world.world_for_map(999999999)=="WorldMap");
+  world.update_world("WorldMap011");
+  world.deactivate(); world.toggle_active();
+  assert(world.user_map==world.world_for_map(0));
   // Map 0 -> WorldMap00 -> WorldMap; first Esc closes search.
   world.send_key(0,true,true); world.update_world("WorldMap");
   for(int repeat=0;repeat<30;++repeat) {

@@ -53,6 +53,7 @@ namespace ms
 	private:
 		static constexpr uint8_t MAPSPOT_TYPE_MAX = 4u;
 
+		static std::string world_for_map(int32_t id);
 		void set_search(bool enable);
 		void choose_destination(std::vector<int32_t> ids, size_t page);
 		void request_travel(int32_t id);

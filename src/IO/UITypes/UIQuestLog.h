@@ -55,6 +55,7 @@ namespace ms
 		// appears in the completed list). Used by the BT_NOTICE drawer
 		// when the user clicks a "Quest Completed" notification.
 		void focus_completed_quest(int16_t qid);
+		void focus_npc_quest(int16_t qid);
 
 	protected:
 		Button::State button_pressed(uint16_t buttonid) override;

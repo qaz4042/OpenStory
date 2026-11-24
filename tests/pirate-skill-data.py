@@ -56,6 +56,14 @@ int main(int argc, char** argv) {
     }
     assert(SkillData::get(SkillId::DOUBLE_UPPERCUT).get_stats(1).attackcount == 2);
     assert(SkillData::get(SkillId::CORKSCREW_BLOW).get_stats(1).mobcount == 3);
+    const auto& blank = SkillData::get(SkillId::BLANK_SHOT);
+    assert(blank.is_attack() && !blank.is_passive() && !blank.is_melee());
+    assert(blank.get_required_weapon() == Weapon::GUN);
+    assert(blank.get_stats(1).mobcount == 3);
+    assert(blank.get_stats(1).bulletcount > 0);
+    assert(blank.get_stats(1).damage > 0);
+    assert(!blank.get_stats(1).range.empty());
+    std::cout << "Blank Shot bullets=" << int(blank.get_stats(1).bulletcount) << " targets=" << int(blank.get_stats(1).mobcount) << "\n";
     const auto& fist = SkillData::get(SkillId::FLASH_FIST);
     const auto& kick = SkillData::get(SkillId::SOMERSAULT_KICK);
     const auto& shot = SkillData::get(SkillId::DOUBLE_SHOT);

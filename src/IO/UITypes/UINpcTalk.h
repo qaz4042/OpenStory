@@ -63,6 +63,7 @@ namespace ms
 		static constexpr bool TOGGLED = false;
 
 		UINpcTalk();
+		void show_local_menu(int32_t npcid, const std::string& text, std::function<void(int32_t)> selected);
 
 		void draw(float inter) const override;
 		void update() override;
@@ -83,6 +84,9 @@ namespace ms
 		Button::State button_pressed(uint16_t buttonid) override;
 
 	private:
+		bool compact_job_switch = false;
+		std::string compact_job_text;
+		void setup_compact_job_switch(const std::string& text);
 		bool is_valid_type(int8_t value);
 		std::string format_text(const std::string& tx, const int32_t& npcid);
 		std::string parse_simple_selections(const std::string& tx);
@@ -160,10 +164,12 @@ namespace ms
 		bool draw_text;
 		Slider slider;
 		TalkType type;
+		int8_t wire_type = 0;
 		std::string formatted_text;
 		size_t formatted_text_pos;
 		uint16_t timestep;
 
+		std::function<void(int32_t)> local_selection;
 		std::vector<Selection> selections;
 		int16_t selection_top;
 		int32_t hovered_selection;

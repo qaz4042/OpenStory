@@ -166,6 +166,7 @@ namespace ms
 			{ SkillId::FLASH_FIST, ATTACK | MELEE },
 			{ SkillId::SOMERSAULT_KICK, ATTACK | MELEE },
 			{ SkillId::DOUBLE_SHOT, ATTACK | RANGED },
+			{ SkillId::BLANK_SHOT, ATTACK | RANGED },
 			// Brawler
 			{ SkillId::BACK_SPIN_BLOW, ATTACK | MELEE },
 			{ SkillId::DOUBLE_UPPERCUT, ATTACK | MELEE },

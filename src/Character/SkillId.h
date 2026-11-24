@@ -169,6 +169,9 @@ namespace ms
 			SOMERSAULT_KICK = 5001002,
 			DOUBLE_SHOT = 5001003,
 
+			// Gunslinger
+			BLANK_SHOT = 5201004,
+
 			// Brawler
 			BACK_SPIN_BLOW = 5101002,
 			DOUBLE_UPPERCUT = 5101003,
