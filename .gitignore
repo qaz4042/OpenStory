@@ -68,3 +68,4 @@ __pycache__/
 
 # Isolated training-assist build
 /build-training/
+/.idea/
