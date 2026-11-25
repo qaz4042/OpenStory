@@ -37,9 +37,18 @@ namespace ms
 			write_byte((attack.mobcount << 4) | attack.hitcount);
 			write_int(attack.skill);
 
-			// Cosmic reads this field for Corkscrew Blow even on an uncharged tap.
-			if (attack.charge > 0 || attack.skill == SkillId::CORKSCREW_BLOW)
+			// Match Cosmic AbstractDealDamageHandler.parseDamage's v83 layout,
+			// including an explicit zero for an uncharged tap.
+			switch (attack.skill)
+			{
+			case 22121000: case 22151001: // Evan breaths
+			case 2121001: case 2221001: case 2321001: // Big Bang
+			case 5201002: // Grenade
+			case SkillId::CORKSCREW_BLOW: case 15101003:
+			case 14111006: // Poison Bomb
 				write_int(attack.charge);
+				break;
+			}
 
 			skip(8);
 
@@ -58,7 +67,7 @@ namespace ms
 				skip(7);
 
 				// Hurricane/piercing arrow/rapidfire require additional 4 bytes
-				if (attack.skill == 5221004 || attack.skill == 5721001 || attack.skill == 4341002 || attack.skill == 4341003)
+				if (attack.skill == 3121004 || attack.skill == 3221001 || attack.skill == 5221004 || attack.skill == 13111002)
 					skip(4);
 			}
 			else
@@ -78,8 +87,13 @@ namespace ms
 					// Critical hit flag placeholder
 				}
 
-				if (attack.skill != 5221004)
-					skip(4);
+				// Cosmic currently skips this footer for every target, also Rapid Fire.
+				skip(4);
+			}
+			if (attack.skill == 14111006)
+			{
+				skip(4);
+				write_point(attack.origin);
 			}
 		}
 

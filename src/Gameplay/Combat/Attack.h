@@ -108,9 +108,11 @@ namespace ms
 			stance = attack.stance;
 			bullet = attack.bullet;
 			toleft = attack.toleft;
+			origin = attack.origin;
 		}
 
 		Attack::Type type;
+		Point<int16_t> origin;
 		int32_t attacker = 0;
 		uint8_t mobcount = 0;
 		uint8_t hitcount = 1;

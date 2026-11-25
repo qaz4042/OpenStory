@@ -93,6 +93,34 @@ namespace ms
 		masterlevel = static_cast<int32_t>(stats.size());
 		passive = (id % 10000) / 1000 == 0;
 		flags = flags_of(id);
+		// v83 Skill.nx is the source of truth for ordinary direct attacks.
+		// Keep ID overrides only for exceptional mechanics / incomplete metadata.
+		if (!passive && flags == NONE && src["skillType"].get_integer(-1) != 2
+			&& src["skillType"].get_integer(-1) != 3 && !src["summon"]
+			&& id != 12111005) // Flame Gear is a persistent field; tile alone also occurs on Meteor.
+		{
+			const std::string action = src["action"]["0"];
+			const bool buff_action = action == "alert2" || action == "alert4" || action == "alert6";
+			bool damaging = false, magic = false, fixed = false;
+			for (const auto& level : stats)
+			{
+				const auto& stat = level.second;
+				damaging |= stat.damage > 0 || stat.matk > 0 || stat.fixdamage > 0;
+				magic |= stat.matk > 0;
+				fixed |= stat.fixdamage > 0;
+			}
+			const bool attack_visual = src["hit"] || src["ball"] || src["prepare"]
+				|| (!action.empty() && action.compare(0, 5, "alert") != 0);
+			if (damaging && !buff_action && (attack_visual || fixed))
+			{
+				flags = ATTACK;
+				if (reqweapon == Weapon::GUN || reqweapon == Weapon::BOW
+					|| reqweapon == Weapon::CROSSBOW || reqweapon == Weapon::CLAW)
+					flags |= RANGED;
+				else if (!magic && !src["ball"] && !fixed)
+					flags |= MELEE;
+			}
+		}
 		invisible = src["invisible"].get_bool();
 
 		/// Load required skills
@@ -162,15 +190,11 @@ namespace ms
             { 3001004, ATTACK | RANGED }, { 3001005, ATTACK | RANGED },
             { 4001334, ATTACK | MELEE }, { 4001344, ATTACK | RANGED },
             { 5201001, ATTACK | RANGED },
-			// Pirate
-			{ SkillId::FLASH_FIST, ATTACK | MELEE },
-			{ SkillId::SOMERSAULT_KICK, ATTACK | MELEE },
-			{ SkillId::DOUBLE_SHOT, ATTACK | RANGED },
-			{ SkillId::BLANK_SHOT, ATTACK | RANGED },
-			// Brawler
-			{ SkillId::BACK_SPIN_BLOW, ATTACK | MELEE },
-			{ SkillId::DOUBLE_UPPERCUT, ATTACK | MELEE },
-			{ SkillId::CORKSCREW_BLOW, ATTACK | MELEE }
+			// Legacy exception retained for Corkscrew Blow.
+			{ SkillId::CORKSCREW_BLOW, ATTACK | MELEE },
+			// v83 Drain / Steal have no hit, ball or action metadata.
+			{ 4101005, ATTACK | RANGED },
+			{ 4201004, ATTACK | MELEE }
 		};
 
 		auto iter = skill_flags.find(id);

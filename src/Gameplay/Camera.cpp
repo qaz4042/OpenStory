@@ -54,7 +54,10 @@ namespace ms
 		if (std::abs(vdelta) >= 5.0)
 			next_y += vdelta * (12.0 / VHEIGHT);
 
-		if (next_x > hbounds.first() || hbounds.length() < VWIDTH)
+		// A narrow map cannot fill the view: share the extra space on both sides.
+		if (hbounds.length() < VWIDTH)
+			next_x = (static_cast<double>(hbounds.first()) + hbounds.second() + VWIDTH) / 2.0;
+		else if (next_x > hbounds.first())
 			next_x = hbounds.first();
 		else if (next_x < hbounds.second() + VWIDTH)
 			next_x = hbounds.second() + VWIDTH;
